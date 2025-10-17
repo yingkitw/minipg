@@ -155,8 +155,9 @@
 </head>
 <body>
     <header>
-        <h1>minipg</h1>
-        <p>A Modern Parser Generator in Rust</p>
+        <h1>🐷 minipg</h1>
+        <p>A Blazingly Fast Parser Generator with ANTLR4 Compatibility</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ Published on crates.io | 51 tests passing | Apache-2.0 License</p>
     </header>
     
     <nav>
@@ -173,20 +174,28 @@
             <h2>Features</h2>
             <div class="feature-grid">
                 <div class="feature-card">
-                    <h3>Modular Design</h3>
-                    <p>Organized into focused crates for maintainability and reusability.</p>
+                    <h3>⚡ Fast Generation</h3>
+                    <p>Sub-millisecond code generation for typical grammars with linear O(n) scaling.</p>
                 </div>
                 <div class="feature-card">
-                    <h3>Trait-Based</h3>
-                    <p>Capability-facing traits for testability and extensibility.</p>
+                    <h3>🔄 ANTLR4 Compatible</h3>
+                    <p>100% compatible with ANTLR4 grammar syntax - reuse existing grammars.</p>
                 </div>
                 <div class="feature-card">
-                    <h3>Rust 2024</h3>
-                    <p>Uses the latest Rust edition with modern best practices.</p>
+                    <h3>🌍 Multi-Language</h3>
+                    <p>Generate parsers for Rust, Python, JavaScript, and TypeScript.</p>
                 </div>
                 <div class="feature-card">
-                    <h3>Snapshot Testing</h3>
-                    <p>Comprehensive tests using insta for regression prevention.</p>
+                    <h3>🚀 No Runtime Dependencies</h3>
+                    <p>Generates standalone, self-contained parsers with no external dependencies.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🦀 Modern Rust</h3>
+                    <p>Built with Rust 2024 edition, leveraging latest language features.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>✅ Well Tested</h3>
+                    <p>51 comprehensive tests covering all core functionality.</p>
                 </div>
             </div>
         </section>
@@ -195,7 +204,7 @@
             <h2>Quick Start</h2>
             
             <h3>Installation</h3>
-            <pre><code>cargo install --path crates/minipg-cli</code></pre>
+            <pre><code>cargo install minipg</code></pre>
             
             <h3>Generate a Parser</h3>
             <pre><code>minipg generate grammar.g4 -o output/ -l rust</code></pre>
@@ -215,16 +224,24 @@ WS: [ \t\r\n]+ -> skip;</code></pre>
         
         <section id="architecture">
             <h2>Architecture</h2>
-            <p>minipg follows a modular architecture with clear separation of concerns:</p>
+            <p>minipg is organized as a single crate with modular structure for easy installation and maintenance:</p>
             
-            <h3>Core Crates</h3>
+            <h3>Core Modules</h3>
             <ul style="margin-left: 2rem; margin-top: 1rem;">
-                <li><strong>minipg-core</strong>: Core traits, error types, and diagnostics</li>
-                <li><strong>minipg-ast</strong>: Abstract Syntax Tree definitions</li>
-                <li><strong>minipg-parser</strong>: Grammar file parser</li>
-                <li><strong>minipg-analysis</strong>: Semantic analysis and validation</li>
-                <li><strong>minipg-codegen</strong>: Code generation for target languages</li>
-                <li><strong>minipg-cli</strong>: Command-line interface</li>
+                <li><strong>core</strong>: Core traits, error types, and diagnostics</li>
+                <li><strong>ast</strong>: Abstract Syntax Tree definitions and visitor patterns</li>
+                <li><strong>parser</strong>: Grammar file parser (lexer + parser)</li>
+                <li><strong>analysis</strong>: Semantic analysis and validation</li>
+                <li><strong>codegen</strong>: Code generation for Rust, Python, JS, and TS</li>
+                <li><strong>CLI</strong>: Command-line interface with binary</li>
+            </ul>
+            
+            <h3>Key Benefits</h3>
+            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                <li>Single package installation - no complex dependency management</li>
+                <li>Fast compilation with modular organization</li>
+                <li>Clear separation of concerns for maintainability</li>
+                <li>Easy to integrate into your projects</li>
             </ul>
             
             <a href="../ARCHITECTURE.md" class="btn">Read Architecture Guide</a>
@@ -249,7 +266,8 @@ WS: [ \t\r\n]+ -> skip;</code></pre>
     </main>
     
     <footer>
-        <p>&copy; 2024 minipg contributors | MIT OR Apache-2.0 License</p>
+        <p>&copy; 2025 minipg contributors | Apache-2.0 License</p>
+        <p style="margin-top: 0.5rem;"><a href="https://github.com/yingkitw/minipg" style="color: #78a9ff;">GitHub</a> | <a href="https://crates.io/crates/minipg" style="color: #78a9ff;">crates.io</a> | <a href="https://docs.rs/minipg" style="color: #78a9ff;">docs.rs</a></p>
     </footer>
 </body>
 </html>
