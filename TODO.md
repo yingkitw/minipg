@@ -104,15 +104,28 @@
 ### Recent Accomplishments
 - [x] **Published to crates.io** as v0.1.0-alpha.1 ✅
 - [x] **Consolidated to single crate** (removed 7,560 lines) ✅
-- [x] **65 tests passing** (43 unit + 11 E2E + 11 integration) ✅
+- [x] **99 tests passing** (all tests, 0 ignored!) ✅
 - [x] **E2E test suite** covering full pipeline ✅
 - [x] **CharClass AST support** with negation ✅
 - [x] **Documentation updates** (KNOWN_LIMITATIONS, NEXT_PHASE) ✅
+- [x] **CompleteJSON.g4 fully supported** - all 5 tests passing ✅
+- [x] **SQL.g4 fully supported** - all 4 tests passing ✅
+- [x] **Lexer state machine** for character classes ✅
+- [x] **Non-greedy quantifiers** (`.*?`, `.+?`, `.??`) ✅
+- [x] **Lexer commands** parsed and stored in AST ✅
 
-### In Progress
-- [ ] **Lexer state machine** for character class tokenization (Week 1-2)
-- [ ] Fix 9 ignored integration tests (CompleteJSON.g4, SQL.g4)
-- [ ] Prepare v0.1.0-alpha.2 release
+### Completed for v0.1.0-alpha.2
+- [x] **Lexer state machine** for character class tokenization ✅
+  - [x] Enter CharClass mode after `:`, `|`, `~`, `(`, `]`, `?`, `*`, `+`
+  - [x] Handle escape sequences in character classes (`\\`, `\u0000`, etc.)
+  - [x] Treat special characters as literals in CharClass mode (`/`, `+`, etc.)
+  - [x] Skip whitespace but not comments in CharClass mode
+- [x] Fix all 9 ignored integration tests ✅
+  - [x] CompleteJSON.g4 - all 5 tests passing ✅
+  - [x] SQL.g4 - all 4 tests passing ✅
+- [x] Add support for lexer commands (`-> skip`, `-> channel(...)`) ✅
+- [x] Implement non-greedy quantifiers (`.*?`, `.+?`, `.??`) ✅
+- [x] Prepare v0.1.0-alpha.2 release ✅
 
 ### Next Priorities (See NEXT_PHASE.md for details)
 1. **Phase 1**: Advanced ANTLR4 Syntax (Weeks 1-3)

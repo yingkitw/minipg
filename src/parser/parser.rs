@@ -253,6 +253,49 @@ impl Parser {
             alt.add_element(element);
         }
         
+        // Handle lexer commands: -> skip, -> channel(HIDDEN), etc.
+        if self.current_token.kind == TokenKind::Arrow {
+            self.advance();
+            if self.current_token.kind == TokenKind::Identifier {
+                let command_name = self.current_token.text.clone();
+                self.advance();
+                
+                let command = match command_name.as_str() {
+                    "skip" => crate::ast::LexerCommand::Skip,
+                    "more" => crate::ast::LexerCommand::More,
+                    "popMode" => crate::ast::LexerCommand::PopMode,
+                    "channel" | "mode" | "type" | "pushMode" => {
+                        // These commands require a parameter in parentheses
+                        if self.current_token.kind == TokenKind::LeftParen {
+                            self.advance();
+                            let param = if self.current_token.kind == TokenKind::Identifier {
+                                let p = self.current_token.text.clone();
+                                self.advance();
+                                p
+                            } else {
+                                String::new()
+                            };
+                            if self.current_token.kind == TokenKind::RightParen {
+                                self.advance();
+                            }
+                            match command_name.as_str() {
+                                "channel" => crate::ast::LexerCommand::Channel(param),
+                                "mode" => crate::ast::LexerCommand::Mode(param),
+                                "type" => crate::ast::LexerCommand::Type(param),
+                                "pushMode" => crate::ast::LexerCommand::PushMode(param),
+                                _ => crate::ast::LexerCommand::Skip, // fallback
+                            }
+                        } else {
+                            crate::ast::LexerCommand::Skip // fallback if no params
+                        }
+                    }
+                    _ => crate::ast::LexerCommand::Skip, // unknown commands default to skip
+                };
+                
+                alt.set_lexer_command(command);
+            }
+        }
+        
         Ok(alt)
     }
 
@@ -305,19 +348,37 @@ impl Parser {
             }
         };
 
-        // Handle suffixes (?, *, +)
+        // Handle suffixes (?, *, +) with optional non-greedy modifier (??, *?, +?)
         let element = match self.current_token.kind {
             TokenKind::Question => {
                 self.advance();
-                Element::optional(element)
+                // Check for non-greedy modifier ??
+                if self.current_token.kind == TokenKind::Question {
+                    self.advance();
+                    Element::optional_non_greedy(element)
+                } else {
+                    Element::optional(element)
+                }
             }
             TokenKind::Star => {
                 self.advance();
-                Element::zero_or_more(element)
+                // Check for non-greedy modifier *?
+                if self.current_token.kind == TokenKind::Question {
+                    self.advance();
+                    Element::zero_or_more_non_greedy(element)
+                } else {
+                    Element::zero_or_more(element)
+                }
             }
             TokenKind::Plus => {
                 self.advance();
-                Element::one_or_more(element)
+                // Check for non-greedy modifier +?
+                if self.current_token.kind == TokenKind::Question {
+                    self.advance();
+                    Element::one_or_more_non_greedy(element)
+                } else {
+                    Element::one_or_more(element)
+                }
             }
             _ => element,
         };
@@ -416,6 +477,7 @@ impl Parser {
                 | TokenKind::Semicolon
                 | TokenKind::RightParen
                 | TokenKind::RightBracket
+                | TokenKind::Arrow
                 | TokenKind::Eof
         )
     }

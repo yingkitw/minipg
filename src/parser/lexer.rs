@@ -9,7 +9,8 @@ enum LexerMode {
     Normal,
     /// Character class mode - inside [...]
     CharClass,
-    /// String literal mode - inside "..."
+    /// String literal mode - inside "..." (reserved for future use)
+    #[allow(dead_code)]
     String,
 }
 
@@ -52,7 +53,13 @@ impl Lexer {
     }
 
     pub fn next_token(&mut self) -> Token {
-        self.skip_whitespace_and_comments();
+        // In CharClass mode, don't skip comments - treat / as a regular character
+        if self.mode != LexerMode::CharClass {
+            self.skip_whitespace_and_comments();
+        } else {
+            // In CharClass mode, only skip whitespace, not comments
+            self.skip_whitespace();
+        }
 
         if self.is_at_end() {
             return Token::eof(self.line, self.column);
@@ -88,8 +95,15 @@ impl Lexer {
                 Token::new(TokenKind::Star, "*".to_string(), start_line, start_column)
             }
             '+' => {
-                self.advance();
-                Token::new(TokenKind::Plus, "+".to_string(), start_line, start_column)
+                if self.mode == LexerMode::CharClass {
+                    // In CharClass mode, + is just a character
+                    let text = self.current_char().to_string();
+                    self.advance();
+                    Token::new(TokenKind::Identifier, text, start_line, start_column)
+                } else {
+                    self.advance();
+                    Token::new(TokenKind::Plus, "+".to_string(), start_line, start_column)
+                }
             }
             '~' => {
                 self.advance();
@@ -113,8 +127,13 @@ impl Lexer {
             }
             '[' => {
                 self.advance();
-                // Enter character class mode only if previous token was : or | or ~ (lexer rule context)
-                if matches!(self.last_token_kind, Some(TokenKind::Colon) | Some(TokenKind::Pipe) | Some(TokenKind::Not)) {
+                // Enter character class mode in lexer rule contexts
+                // In ANTLR4, [...] is always a character class in lexer rules
+                // Common contexts: after : (rule start), | (alternative), ~ (negation), ( (grouping), ] (after another char class), ? * + (after quantifiers)
+                if matches!(self.last_token_kind, 
+                    Some(TokenKind::Colon) | Some(TokenKind::Pipe) | Some(TokenKind::Not) | 
+                    Some(TokenKind::LeftParen) | Some(TokenKind::RightBracket) | 
+                    Some(TokenKind::Question) | Some(TokenKind::Star) | Some(TokenKind::Plus)) {
                     self.push_mode(LexerMode::CharClass);
                 }
                 Token::new(TokenKind::LeftBracket, "[".to_string(), start_line, start_column)
@@ -180,6 +199,12 @@ impl Lexer {
             '\\' if self.mode == LexerMode::CharClass => {
                 // Handle escape sequences in character classes
                 self.lex_escape_sequence(start_line, start_column)
+            }
+            _ if self.mode == LexerMode::CharClass => {
+                // In CharClass mode, treat any other character as a literal character
+                let text = ch.to_string();
+                self.advance();
+                Token::new(TokenKind::Identifier, text, start_line, start_column)
             }
             _ => {
                 self.advance();
@@ -308,6 +333,17 @@ impl Lexer {
         
         // Treat as string literal for grammar purposes
         Token::new(TokenKind::StringLiteral, text, start_line, start_column)
+    }
+
+    fn skip_whitespace(&mut self) {
+        while !self.is_at_end() {
+            match self.current_char() {
+                ' ' | '\t' | '\r' | '\n' => {
+                    self.advance();
+                }
+                _ => break,
+            }
+        }
     }
 
     fn skip_whitespace_and_comments(&mut self) {

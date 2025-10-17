@@ -7,5 +7,5 @@ pub mod visitor;
 
 pub use grammar::{Grammar, GrammarNode};
 pub use rule::{Rule, RuleType};
-pub use element::{Element, Alternative};
+pub use element::{Element, Alternative, LexerCommand};
 pub use visitor::{AstVisitor, AstVisitorMut};

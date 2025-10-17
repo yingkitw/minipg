@@ -40,9 +40,9 @@ pub trait AstVisitor {
 
     fn walk_element(&mut self, element: &Element) {
         match element {
-            Element::Optional { element } => self.visit_element(element),
-            Element::ZeroOrMore { element } => self.visit_element(element),
-            Element::OneOrMore { element } => self.visit_element(element),
+            Element::Optional { element, .. } => self.visit_element(element),
+            Element::ZeroOrMore { element, .. } => self.visit_element(element),
+            Element::OneOrMore { element, .. } => self.visit_element(element),
             Element::Not { element } => self.visit_element(element),
             Element::Group { alternatives } => {
                 for alt in alternatives {
@@ -92,9 +92,9 @@ pub trait AstVisitorMut {
 
     fn walk_element_mut(&mut self, element: &mut Element) {
         match element {
-            Element::Optional { element } => self.visit_element_mut(element),
-            Element::ZeroOrMore { element } => self.visit_element_mut(element),
-            Element::OneOrMore { element } => self.visit_element_mut(element),
+            Element::Optional { element, .. } => self.visit_element_mut(element),
+            Element::ZeroOrMore { element, .. } => self.visit_element_mut(element),
+            Element::OneOrMore { element, .. } => self.visit_element_mut(element),
             Element::Not { element } => self.visit_element_mut(element),
             Element::Group { alternatives } => {
                 for alt in alternatives {

@@ -79,9 +79,9 @@ impl LookupTableBuilder {
                     }
                 }
             }
-            Element::Optional { element } |
-            Element::ZeroOrMore { element } |
-            Element::OneOrMore { element } |
+            Element::Optional { element, .. } |
+            Element::ZeroOrMore { element, .. } |
+            Element::OneOrMore { element, .. } |
             Element::Not { element } => {
                 self.analyze_element(element, rule_name);
             }

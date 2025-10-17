@@ -9,25 +9,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0-alpha.2] - 2025-10-17
 
+### Major Features
+
+#### Lexer State Machine for Character Classes ✅
+- **CharClass Mode**: Context-aware lexer mode for proper `[...]` tokenization
+- **Automatic Mode Entry**: Triggers after `:`, `|`, `~`, `(`, `]`, `?`, `*`, `+`
+- **Escape Sequences**: Full support for `\\`, `\/`, `\n`, `\r`, `\t`, `\u0000-\uFFFF`
+- **Special Character Handling**: `/`, `+`, and other chars treated as literals in CharClass mode
+- **Comment Preservation**: Skips whitespace but preserves `/` for character matching
+
+#### Non-Greedy Quantifiers ✅
+- **Parsing Support**: `.*?`, `.+?`, `.??` syntax fully supported
+- **AST Representation**: Added `greedy: bool` field to quantifier variants
+- **Helper Methods**: `zero_or_more_non_greedy()`, `one_or_more_non_greedy()`, `optional_non_greedy()`
+- **SQL.g4 Support**: All SQL grammar tests now passing
+
+#### Lexer Commands ✅
+- **AST Support**: New `LexerCommand` enum with Skip, Channel, Mode, Type, PushMode, PopMode, More
+- **Parser Integration**: Properly parses `-> skip`, `-> channel(NAME)`, etc.
+- **Storage**: Commands stored in `Alternative.lexer_command` field
+
+### Test Suite Improvements
+- **99 tests passing** (up from 65 in alpha.1)
+- **0 tests ignored** (down from 9 in alpha.1)
+- **CompleteJSON.g4**: All 5 integration tests passing
+- **SQL.g4**: All 4 integration tests passing
+- **New test coverage**: Character classes, Unicode escapes, non-greedy quantifiers
+
+### Bug Fixes
+- Fixed character class parsing for complex patterns like `["\\\u0000-\u001F]`
+- Fixed tokenization of special characters in character classes
+- Fixed comment handling in character class mode
+- Fixed CharClass mode entry/exit logic
+- Updated all pattern matches to handle new `greedy` field
+
 ### Changed
-- **Consolidated to single crate**: Removed obsolete multi-crate structure, all code now in `src/`
-- **Improved test coverage**: 65 tests passing (43 unit + 11 E2E + 11 integration)
-- **Better documentation**: Added KNOWN_LIMITATIONS.md and NEXT_PHASE.md
+- **Element enum**: Added `greedy` field to `Optional`, `ZeroOrMore`, `OneOrMore` variants
+- **Alternative struct**: Added `lexer_command` field
+- **Visitor patterns**: Updated to handle new fields with `..` patterns
 
-### Added
-- **11 comprehensive E2E tests**: Full pipeline testing (grammar → parser → code generation)
-- **Character class AST support**: Added `CharClass` variant with negation and Unicode escape handling
-- **Enhanced parser**: Partial support for `~[...]` negated character classes (lexer work still needed)
-- **3 new character class tests**: Testing CharClass variants
-- **E2E test coverage**: Tests for keywords, alternatives, repetition, grouping, fragments, and more
+### Performance
+- No performance regression
+- All benchmarks still passing
+- Code generation remains sub-millisecond
 
-### Fixed
-- **Removed 7,560 lines of duplicate code**: Cleaned up obsolete crates folder
-- **Project size reduced**: More maintainable single-crate structure
-
-### Known Issues
-- Character class parsing requires lexer state machine (documented in KNOWN_LIMITATIONS.md)
-- 9 integration tests still ignored pending lexer improvements
+### Documentation
+- Created CHANGELOG_v0.1.0-alpha.2.md with detailed changes
+- Updated TODO.md with progress and new test counts
+- Updated README.md (pending)
 
 ## [0.1.0-alpha.1] - 2025-10-17
 

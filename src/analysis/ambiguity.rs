@@ -93,11 +93,12 @@ impl AmbiguityDetector {
                 crate::ast::Element::Optional { .. } | crate::ast::Element::ZeroOrMore { .. } => {
                     // Nullable, continue
                 }
-                crate::ast::Element::OneOrMore { element } => {
+                crate::ast::Element::OneOrMore { element, .. } => {
                     // Get first of inner element
                     result.extend(self.first_of_alternative(&crate::ast::Alternative {
                         elements: vec![*element.clone()],
                         label: None,
+                        lexer_command: None,
                     }));
                     break;
                 }

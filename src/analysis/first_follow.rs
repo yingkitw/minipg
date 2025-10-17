@@ -91,7 +91,7 @@ impl FirstFollowComputer {
                 Element::Optional { .. } | Element::ZeroOrMore { .. } => {
                     // These are nullable, continue
                 }
-                Element::OneOrMore { element } => {
+                Element::OneOrMore { element, .. } => {
                     // Not nullable, process inner element
                     self.compute_first_of_sequence(&[*element.clone()], grammar);
                     break;
@@ -121,7 +121,7 @@ impl FirstFollowComputer {
                 Element::Optional { .. } | Element::ZeroOrMore { .. } => {
                     // Nullable, continue
                 }
-                Element::OneOrMore { element } => {
+                Element::OneOrMore { element, .. } => {
                     result.extend(self.first_of_sequence(&[*element.clone()], grammar));
                     break;
                 }
