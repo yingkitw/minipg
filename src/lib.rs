@@ -14,7 +14,9 @@
 //! ## Example
 //!
 //! ```rust,no_run
-//! use minipg::{parse_grammar, generate_code, TargetLanguage, CodegenConfig};
+//! use minipg::parser::{Lexer, Parser};
+//! use minipg::codegen::RustCodeGenerator;
+//! use minipg::core::{types::CodeGenConfig, CodeGenerator};
 //!
 //! let grammar_source = r#"
 //!     grammar Calculator;
@@ -25,17 +27,14 @@
 //! "#;
 //!
 //! // Parse the grammar
-//! let grammar = parse_grammar(grammar_source).expect("Failed to parse grammar");
+//! let lexer = Lexer::new(grammar_source, "calculator.g4");
+//! let mut parser = Parser::new(lexer);
+//! let grammar = parser.parse().expect("Failed to parse grammar");
 //!
 //! // Generate Rust code
-//! let config = CodegenConfig {
-//!     target_language: TargetLanguage::Rust,
-//!     output_dir: "output".into(),
-//!     generate_visitor: true,
-//!     generate_listener: true,
-//! };
-//!
-//! let code = generate_code(&grammar, &config).expect("Failed to generate code");
+//! let generator = RustCodeGenerator::new();
+//! let config = CodeGenConfig::default();
+//! let code = generator.generate(&grammar, &config).expect("Failed to generate code");
 //! ```
 
 // Re-export core types
