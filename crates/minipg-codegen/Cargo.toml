@@ -1,0 +1,19 @@
+[package]
+name = "minipg-codegen"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+minipg-core.workspace = true
+minipg-ast.workspace = true
+minipg-analysis.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+insta.workspace = true

@@ -1,0 +1,12 @@
+---
+source: crates/minipg-analysis/tests/semantic_tests.rs
+expression: result.diagnostics
+---
+- severity: Warning
+  location: ~
+  message: "direct left recursion in rule 'expr'"
+  code: W002
+- severity: Warning
+  location: ~
+  message: "unreachable rule: expr"
+  code: W003

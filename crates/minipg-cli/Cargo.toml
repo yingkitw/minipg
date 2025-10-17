@@ -1,0 +1,26 @@
+[package]
+name = "minipg-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "minipg"
+path = "src/main.rs"
+
+[dependencies]
+minipg-core.workspace = true
+minipg-ast.workspace = true
+minipg-parser.workspace = true
+minipg-analysis.workspace = true
+minipg-codegen.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[dev-dependencies]
+insta.workspace = true

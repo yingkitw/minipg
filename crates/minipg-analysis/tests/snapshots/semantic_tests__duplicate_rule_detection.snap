@@ -1,0 +1,8 @@
+---
+source: crates/minipg-analysis/tests/semantic_tests.rs
+expression: result.diagnostics
+---
+- severity: Error
+  location: ~
+  message: "duplicate rule definition: rule1"
+  code: E002

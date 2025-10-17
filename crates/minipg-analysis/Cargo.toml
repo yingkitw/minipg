@@ -1,0 +1,16 @@
+[package]
+name = "minipg-analysis"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+minipg-core.workspace = true
+minipg-ast.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
