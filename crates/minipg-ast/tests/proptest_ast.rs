@@ -1,7 +1,7 @@
 //! Property-based tests for AST operations.
 
-use minipg_ast::{Alternative, Element, Grammar, Rule};
-use minipg_core::types::GrammarType;
+use minipg::ast::{Alternative, Element, Grammar, Rule};
+use minipg::core::types::GrammarType;
 use proptest::prelude::*;
 
 proptest! {

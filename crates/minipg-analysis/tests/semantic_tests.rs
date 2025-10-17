@@ -1,8 +1,8 @@
 //! Semantic analysis tests.
 
-use minipg_ast::{Alternative, Element, Grammar, Rule};
-use minipg_analysis::SemanticAnalyzer;
-use minipg_core::{types::GrammarType, SemanticAnalyzer as SemanticAnalyzerTrait};
+use minipg::ast::{Alternative, Element, Grammar, Rule};
+use minipg::analysis::SemanticAnalyzer;
+use minipg::core::{types::GrammarType, SemanticAnalyzer as SemanticAnalyzerTrait};
 
 #[test]
 fn test_undefined_rule_detection() {

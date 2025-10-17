@@ -1,7 +1,7 @@
 //! Parser tests with snapshot testing.
 
-use minipg_core::GrammarParser;
-use minipg_parser::GrammarParser as Parser;
+use minipg::core::GrammarParser;
+use minipg::parser::GrammarParser as Parser;
 
 #[test]
 fn test_parse_simple_grammar() {

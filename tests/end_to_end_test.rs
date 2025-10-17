@@ -1,12 +1,12 @@
 //! End-to-end integration tests for the complete pipeline.
 
-use minipg_analysis::SemanticAnalyzer;
-use minipg_ast::Grammar;
-use minipg_codegen::RustCodeGenerator;
-use minipg_core::{
+use minipg::analysis::SemanticAnalyzer;
+use minipg::ast::Grammar;
+use minipg::codegen::RustCodeGenerator;
+use minipg::core::{
     types::CodeGenConfig, CodeGenerator, GrammarParser, SemanticAnalyzer as SemanticAnalyzerTrait,
 };
-use minipg_parser::GrammarParser as Parser;
+use minipg::parser::GrammarParser as Parser;
 
 #[test]
 fn test_complete_pipeline_simple_grammar() {
@@ -154,18 +154,18 @@ expr: 'x';
     assert!(!analysis.has_errors());
     
     // Generate Rust
-    let rust_gen = minipg_codegen::RustCodeGenerator::new();
+    let rust_gen = minipg::codegen::RustCodeGenerator::new();
     let config = CodeGenConfig::default();
     let rust_code = rust_gen.generate(&grammar, &config).unwrap();
     assert!(rust_code.contains("SimpleParser"));
     
     // Generate Python
-    let python_gen = minipg_codegen::PythonCodeGenerator::new();
+    let python_gen = minipg::codegen::PythonCodeGenerator::new();
     let python_code = python_gen.generate(&grammar, &config).unwrap();
     assert!(python_code.contains("class SimpleParser"));
     
     // Generate JavaScript
-    let js_gen = minipg_codegen::JavaScriptCodeGenerator::new();
+    let js_gen = minipg::codegen::JavaScriptCodeGenerator::new();
     let js_code = js_gen.generate(&grammar, &config).unwrap();
     assert!(js_code.contains("class SimpleParser"));
 }

@@ -1,9 +1,9 @@
 //! Tests to validate error recovery features in generated code.
 
-use minipg_codegen::RustCodeGenerator;
-use minipg_core::{types::CodeGenConfig, CodeGenerator};
-use minipg_ast::{Alternative, Element, Grammar, Rule, RuleType};
-use minipg_core::types::GrammarType;
+use minipg::codegen::RustCodeGenerator;
+use minipg::core::{types::CodeGenConfig, CodeGenerator};
+use minipg::ast::{Alternative, Element, Grammar, Rule, RuleType};
+use minipg::core::types::GrammarType;
 
 #[test]
 fn test_error_recovery_in_generated_code() {

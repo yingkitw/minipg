@@ -1,7 +1,7 @@
 //! Visitor pattern tests.
 
-use minipg_ast::{Alternative, AstVisitor, Element, Grammar, Rule};
-use minipg_core::types::GrammarType;
+use minipg::ast::{Alternative, AstVisitor, Element, Grammar, Rule};
+use minipg::core::types::GrammarType;
 
 struct RuleCounter {
     count: usize,

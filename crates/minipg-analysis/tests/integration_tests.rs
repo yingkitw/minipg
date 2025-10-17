@@ -1,11 +1,11 @@
 //! Integration tests for complete analysis pipeline.
 
-use minipg_analysis::{
+use minipg::analysis::{
     ambiguity::AmbiguityDetector, first_follow::FirstFollowComputer,
     left_recursion::LeftRecursionDetector, reachability::ReachabilityAnalyzer, SemanticAnalyzer,
 };
-use minipg_ast::{Alternative, Element, Grammar, Rule};
-use minipg_core::{types::GrammarType, SemanticAnalyzer as SemanticAnalyzerTrait};
+use minipg::ast::{Alternative, Element, Grammar, Rule};
+use minipg::core::{types::GrammarType, SemanticAnalyzer as SemanticAnalyzerTrait};
 
 #[test]
 fn test_complete_analysis_pipeline() {

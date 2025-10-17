@@ -1,8 +1,8 @@
 //! Code generation tests.
 
-use minipg_ast::{Alternative, Element, Grammar, Rule};
-use minipg_codegen::RustCodeGenerator;
-use minipg_core::{types::{CodeGenConfig, GrammarType}, CodeGenerator};
+use minipg::ast::{Alternative, Element, Grammar, Rule};
+use minipg::codegen::RustCodeGenerator;
+use minipg::core::{types::{CodeGenConfig, GrammarType}, CodeGenerator};
 
 #[test]
 fn test_rust_codegen_simple() {

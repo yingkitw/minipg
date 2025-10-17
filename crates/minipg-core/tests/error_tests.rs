@@ -1,6 +1,6 @@
 //! Error handling tests.
 
-use minipg_core::Error;
+use minipg::core::Error;
 
 #[test]
 fn test_parse_error() {

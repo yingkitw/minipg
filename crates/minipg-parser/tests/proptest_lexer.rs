@@ -1,6 +1,6 @@
 //! Property-based tests for the lexer.
 
-use minipg_parser::{Lexer, TokenKind};
+use minipg::parser::{Lexer, TokenKind};
 use proptest::prelude::*;
 
 proptest! {

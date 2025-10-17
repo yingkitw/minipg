@@ -1,8 +1,8 @@
 //! Cross-language tests to verify generated code works in Python, JavaScript, etc.
 
-use minipg_ast::{Alternative, Element, Grammar, Rule, RuleType};
-use minipg_codegen::{JavaScriptCodeGenerator, PythonCodeGenerator};
-use minipg_core::{types::{CodeGenConfig, GrammarType}, CodeGenerator};
+use minipg::ast::{Alternative, Element, Grammar, Rule, RuleType};
+use minipg::codegen::{JavaScriptCodeGenerator, PythonCodeGenerator};
+use minipg::core::{types::{CodeGenConfig, GrammarType}, CodeGenerator};
 use std::fs;
 use std::process::Command;
 

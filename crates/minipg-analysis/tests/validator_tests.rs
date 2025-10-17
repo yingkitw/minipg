@@ -1,8 +1,8 @@
 //! Grammar validator tests.
 
-use minipg_analysis::GrammarValidator;
-use minipg_ast::{Grammar, Rule};
-use minipg_core::{types::GrammarType, GrammarValidator as GrammarValidatorTrait};
+use minipg::analysis::GrammarValidator;
+use minipg::ast::{Grammar, Rule};
+use minipg::core::{types::GrammarType, GrammarValidator as GrammarValidatorTrait};
 
 #[test]
 fn test_valid_grammar() {

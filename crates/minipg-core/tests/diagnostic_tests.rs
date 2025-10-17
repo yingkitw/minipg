@@ -1,6 +1,6 @@
 //! Diagnostic tests.
 
-use minipg_core::{Diagnostic, DiagnosticSeverity, Location};
+use minipg::core::{Diagnostic, DiagnosticSeverity, Location};
 
 #[test]
 fn test_location_display() {

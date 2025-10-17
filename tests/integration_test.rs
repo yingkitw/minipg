@@ -1,12 +1,12 @@
 //! Integration tests for the full pipeline.
 
-use minipg_analysis::SemanticAnalyzer;
-use minipg_codegen::{CodeGenerator, RustCodeGenerator};
-use minipg_core::{
+use minipg::analysis::SemanticAnalyzer;
+use minipg::codegen::{CodeGenerator, RustCodeGenerator};
+use minipg::core::{
     types::CodeGenConfig, CodeGenerator as CodeGeneratorTrait, GrammarParser,
     SemanticAnalyzer as SemanticAnalyzerTrait,
 };
-use minipg_parser::GrammarParser as Parser;
+use minipg::parser::GrammarParser as Parser;
 
 #[test]
 fn test_full_pipeline() {

@@ -1,6 +1,6 @@
 //! Lexer tests.
 
-use minipg_parser::{Lexer, TokenKind};
+use minipg::parser::{Lexer, TokenKind};
 
 #[test]
 fn test_lexer_keywords() {

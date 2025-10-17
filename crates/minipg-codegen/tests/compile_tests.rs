@@ -2,9 +2,9 @@
 //!
 //! These tests write generated code to temporary files and attempt to compile them.
 
-use minipg_ast::{Alternative, Element, Grammar, Rule, RuleType};
-use minipg_codegen::RustCodeGenerator;
-use minipg_core::{types::{CodeGenConfig, GrammarType}, CodeGenerator};
+use minipg::ast::{Alternative, Element, Grammar, Rule, RuleType};
+use minipg::codegen::RustCodeGenerator;
+use minipg::core::{types::{CodeGenConfig, GrammarType}, CodeGenerator};
 use std::fs;
 use std::process::Command;
 

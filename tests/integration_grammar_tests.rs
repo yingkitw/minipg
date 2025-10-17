@@ -1,9 +1,9 @@
 //! Integration tests for complex real-world grammars.
 
-use minipg_parser::{Lexer, Parser};
-use minipg_analysis::SemanticAnalyzer;
-use minipg_codegen::{RustCodeGenerator, PythonCodeGenerator, JavaScriptCodeGenerator, TypeScriptCodeGenerator};
-use minipg_core::{types::CodeGenConfig, CodeGenerator, SemanticAnalyzer as SemanticAnalyzerTrait};
+use minipg::parser::{Lexer, Parser};
+use minipg::analysis::SemanticAnalyzer;
+use minipg::codegen::{RustCodeGenerator, PythonCodeGenerator, JavaScriptCodeGenerator, TypeScriptCodeGenerator};
+use minipg::core::{types::CodeGenConfig, CodeGenerator, SemanticAnalyzer as SemanticAnalyzerTrait};
 use std::fs;
 
 #[test]
@@ -12,7 +12,7 @@ fn test_complete_json_grammar_parsing() {
         .expect("Failed to read CompleteJSON.g4");
     
     // Parse the grammar
-    let lexer = Lexer::new(&grammar_content);
+    let lexer = Lexer::new(&grammar_content, "test.g4");
     let mut parser = Parser::new(lexer);
     let grammar = parser.parse().expect("Failed to parse CompleteJSON.g4");
     
@@ -36,7 +36,7 @@ fn test_complete_json_semantic_analysis() {
     let grammar_content = fs::read_to_string("examples/CompleteJSON.g4")
         .expect("Failed to read CompleteJSON.g4");
     
-    let lexer = Lexer::new(&grammar_content);
+    let lexer = Lexer::new(&grammar_content, "test.g4");
     let mut parser = Parser::new(lexer);
     let grammar = parser.parse().expect("Failed to parse CompleteJSON.g4");
     
@@ -49,7 +49,7 @@ fn test_complete_json_semantic_analysis() {
     // Check for errors
     let diagnostics = analyzer.diagnostics();
     let errors: Vec<_> = diagnostics.iter()
-        .filter(|d| d.severity == minipg_core::DiagnosticSeverity::Error)
+        .filter(|d| d.severity == minipg::core::DiagnosticSeverity::Error)
         .collect();
     
     if !errors.is_empty() {
@@ -67,7 +67,7 @@ fn test_complete_json_rust_codegen() {
     let grammar_content = fs::read_to_string("examples/CompleteJSON.g4")
         .expect("Failed to read CompleteJSON.g4");
     
-    let lexer = Lexer::new(&grammar_content);
+    let lexer = Lexer::new(&grammar_content, "test.g4");
     let mut parser = Parser::new(lexer);
     let grammar = parser.parse().expect("Failed to parse CompleteJSON.g4");
     
@@ -97,7 +97,7 @@ fn test_complete_json_python_codegen() {
     let grammar_content = fs::read_to_string("examples/CompleteJSON.g4")
         .expect("Failed to read CompleteJSON.g4");
     
-    let lexer = Lexer::new(&grammar_content);
+    let lexer = Lexer::new(&grammar_content, "test.g4");
     let mut parser = Parser::new(lexer);
     let grammar = parser.parse().expect("Failed to parse CompleteJSON.g4");
     
@@ -122,7 +122,7 @@ fn test_sql_grammar_parsing() {
     let grammar_content = fs::read_to_string("examples/SQL.g4")
         .expect("Failed to read SQL.g4");
     
-    let lexer = Lexer::new(&grammar_content);
+    let lexer = Lexer::new(&grammar_content, "test.g4");
     let mut parser = Parser::new(lexer);
     let grammar = parser.parse().expect("Failed to parse SQL.g4");
     
@@ -144,7 +144,7 @@ fn test_sql_rust_codegen() {
     let grammar_content = fs::read_to_string("examples/SQL.g4")
         .expect("Failed to read SQL.g4");
     
-    let lexer = Lexer::new(&grammar_content);
+    let lexer = Lexer::new(&grammar_content, "test.g4");
     let mut parser = Parser::new(lexer);
     let grammar = parser.parse().expect("Failed to parse SQL.g4");
     
@@ -172,7 +172,7 @@ fn test_sql_javascript_codegen() {
     let grammar_content = fs::read_to_string("examples/SQL.g4")
         .expect("Failed to read SQL.g4");
     
-    let lexer = Lexer::new(&grammar_content);
+    let lexer = Lexer::new(&grammar_content, "test.g4");
     let mut parser = Parser::new(lexer);
     let grammar = parser.parse().expect("Failed to parse SQL.g4");
     
@@ -197,7 +197,7 @@ fn test_sql_typescript_codegen() {
     let grammar_content = fs::read_to_string("examples/SQL.g4")
         .expect("Failed to read SQL.g4");
     
-    let lexer = Lexer::new(&grammar_content);
+    let lexer = Lexer::new(&grammar_content, "test.g4");
     let mut parser = Parser::new(lexer);
     let grammar = parser.parse().expect("Failed to parse SQL.g4");
     
@@ -222,7 +222,7 @@ fn test_all_languages_for_json() {
     let grammar_content = fs::read_to_string("examples/CompleteJSON.g4")
         .expect("Failed to read CompleteJSON.g4");
     
-    let lexer = Lexer::new(&grammar_content);
+    let lexer = Lexer::new(&grammar_content, "test.g4");
     let mut parser = Parser::new(lexer);
     let grammar = parser.parse().expect("Failed to parse CompleteJSON.g4");
     

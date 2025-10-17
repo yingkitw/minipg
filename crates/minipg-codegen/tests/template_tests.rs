@@ -1,6 +1,6 @@
 //! Template engine tests.
 
-use minipg_codegen::template::Template;
+use minipg::codegen::template::Template;
 use std::collections::HashMap;
 
 #[test]

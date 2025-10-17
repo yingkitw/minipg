@@ -1,8 +1,8 @@
 //! Tests to verify that generated code actually compiles and runs correctly.
 
-use minipg_ast::{Alternative, Element, Grammar, Rule, RuleType};
-use minipg_codegen::RustCodeGenerator;
-use minipg_core::{types::{CodeGenConfig, GrammarType}, CodeGenerator};
+use minipg::ast::{Alternative, Element, Grammar, Rule, RuleType};
+use minipg::codegen::RustCodeGenerator;
+use minipg::core::{types::{CodeGenConfig, GrammarType}, CodeGenerator};
 use std::fs;
 
 /// Helper to create a test grammar

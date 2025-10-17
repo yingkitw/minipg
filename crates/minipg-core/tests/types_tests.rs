@@ -1,6 +1,6 @@
 //! Types tests.
 
-use minipg_core::types::{CodeGenConfig, GrammarType, SymbolTable};
+use minipg::core::types::{CodeGenConfig, GrammarType, SymbolTable};
 
 #[test]
 fn test_grammar_type() {

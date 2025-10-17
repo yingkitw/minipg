@@ -1,8 +1,8 @@
 //! Integration tests for code generation.
 
-use minipg_ast::{Alternative, Element, Grammar, Rule};
-use minipg_codegen::{JavaScriptCodeGenerator, PythonCodeGenerator, RustCodeGenerator};
-use minipg_core::{
+use minipg::ast::{Alternative, Element, Grammar, Rule};
+use minipg::codegen::{JavaScriptCodeGenerator, PythonCodeGenerator, RustCodeGenerator};
+use minipg::core::{
     types::{CodeGenConfig, GrammarType},
     CodeGenerator,
 };
