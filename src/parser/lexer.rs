@@ -23,6 +23,7 @@ pub struct Lexer {
     column: usize,
     mode: LexerMode,
     mode_stack: Vec<LexerMode>,
+    last_token_kind: Option<TokenKind>,
 }
 
 impl Lexer {
@@ -35,6 +36,7 @@ impl Lexer {
             column: 1,
             mode: LexerMode::Normal,
             mode_stack: Vec::new(),
+            last_token_kind: None,
         }
     }
     
@@ -60,7 +62,7 @@ impl Lexer {
         let start_column = self.column;
         let ch = self.current_char();
 
-        match ch {
+        let token = match ch {
             ':' => {
                 self.advance();
                 Token::new(TokenKind::Colon, ":".to_string(), start_line, start_column)
@@ -111,8 +113,10 @@ impl Lexer {
             }
             '[' => {
                 self.advance();
-                // Enter character class mode for single-char tokenization
-                self.push_mode(LexerMode::CharClass);
+                // Enter character class mode only if previous token was : or | (lexer rule context)
+                if matches!(self.last_token_kind, Some(TokenKind::Colon) | Some(TokenKind::Pipe)) {
+                    self.push_mode(LexerMode::CharClass);
+                }
                 Token::new(TokenKind::LeftBracket, "[".to_string(), start_line, start_column)
             }
             ']' => {
@@ -159,7 +163,11 @@ impl Lexer {
                 self.advance();
                 Token::error(format!("unexpected character: {}", ch), start_line, start_column)
             }
-        }
+        };
+        
+        // Track the token kind for context-aware lexing
+        self.last_token_kind = Some(token.kind);
+        token
     }
 
     fn lex_identifier_or_keyword(&mut self) -> Token {
