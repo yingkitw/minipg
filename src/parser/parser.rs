@@ -209,27 +209,85 @@ impl Parser {
     }
 
     fn parse_char_class(&mut self) -> Result<Element> {
-        // Simple character class parsing
-        if self.current_token.kind == TokenKind::StringLiteral {
-            let start = self.current_token.text.chars().next().unwrap_or('\0');
+        // Check for negation
+        let negated = if self.current_token.kind == TokenKind::Not {
             self.advance();
+            true
+        } else {
+            false
+        };
+        
+        let mut ranges = Vec::new();
+        
+        // Parse character class contents
+        while self.current_token.kind != TokenKind::RightBracket 
+            && self.current_token.kind != TokenKind::Eof {
             
-            if self.current_token.kind == TokenKind::Range {
-                self.advance();
-                if self.current_token.kind == TokenKind::StringLiteral {
-                    let end = self.current_token.text.chars().next().unwrap_or('\0');
+            if self.current_token.kind == TokenKind::StringLiteral 
+                || self.current_token.kind == TokenKind::CharLiteral {
+                let start_char = self.parse_char_literal()?;
+                
+                // Check for range
+                if self.current_token.kind == TokenKind::Range {
                     self.advance();
-                    return Ok(Element::CharRange { start, end });
+                    if self.current_token.kind == TokenKind::StringLiteral 
+                        || self.current_token.kind == TokenKind::CharLiteral {
+                        let end_char = self.parse_char_literal()?;
+                        ranges.push((start_char, end_char));
+                    } else {
+                        return Err(Error::parse(
+                            format!("{}:{}", self.current_token.line, self.current_token.column),
+                            "expected character after range operator".to_string(),
+                        ));
+                    }
+                } else {
+                    // Single character
+                    ranges.push((start_char, start_char));
                 }
+            } else {
+                break;
             }
-            
-            return Ok(Element::string_literal(start.to_string()));
         }
         
-        Err(Error::parse(
-            format!("{}:{}", self.current_token.line, self.current_token.column),
-            "invalid character class".to_string(),
-        ))
+        if ranges.is_empty() {
+            return Err(Error::parse(
+                format!("{}:{}", self.current_token.line, self.current_token.column),
+                "empty character class".to_string(),
+            ));
+        }
+        
+        Ok(Element::CharClass { negated, ranges })
+    }
+    
+    fn parse_char_literal(&mut self) -> Result<char> {
+        let text = &self.current_token.text;
+        let ch = if text.starts_with("\\u") {
+            // Unicode escape: \uXXXX
+            let hex = &text[2..];
+            u32::from_str_radix(hex, 16)
+                .ok()
+                .and_then(|code| char::from_u32(code))
+                .ok_or_else(|| Error::parse(
+                    format!("{}:{}", self.current_token.line, self.current_token.column),
+                    format!("invalid unicode escape: {}", text),
+                ))?
+        } else if text.starts_with('\\') && text.len() == 2 {
+            // Simple escape sequences
+            match text.chars().nth(1).unwrap() {
+                'n' => '\n',
+                'r' => '\r',
+                't' => '\t',
+                '\\' => '\\',
+                '\'' => '\'',
+                '"' => '"',
+                c => c,
+            }
+        } else {
+            text.chars().next().unwrap_or('\0')
+        };
+        
+        self.advance();
+        Ok(ch)
     }
 
     fn is_alternative_end(&self) -> bool {

@@ -56,6 +56,11 @@ pub enum Element {
         start: char,
         end: char,
     },
+    /// Character class (e.g., [a-z0-9], ~["\r\n])
+    CharClass {
+        negated: bool,
+        ranges: Vec<(char, char)>, // Vec of (start, end) - single char is (c, c)
+    },
     /// Optional element (?)
     Optional {
         element: Box<Element>,
@@ -248,6 +253,52 @@ mod tests {
                 assert_eq!(language, None);
             }
             _ => panic!("Expected Predicate"),
+        }
+    }
+
+    #[test]
+    fn test_char_class_simple() {
+        let elem = Element::CharClass {
+            negated: false,
+            ranges: vec![('a', 'z')],
+        };
+        match elem {
+            Element::CharClass { negated, ranges } => {
+                assert!(!negated);
+                assert_eq!(ranges.len(), 1);
+                assert_eq!(ranges[0], ('a', 'z'));
+            }
+            _ => panic!("Expected CharClass"),
+        }
+    }
+
+    #[test]
+    fn test_char_class_negated() {
+        let elem = Element::CharClass {
+            negated: true,
+            ranges: vec![('"', '"'), ('\\', '\\'), ('\u{0000}', '\u{001F}')],
+        };
+        match elem {
+            Element::CharClass { negated, ranges } => {
+                assert!(negated);
+                assert_eq!(ranges.len(), 3);
+            }
+            _ => panic!("Expected CharClass"),
+        }
+    }
+
+    #[test]
+    fn test_char_class_multiple_ranges() {
+        let elem = Element::CharClass {
+            negated: false,
+            ranges: vec![('a', 'z'), ('A', 'Z'), ('0', '9')],
+        };
+        match elem {
+            Element::CharClass { negated, ranges } => {
+                assert!(!negated);
+                assert_eq!(ranges.len(), 3);
+            }
+            _ => panic!("Expected CharClass"),
         }
     }
 }
