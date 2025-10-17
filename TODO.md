@@ -14,6 +14,7 @@
 
 ### Foundation
 - [x] Create workspace structure with modular crates
+- [x] Consolidate to single-crate structure (removed 7,560 lines of duplicate code)
 - [x] Implement core traits and error handling
 - [x] Implement AST definitions with visitor pattern
 - [x] Implement lexer for grammar files
@@ -24,7 +25,8 @@
 - [x] Add insta snapshot tests
 - [x] Fix parser implementation issues
 - [x] Ensure cargo build succeeds
-- [x] Ensure cargo test succeeds (68 tests passing)
+- [x] Ensure cargo test succeeds (65 tests passing: 43 unit + 11 E2E + 11 integration)
+- [x] Add comprehensive E2E tests (grammar → parser → code generation)
 
 ### Documentation
 - [x] README, ARCHITECTURE, ROADMAP, DECISIONS
@@ -33,6 +35,8 @@
 - [x] Multi-Language plan
 - [x] Runtime Decision analysis
 - [x] Comparison with antlr4rust
+- [x] KNOWN_LIMITATIONS.md documenting current alpha limitations
+- [x] NEXT_PHASE.md with detailed implementation plan
 
 ### Examples
 - [x] Simple examples (Calculator, JSON)
@@ -92,6 +96,32 @@
 - [x] Add release workflow ✅
 - [x] Add documentation workflow ✅
 - [x] Add coverage workflow ✅
+
+---
+
+## Current Status (v0.1.0-alpha.2) 🎯
+
+### Recent Accomplishments
+- [x] **Published to crates.io** as v0.1.0-alpha.1 ✅
+- [x] **Consolidated to single crate** (removed 7,560 lines) ✅
+- [x] **65 tests passing** (43 unit + 11 E2E + 11 integration) ✅
+- [x] **E2E test suite** covering full pipeline ✅
+- [x] **CharClass AST support** with negation ✅
+- [x] **Documentation updates** (KNOWN_LIMITATIONS, NEXT_PHASE) ✅
+
+### In Progress
+- [ ] **Lexer state machine** for character class tokenization (Week 1-2)
+- [ ] Fix 9 ignored integration tests (CompleteJSON.g4, SQL.g4)
+- [ ] Prepare v0.1.0-alpha.2 release
+
+### Next Priorities (See NEXT_PHASE.md for details)
+1. **Phase 1**: Advanced ANTLR4 Syntax (Weeks 1-3)
+   - Character class improvements (lexer state machine)
+   - Rule arguments & return values
+   - Lexer modes & channels
+2. **Phase 2**: Go Target Language (Weeks 4-5)
+3. **Phase 3**: C Target Language (Weeks 6-7)
+4. **Phase 4**: C++ Target Language (Weeks 8-9)
 
 ---
 

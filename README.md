@@ -211,10 +211,11 @@ RUST_LOG=info cargo run -- generate grammar.g4
 
 ## Project Status
 
-- **Current Version**: 0.1.0-alpha.1
+- **Current Version**: 0.1.0-alpha.2 (ready to publish)
 - **Status**: Alpha Release - Published on crates.io
-- **Tests**: 51 passing (9 ignored due to alpha limitations)
+- **Tests**: 65 passing (43 unit + 11 E2E + 11 integration, 9 ignored)
 - **Package**: Single consolidated crate for easy installation
+- **E2E Coverage**: Full pipeline testing from grammar to working parser
 
 See [TODO.md](TODO.md) for current tasks and [ROADMAP.md](ROADMAP.md) for the complete roadmap.
 
