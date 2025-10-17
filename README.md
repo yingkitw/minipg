@@ -213,7 +213,7 @@ RUST_LOG=info cargo run -- generate grammar.g4
 
 - **Current Version**: 0.1.0-alpha.1
 - **Status**: Alpha Release - Published on crates.io
-- **Tests**: 32 passing (9 ignored due to alpha limitations)
+- **Tests**: 51 passing (9 ignored due to alpha limitations)
 - **Package**: Single consolidated crate for easy installation
 
 See [TODO.md](TODO.md) for current tasks and [ROADMAP.md](ROADMAP.md) for the complete roadmap.

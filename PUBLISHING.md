@@ -9,7 +9,7 @@ This document provides instructions for publishing minipg to crates.io.
 - [x] Package has required metadata (description, homepage, documentation, readme)
 - [x] LICENSE file created (Apache-2.0)
 - [x] `cargo build` passes
-- [x] `cargo test` passes (32 tests passing, 9 ignored)
+- [x] `cargo test` passes (51 tests passing, 9 ignored)
 - [x] Consolidated to single crate for easier publishing
 - [x] All documentation updated
 
@@ -54,5 +54,5 @@ After publishing:
 - This is an **alpha release** - expect breaking changes
 - Single consolidated crate for easy installation
 - Version: 0.1.0-alpha.1
-- 32 tests passing (9 ignored due to alpha limitations with complex ANTLR4 features)
+- 51 tests passing (9 ignored due to alpha limitations with complex ANTLR4 features)
 - Repository: https://github.com/yingkitw/minipg

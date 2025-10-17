@@ -33,11 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Low memory footprint (<100 KB)
   - Comprehensive benchmarks with criterion
 - **Testing**:
-  - 32 tests passing (9 ignored due to alpha limitations)
+  - 51 tests passing (9 ignored due to alpha limitations)
   - Unit, integration, and end-to-end tests
   - Grammar validation tests
   - Error recovery tests
   - Cross-language consistency tests
+  - Comprehensive coverage of core types, tokens, and AST
 - **Documentation**:
   - Getting started tutorial
   - Migration guide from ANTLR4
