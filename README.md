@@ -38,10 +38,12 @@ A blazingly fast, modern parser generator written in Rust. **faster** than ANTLR
 - **Non-Greedy Quantifiers** - `.*?`, `.+?`, `.??` for complex patterns
 - **Lexer Commands** - `-> skip`, `-> channel(NAME)`, `-> mode(NAME)` (parsed)
 - **Labels** - Element labels (`id=ID`) and list labels (`ids+=ID`)
-- **Named Actions** - `@header`, `@members`, `@init` for custom code
-- **Actions** - Embedded actions and semantic predicates
+- **Named Actions** - `@header`, `@members` with code generation for all 5 languages
+- **Actions** - Embedded actions and semantic predicates (parsed)
 - **Fragments** - Reusable lexer components
 - **Parameterized Rules** - Arguments, returns, and local variables
+- **Grammar Imports** - `import X;` syntax
+- **Grammar Options** - `options {...}` blocks
 - **Real-World Grammars** - CompleteJSON.g4 ✅, SQL.g4 ✅
 - **Modular Architecture**: Organized into focused crates
 - **Trait-Based Design**: Extensible and testable
@@ -242,14 +244,15 @@ RUST_LOG=info cargo run -- generate grammar.g4
 ## Project Status
 
 - **Current Version**: 0.1.0-alpha.3 (Published on crates.io)
+- **Next Version**: 0.1.0-alpha.4 (Ready to publish)
 - **Status**: Alpha Release - Production Ready
-- **Tests**: 111 passing (all tests, 0 ignored)
+- **Tests**: 115 passing (all tests, 0 ignored, 100% pass rate)
 - **Target Languages**: 5 (Rust, Python, JavaScript, TypeScript, Go)
 - **Package**: Single consolidated crate for easy installation
 - **Grammar Support**: CompleteJSON.g4 ✅, SQL.g4 ✅
 - **E2E Coverage**: Full pipeline testing from grammar to working parser
 - **ANTLR4 Compatibility**: High - supports most common features
-- **New Features**: List labels (`ids+=ID`), Named actions (`@header`)
+- **New Features**: List labels (`ids+=ID`), Named actions with code generation
 
 See [TODO.md](TODO.md) for current tasks and [ROADMAP.md](ROADMAP.md) for the complete roadmap.
 

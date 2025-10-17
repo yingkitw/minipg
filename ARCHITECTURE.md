@@ -114,6 +114,14 @@ The code generator produces:
 - Error types (ParseError)
 - Visitor/listener patterns (optional)
 - Documentation comments
+- **Named action insertion** - Custom code from `@header` and `@members`
+
+All 5 generators support:
+- Parameterized rules (arguments, returns, locals)
+- Named actions (`@header` for imports, `@members` for fields)
+- List labels (`ids+=ID`)
+- Non-greedy quantifiers
+- Character classes with Unicode
 
 ### cli
 
