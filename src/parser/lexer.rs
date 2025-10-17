@@ -113,8 +113,8 @@ impl Lexer {
             }
             '[' => {
                 self.advance();
-                // Enter character class mode only if previous token was : or | (lexer rule context)
-                if matches!(self.last_token_kind, Some(TokenKind::Colon) | Some(TokenKind::Pipe)) {
+                // Enter character class mode only if previous token was : or | or ~ (lexer rule context)
+                if matches!(self.last_token_kind, Some(TokenKind::Colon) | Some(TokenKind::Pipe) | Some(TokenKind::Not)) {
                     self.push_mode(LexerMode::CharClass);
                 }
                 Token::new(TokenKind::LeftBracket, "[".to_string(), start_line, start_column)
@@ -150,14 +150,36 @@ impl Lexer {
                     Token::new(TokenKind::Minus, "-".to_string(), start_line, start_column)
                 }
             }
-            '\'' => self.lex_char_or_string_literal(),
-            '"' => self.lex_string_literal(),
+            '\'' => {
+                if self.mode == LexerMode::CharClass {
+                    // In CharClass mode, single quote is just a character
+                    let text = self.current_char().to_string();
+                    self.advance();
+                    Token::new(TokenKind::Identifier, text, start_line, start_column)
+                } else {
+                    self.lex_char_or_string_literal()
+                }
+            }
+            '"' => {
+                if self.mode == LexerMode::CharClass {
+                    // In CharClass mode, double quote is just a character
+                    let text = self.current_char().to_string();
+                    self.advance();
+                    Token::new(TokenKind::Identifier, text, start_line, start_column)
+                } else {
+                    self.lex_string_literal()
+                }
+            }
             _ if ch.is_alphabetic() || ch == '_' => self.lex_identifier_or_keyword(),
             _ if ch.is_numeric() => {
                 // Standalone digit - treat as identifier for character class ranges
                 let text = ch.to_string();
                 self.advance();
                 Token::new(TokenKind::Identifier, text, start_line, start_column)
+            }
+            '\\' if self.mode == LexerMode::CharClass => {
+                // Handle escape sequences in character classes
+                self.lex_escape_sequence(start_line, start_column)
             }
             _ => {
                 self.advance();
@@ -170,6 +192,36 @@ impl Lexer {
         token
     }
 
+    fn lex_escape_sequence(&mut self, start_line: usize, start_column: usize) -> Token {
+        let mut text = String::new();
+        text.push(self.current_char()); // backslash
+        self.advance();
+        
+        if self.is_at_end() {
+            return Token::error("incomplete escape sequence".to_string(), start_line, start_column);
+        }
+        
+        let escape_char = self.current_char();
+        text.push(escape_char);
+        self.advance();
+        
+        // Handle Unicode escapes: \uXXXX
+        if escape_char == 'u' {
+            // Read 4 hex digits
+            for _ in 0..4 {
+                if self.is_at_end() || !self.current_char().is_ascii_hexdigit() {
+                    return Token::error("invalid unicode escape".to_string(), start_line, start_column);
+                }
+                text.push(self.current_char());
+                self.advance();
+            }
+        }
+        // For other escapes like \n, \r, \t, \\, etc., we already consumed them
+        
+        // Return as StringLiteral so parser can handle it with parse_char_literal
+        Token::new(TokenKind::StringLiteral, text, start_line, start_column)
+    }
+    
     fn lex_identifier_or_keyword(&mut self) -> Token {
         let start_line = self.line;
         let start_column = self.column;
