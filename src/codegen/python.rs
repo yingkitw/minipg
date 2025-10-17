@@ -92,7 +92,16 @@ impl PythonCodeGenerator {
         code.push_str(&format!("class {}:\n", class_name));
         code.push_str("    def __init__(self, tokens):\n");
         code.push_str("        self.tokens = tokens\n");
-        code.push_str("        self.position = 0\n\n");
+        code.push_str("        self.position = 0\n");
+        
+        // Insert @members named action if present
+        if let Some(members_code) = grammar.named_actions.get("members") {
+            code.push_str("        # Custom members from @members action\n");
+            code.push_str("        ");
+            code.push_str(members_code);
+            code.push_str("\n");
+        }
+        code.push_str("\n");
         
         // Generate parse methods for each rule
         for rule in grammar.parser_rules() {
@@ -217,7 +226,15 @@ impl CodeGeneratorTrait for PythonCodeGenerator {
         // Imports
         code.push_str("from dataclasses import dataclass\n");
         code.push_str("from enum import Enum\n");
-        code.push_str("from typing import List, Optional, Tuple\n\n");
+        code.push_str("from typing import List, Optional, Tuple\n");
+        
+        // Insert @header named action if present
+        if let Some(header_code) = input.named_actions.get("header") {
+            code.push_str("\n# Custom header from @header action\n");
+            code.push_str(header_code);
+            code.push_str("\n");
+        }
+        code.push_str("\n");
         
         // Error class
         code.push_str("@dataclass\n");

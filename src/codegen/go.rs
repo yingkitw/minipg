@@ -27,6 +27,13 @@ impl GoCodeGenerator {
         code.push_str("\t\"strings\"\n");
         code.push_str(")\n\n");
         
+        // Insert @header named action if present
+        if let Some(header_code) = grammar.named_actions.get("header") {
+            code.push_str("// Custom header from @header action\n");
+            code.push_str(header_code);
+            code.push_str("\n\n");
+        }
+        
         code
     }
     
@@ -197,6 +204,15 @@ impl GoCodeGenerator {
         code.push_str(&format!("type {}Parser struct {{\n", grammar.name));
         code.push_str(&format!("\tlexer        *{}Lexer\n", grammar.name));
         code.push_str("\tcurrentToken *Token\n");
+        
+        // Insert @members named action if present
+        if let Some(members_code) = grammar.named_actions.get("members") {
+            code.push_str("\t// Custom members from @members action\n");
+            code.push_str("\t");
+            code.push_str(members_code);
+            code.push_str("\n");
+        }
+        
         code.push_str("}\n\n");
         
         // New parser constructor
