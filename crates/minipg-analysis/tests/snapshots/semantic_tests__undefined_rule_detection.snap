@@ -1,8 +1,0 @@
----
-source: crates/minipg-analysis/tests/semantic_tests.rs
-expression: result.diagnostics
----
-- severity: Error
-  location: ~
-  message: "undefined rule: undefined_rule"
-  code: E001
