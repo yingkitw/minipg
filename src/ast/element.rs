@@ -169,3 +169,85 @@ impl Element {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_alternative_new() {
+        let alt = Alternative::new();
+        assert_eq!(alt.elements.len(), 0);
+        assert_eq!(alt.label, None);
+    }
+
+    #[test]
+    fn test_alternative_with_label() {
+        let alt = Alternative::new().with_label("myLabel".to_string());
+        assert_eq!(alt.label, Some("myLabel".to_string()));
+    }
+
+    #[test]
+    fn test_alternative_add_element() {
+        let mut alt = Alternative::new();
+        alt.add_element(Element::Terminal {
+            value: "ID".to_string(),
+            label: None,
+        });
+        assert_eq!(alt.elements.len(), 1);
+    }
+
+    #[test]
+    fn test_element_rule_ref() {
+        let elem = Element::RuleRef {
+            name: "expr".to_string(),
+            label: Some("e".to_string()),
+        };
+        match elem {
+            Element::RuleRef { name, label } => {
+                assert_eq!(name, "expr");
+                assert_eq!(label, Some("e".to_string()));
+            }
+            _ => panic!("Expected RuleRef"),
+        }
+    }
+
+    #[test]
+    fn test_element_terminal() {
+        let elem = Element::Terminal {
+            value: "ID".to_string(),
+            label: None,
+        };
+        match elem {
+            Element::Terminal { value, label } => {
+                assert_eq!(value, "ID");
+                assert_eq!(label, None);
+            }
+            _ => panic!("Expected Terminal"),
+        }
+    }
+
+    #[test]
+    fn test_element_action() {
+        let elem = Element::action("System.out.println();".to_string());
+        match elem {
+            Element::Action { code, language } => {
+                assert_eq!(code, "System.out.println();");
+                assert_eq!(language, None);
+            }
+            _ => panic!("Expected Action"),
+        }
+    }
+
+    #[test]
+    fn test_element_predicate() {
+        let elem = Element::predicate("x > 0".to_string());
+        match elem {
+            Element::Predicate { code, language } => {
+                assert_eq!(code, "x > 0");
+                assert_eq!(language, None);
+            }
+            _ => panic!("Expected Predicate"),
+        }
+    }
+}

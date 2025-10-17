@@ -104,3 +104,50 @@ impl Token {
         Self::new(TokenKind::Error, text, line, column)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_token_kind_equality() {
+        assert_eq!(TokenKind::Grammar, TokenKind::Grammar);
+        assert_ne!(TokenKind::Grammar, TokenKind::Lexer);
+    }
+
+    #[test]
+    fn test_token_kind_display() {
+        assert_eq!(TokenKind::Grammar.to_string(), "grammar");
+        assert_eq!(TokenKind::Identifier.to_string(), "identifier");
+        assert_eq!(TokenKind::Colon.to_string(), ":");
+        assert_eq!(TokenKind::Arrow.to_string(), "->");
+        assert_eq!(TokenKind::Eof.to_string(), "end of file");
+    }
+
+    #[test]
+    fn test_token_new() {
+        let token = Token::new(TokenKind::Identifier, "test".to_string(), 1, 5);
+        assert_eq!(token.kind, TokenKind::Identifier);
+        assert_eq!(token.text, "test");
+        assert_eq!(token.line, 1);
+        assert_eq!(token.column, 5);
+    }
+
+    #[test]
+    fn test_token_eof() {
+        let token = Token::eof(10, 20);
+        assert_eq!(token.kind, TokenKind::Eof);
+        assert_eq!(token.text, "");
+        assert_eq!(token.line, 10);
+        assert_eq!(token.column, 20);
+    }
+
+    #[test]
+    fn test_token_error() {
+        let token = Token::error("unexpected char".to_string(), 5, 10);
+        assert_eq!(token.kind, TokenKind::Error);
+        assert_eq!(token.text, "unexpected char");
+        assert_eq!(token.line, 5);
+        assert_eq!(token.column, 10);
+    }
+}

@@ -75,3 +75,78 @@ impl Default for CodeGenConfig {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_grammar_type_variants() {
+        assert_eq!(GrammarType::Lexer, GrammarType::Lexer);
+        assert_eq!(GrammarType::Parser, GrammarType::Parser);
+        assert_eq!(GrammarType::Combined, GrammarType::Combined);
+        assert_ne!(GrammarType::Lexer, GrammarType::Parser);
+    }
+
+    #[test]
+    fn test_symbol_table_new() {
+        let table = SymbolTable::new();
+        assert_eq!(table.tokens().len(), 0);
+        assert_eq!(table.rules().len(), 0);
+    }
+
+    #[test]
+    fn test_symbol_table_add_token() {
+        let mut table = SymbolTable::new();
+        table.add_token("ID".to_string(), 1);
+        assert_eq!(table.get_token("ID"), Some(1));
+        assert_eq!(table.get_token("UNKNOWN"), None);
+    }
+
+    #[test]
+    fn test_symbol_table_add_rule() {
+        let mut table = SymbolTable::new();
+        table.add_rule("expr".to_string(), 0);
+        assert_eq!(table.get_rule("expr"), Some(0));
+        assert_eq!(table.get_rule("unknown"), None);
+    }
+
+    #[test]
+    fn test_symbol_table_multiple_entries() {
+        let mut table = SymbolTable::new();
+        table.add_token("ID".to_string(), 1);
+        table.add_token("NUMBER".to_string(), 2);
+        table.add_rule("expr".to_string(), 0);
+        table.add_rule("term".to_string(), 1);
+        
+        assert_eq!(table.tokens().len(), 2);
+        assert_eq!(table.rules().len(), 2);
+    }
+
+    #[test]
+    fn test_codegen_config_default() {
+        let config = CodeGenConfig::default();
+        assert_eq!(config.target_language, "rust");
+        assert_eq!(config.output_directory, ".");
+        assert_eq!(config.package_name, None);
+        assert!(config.generate_listener);
+        assert!(!config.generate_visitor);
+    }
+
+    #[test]
+    fn test_codegen_config_custom() {
+        let config = CodeGenConfig {
+            target_language: "python".to_string(),
+            output_directory: "output".to_string(),
+            package_name: Some("my_parser".to_string()),
+            generate_listener: false,
+            generate_visitor: true,
+        };
+        
+        assert_eq!(config.target_language, "python");
+        assert_eq!(config.output_directory, "output");
+        assert_eq!(config.package_name, Some("my_parser".to_string()));
+        assert!(!config.generate_listener);
+        assert!(config.generate_visitor);
+    }
+}
