@@ -62,29 +62,31 @@ A blazingly fast, modern parser generator written in Rust. **faster** than ANTLR
 
 ## Architecture
 
-minipg is organized into the following crates:
+minipg is organized as a single crate with modular structure:
 
-- **minipg-core**: Core traits, error types, and diagnostics
-- **minipg-ast**: Abstract Syntax Tree definitions and visitor patterns
-- **minipg-parser**: Grammar file parser (lexer + parser)
-- **minipg-analysis**: Semantic analysis and validation
-- **minipg-codegen**: Code generation for target languages
-- **minipg-cli**: Command-line interface
+- **core**: Core types, traits, and error handling
+- **ast**: Abstract Syntax Tree definitions and visitor patterns
+- **parser**: Grammar file parser (lexer + parser)
+- **analysis**: Semantic analysis and validation
+- **codegen**: Code generation for target languages (Rust, Python, JS, TS)
+- **CLI**: Command-line interface with binary
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed design documentation.
 
 ## Installation
 
-### From crates.io (Alpha Release)
+### From crates.io
 
 ```bash
-cargo install minipg-cli
+cargo install minipg
 ```
 
 ### From Source
 
 ```bash
-cargo install --path crates/minipg-cli
+git clone https://github.com/yingkitw/minipg
+cd minipg
+cargo install --path .
 ```
 
 ## Usage
@@ -210,8 +212,9 @@ RUST_LOG=info cargo run -- generate grammar.g4
 ## Project Status
 
 - **Current Version**: 0.1.0-alpha.1
-- **Status**: Alpha Release - Active Development
-- **Tests**: 68 passing (100% success rate)
+- **Status**: Alpha Release - Published on crates.io
+- **Tests**: 32 passing (9 ignored due to alpha limitations)
+- **Package**: Single consolidated crate for easy installation
 
 See [TODO.md](TODO.md) for current tasks and [ROADMAP.md](ROADMAP.md) for the complete roadmap.
 

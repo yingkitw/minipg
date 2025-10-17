@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2025-10-17
+## [0.1.0-alpha.1] - 2025-10-17
+
+### Project Structure
+- **Consolidated to single crate**: Simplified from multi-crate workspace to single package for easier publishing and installation
+- **Modular organization**: Core, AST, Parser, Analysis, and Codegen modules within single crate
 
 ### Added
 - Initial release of minipg parser generator
@@ -29,8 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Low memory footprint (<100 KB)
   - Comprehensive benchmarks with criterion
 - **Testing**:
-  - 101 tests with 100% pass rate
-  - Unit, integration, and benchmark tests
+  - 32 tests passing (9 ignored due to alpha limitations)
+  - Unit, integration, and end-to-end tests
   - Grammar validation tests
   - Error recovery tests
   - Cross-language consistency tests

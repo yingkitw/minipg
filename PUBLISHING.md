@@ -4,74 +4,55 @@ This document provides instructions for publishing minipg to crates.io.
 
 ## Pre-Publishing Checklist
 
-- [x] Version updated to `0.1.0-alpha.1` in workspace Cargo.toml
+- [x] Version updated to `0.1.0-alpha.1` in Cargo.toml
 - [x] Pig mascot added to README
-- [x] All crates have required metadata (description, homepage, documentation, readme)
+- [x] Package has required metadata (description, homepage, documentation, readme)
 - [x] LICENSE file created (Apache-2.0)
-- [x] `cargo build --all` passes
-- [x] `cargo test --all` passes (68 tests passing)
-- [x] `cargo package --allow-dirty` verification passes
+- [x] `cargo build` passes
+- [x] `cargo test` passes (32 tests passing, 9 ignored)
+- [x] Consolidated to single crate for easier publishing
+- [x] All documentation updated
 
-## Publishing Order
+## Publishing (Single Crate)
 
-Crates must be published in dependency order:
-
-1. **minipg-core** (no internal dependencies)
-2. **minipg-ast** (depends on minipg-core)
-3. **minipg-parser** (depends on minipg-core, minipg-ast)
-4. **minipg-analysis** (depends on minipg-core, minipg-ast)
-5. **minipg-codegen** (depends on minipg-core, minipg-ast, minipg-analysis)
-6. **minipg-cli** (depends on all above)
+Since minipg is now a single consolidated crate, publishing is simple:
 
 ## Publishing Commands
 
-Before publishing, ensure you're logged in to crates.io:
+### 1. Login to crates.io
 
 ```bash
 cargo login
 ```
 
-Then publish each crate in order:
+### 2. Verify Package
 
 ```bash
-# 1. Publish minipg-core
-cd crates/minipg-core
-cargo publish
+cargo publish --dry-run
+```
 
-# 2. Publish minipg-ast
-cd ../minipg-ast
-cargo publish
+### 3. Publish
 
-# 3. Publish minipg-parser
-cd ../minipg-parser
-cargo publish
-
-# 4. Publish minipg-analysis
-cd ../minipg-analysis
-cargo publish
-
-# 5. Publish minipg-codegen
-cd ../minipg-codegen
-cargo publish
-
-# 6. Publish minipg-cli
-cd ../minipg-cli
+```bash
 cargo publish
 ```
+
+That's it! Just one command to publish the entire package.
 
 ## Post-Publishing
 
 After publishing:
 
-1. Verify all crates are visible on crates.io
-2. Test installation: `cargo install minipg-cli`
+1. Verify the crate is visible on crates.io: https://crates.io/crates/minipg
+2. Test installation: `cargo install minipg`
 3. Create a git tag: `git tag v0.1.0-alpha.1`
 4. Push the tag: `git push origin v0.1.0-alpha.1`
-5. Create a GitHub release with release notes
+5. Create a GitHub release with release notes from ALPHA_RELEASE_NOTES.md
 
 ## Notes
 
 - This is an **alpha release** - expect breaking changes
-- The benchmarks crate is excluded from publishing (development only)
-- All crates share the same version number (0.1.0-alpha.1)
-- Repository URL should be updated to your actual GitHub repository before publishing
+- Single consolidated crate for easy installation
+- Version: 0.1.0-alpha.1
+- 32 tests passing (9 ignored due to alpha limitations with complex ANTLR4 features)
+- Repository: https://github.com/yingkitw/minipg
