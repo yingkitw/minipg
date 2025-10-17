@@ -2,6 +2,17 @@
 
 use super::token::{Token, TokenKind};
 
+/// Lexer mode for context-aware tokenization
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum LexerMode {
+    /// Normal mode - default tokenization
+    Normal,
+    /// Character class mode - inside [...]
+    CharClass,
+    /// String literal mode - inside "..."
+    String,
+}
+
 /// Lexer for tokenizing grammar files.
 pub struct Lexer {
     source: Vec<char>,
@@ -10,6 +21,8 @@ pub struct Lexer {
     position: usize,
     line: usize,
     column: usize,
+    mode: LexerMode,
+    mode_stack: Vec<LexerMode>,
 }
 
 impl Lexer {
@@ -20,6 +33,19 @@ impl Lexer {
             position: 0,
             line: 1,
             column: 1,
+            mode: LexerMode::Normal,
+            mode_stack: Vec::new(),
+        }
+    }
+    
+    fn push_mode(&mut self, mode: LexerMode) {
+        self.mode_stack.push(self.mode);
+        self.mode = mode;
+    }
+    
+    fn pop_mode(&mut self) {
+        if let Some(prev_mode) = self.mode_stack.pop() {
+            self.mode = prev_mode;
         }
     }
 
@@ -81,10 +107,16 @@ impl Lexer {
             }
             '[' => {
                 self.advance();
+                // Enter character class mode
+                self.push_mode(LexerMode::CharClass);
                 Token::new(TokenKind::LeftBracket, "[".to_string(), start_line, start_column)
             }
             ']' => {
                 self.advance();
+                // Exit character class mode if we're in one
+                if self.mode == LexerMode::CharClass {
+                    self.pop_mode();
+                }
                 Token::new(TokenKind::RightBracket, "]".to_string(), start_line, start_column)
             }
             '=' => {
