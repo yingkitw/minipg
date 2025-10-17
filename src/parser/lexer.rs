@@ -110,13 +110,17 @@ impl Lexer {
                 Token::new(TokenKind::RightBrace, "}".to_string(), start_line, start_column)
             }
             '[' => {
-                // Check if this is a character class (in lexer rule context)
-                // For now, treat it as a regular bracket and let parser handle it
                 self.advance();
+                // Enter character class mode for single-char tokenization
+                self.push_mode(LexerMode::CharClass);
                 Token::new(TokenKind::LeftBracket, "[".to_string(), start_line, start_column)
             }
             ']' => {
                 self.advance();
+                // Exit character class mode
+                if self.mode == LexerMode::CharClass {
+                    self.pop_mode();
+                }
                 Token::new(TokenKind::RightBracket, "]".to_string(), start_line, start_column)
             }
             '=' => {
@@ -145,6 +149,12 @@ impl Lexer {
             '\'' => self.lex_char_or_string_literal(),
             '"' => self.lex_string_literal(),
             _ if ch.is_alphabetic() || ch == '_' => self.lex_identifier_or_keyword(),
+            _ if ch.is_numeric() => {
+                // Standalone digit - treat as identifier for character class ranges
+                let text = ch.to_string();
+                self.advance();
+                Token::new(TokenKind::Identifier, text, start_line, start_column)
+            }
             _ => {
                 self.advance();
                 Token::error(format!("unexpected character: {}", ch), start_line, start_column)
@@ -157,9 +167,16 @@ impl Lexer {
         let start_column = self.column;
         let mut text = String::new();
 
-        while !self.is_at_end() && (self.current_char().is_alphanumeric() || self.current_char() == '_') {
+        // In CharClass mode, only consume a single character
+        if self.mode == LexerMode::CharClass {
             text.push(self.current_char());
             self.advance();
+        } else {
+            // Normal mode: consume full identifier
+            while !self.is_at_end() && (self.current_char().is_alphanumeric() || self.current_char() == '_') {
+                text.push(self.current_char());
+                self.advance();
+            }
         }
 
         let kind = match text.as_str() {
