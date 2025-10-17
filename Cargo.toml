@@ -1,17 +1,5 @@
-[workspace]
-resolver = "2"
-members = [
-    "crates/minipg-core",
-    "crates/minipg-ast",
-    "crates/minipg-parser",
-    "crates/minipg-analysis",
-    "crates/minipg-codegen",
-    "crates/minipg-cli",
-    "crates/minipg-benchmarks",
-]
-exclude = ["crates/minipg-benchmarks"]
-
-[workspace.package]
+[package]
+name = "minipg"
 version = "0.1.0-alpha.1"
 edition = "2024"
 rust-version = "1.85"
@@ -25,25 +13,37 @@ keywords = ["parser", "generator", "antlr4", "compiler", "lexer"]
 categories = ["parser-implementations", "development-tools", "compilers"]
 description = "A blazingly fast parser generator with ANTLR4 compatibility"
 
-[workspace.dependencies]
-# Internal crates
-minipg-core = { path = "crates/minipg-core" }
-minipg-ast = { path = "crates/minipg-ast" }
-minipg-parser = { path = "crates/minipg-parser" }
-minipg-analysis = { path = "crates/minipg-analysis" }
-minipg-codegen = { path = "crates/minipg-codegen" }
+[[bin]]
+name = "minipg"
+path = "src/main.rs"
 
-# External dependencies
-anyhow = "1.0"
-thiserror = "2.0"
+[dependencies]
+# Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-clap = { version = "4.5", features = ["derive", "cargo"] }
+
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+# CLI
+clap = { version = "4.5", features = ["derive"] }
+
+# Logging
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-pulldown-cmark = "0.12"
 
-# Testing
-insta = { version = "1.41", features = ["yaml"] }
+[dev-dependencies]
+insta = "1.41"
+proptest = "1.6"
 criterion = "0.5"
-proptest = "1.5"
+
+[[bench]]
+name = "codegen_bench"
+harness = false
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
