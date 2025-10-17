@@ -110,17 +110,13 @@ impl Lexer {
                 Token::new(TokenKind::RightBrace, "}".to_string(), start_line, start_column)
             }
             '[' => {
+                // Check if this is a character class (in lexer rule context)
+                // For now, treat it as a regular bracket and let parser handle it
                 self.advance();
-                // Enter character class mode
-                self.push_mode(LexerMode::CharClass);
                 Token::new(TokenKind::LeftBracket, "[".to_string(), start_line, start_column)
             }
             ']' => {
                 self.advance();
-                // Exit character class mode if we're in one
-                if self.mode == LexerMode::CharClass {
-                    self.pop_mode();
-                }
                 Token::new(TokenKind::RightBracket, "]".to_string(), start_line, start_column)
             }
             '=' => {
@@ -142,7 +138,8 @@ impl Lexer {
                     self.advance();
                     Token::new(TokenKind::Arrow, "->".to_string(), start_line, start_column)
                 } else {
-                    Token::error(format!("unexpected character: {}", ch), start_line, start_column)
+                    // Standalone minus (used in character classes for ranges)
+                    Token::new(TokenKind::Minus, "-".to_string(), start_line, start_column)
                 }
             }
             '\'' => self.lex_char_or_string_literal(),

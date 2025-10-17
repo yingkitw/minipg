@@ -341,14 +341,16 @@ impl Parser {
             && self.current_token.kind != TokenKind::Eof {
             
             if self.current_token.kind == TokenKind::StringLiteral 
-                || self.current_token.kind == TokenKind::CharLiteral {
+                || self.current_token.kind == TokenKind::CharLiteral
+                || self.current_token.kind == TokenKind::Identifier {
                 let start_char = self.parse_char_literal()?;
                 
-                // Check for range
-                if self.current_token.kind == TokenKind::Range {
+                // Check for range (either .. or -)
+                if self.current_token.kind == TokenKind::Range || self.current_token.kind == TokenKind::Minus {
                     self.advance();
                     if self.current_token.kind == TokenKind::StringLiteral 
-                        || self.current_token.kind == TokenKind::CharLiteral {
+                        || self.current_token.kind == TokenKind::CharLiteral
+                        || self.current_token.kind == TokenKind::Identifier {
                         let end_char = self.parse_char_literal()?;
                         ranges.push((start_char, end_char));
                     } else {
