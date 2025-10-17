@@ -6,17 +6,21 @@ minipg is a parser generator inspired by ANTLR4, designed with modularity and te
 
 ## Design Principles
 
-1. **Separation of Concerns**: Each crate has a single, well-defined responsibility
+1. **Separation of Concerns**: Each module has a single, well-defined responsibility
 2. **Trait-Based Abstraction**: Core capabilities are defined as traits for flexibility
 3. **Test-Friendly Design**: All components can be tested in isolation
 4. **Type Safety**: Leverage Rust's type system for correctness
 5. **Error Handling**: Comprehensive error types with diagnostic information
+6. **Performance**: Sub-millisecond code generation with optimized output
+7. **Multi-Language**: Consistent API across all target languages
 
-## Crate Structure
+## Module Structure
 
-### minipg-core
+**Note**: minipg is now a single consolidated crate with modular organization for easier publishing and installation.
 
-The foundation crate providing:
+### core
+
+The foundation module providing:
 - **Error Types**: Unified error handling with `Error` and `Result`
 - **Diagnostics**: Rich diagnostic messages with location information
 - **Traits**: Core capability traits (`GrammarParser`, `SemanticAnalyzer`, `CodeGenerator`, etc.)
@@ -45,9 +49,9 @@ pub trait CodeGenerator {
 }
 ```
 
-### minipg-ast
+### ast
 
-Abstract Syntax Tree definitions:
+Abstract Syntax Tree module:
 - **Grammar**: Root node containing rules, options, and imports
 - **Rule**: Individual grammar rules (parser or lexer)
 - **Element**: Grammar elements (terminals, non-terminals, operators)
@@ -59,18 +63,18 @@ The AST is designed to be:
 - Immutable by default
 - Easy to traverse and transform
 
-### minipg-parser
+### parser
 
-Grammar file parsing:
+Grammar file parsing module:
 - **Lexer**: Tokenizes grammar files
 - **Parser**: Builds AST from tokens
 - **Token**: Token definitions with location info
 
 The parser implements the `GrammarParser` trait from minipg-core.
 
-### minipg-analysis
+### analysis
 
-Semantic analysis and validation:
+Semantic analysis and validation module:
 - **SemanticAnalyzer**: Performs semantic checks
   - Undefined rule detection
   - Duplicate rule detection
@@ -79,22 +83,30 @@ Semantic analysis and validation:
 - **GrammarValidator**: Basic grammar validation
 - **AnalysisResult**: Contains validated grammar and diagnostics
 
-### minipg-codegen
+### codegen
 
-Code generation for target languages:
+Code generation module for target languages:
 - **CodeGenerator**: Main dispatcher for code generation
-- **RustCodeGenerator**: Rust-specific code generation
+- **RustCodeGenerator**: Rust-specific code generation with inline DFA
+- **PythonCodeGenerator**: Python code with type hints (3.10+)
+- **JavaScriptCodeGenerator**: Modern ES6+ JavaScript
+- **TypeScriptCodeGenerator**: TypeScript with full type safety
+- **GoCodeGenerator**: Idiomatic Go with interfaces
 - **Template**: Simple template engine for code generation
+- **DfaBuilder**: Generates optimized DFA for tokenization
+- **LookupTableBuilder**: Creates const lookup tables for character classes
 
 The code generator produces:
-- Lexer implementation
-- Parser implementation
-- AST type definitions
+- Lexer implementation with optimized tokenization
+- Parser implementation with error recovery
+- Token type definitions
+- Error types (ParseError)
 - Visitor/listener patterns (optional)
+- Documentation comments
 
-### minipg-cli
+### cli
 
-Command-line interface:
+Command-line interface module:
 - **CLI**: Argument parsing with clap
 - **Commands**: Command implementations
   - `generate`: Generate parser from grammar

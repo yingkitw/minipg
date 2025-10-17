@@ -70,16 +70,19 @@ pub enum Element {
     RuleRef {
         name: String,
         label: Option<String>,
+        is_list: bool, // true for ids+=ID, false for id=ID
     },
     /// Terminal token
     Terminal {
         value: String,
         label: Option<String>,
+        is_list: bool, // true for tokens+=TOKEN, false for token=TOKEN
     },
     /// String literal
     StringLiteral {
         value: String,
         label: Option<String>,
+        is_list: bool, // true for strs+='string', false for str='string'
     },
     /// Character range (for lexer rules)
     CharRange {
@@ -132,15 +135,15 @@ pub enum Element {
 
 impl Element {
     pub fn rule_ref(name: String) -> Self {
-        Element::RuleRef { name, label: None }
+        Element::RuleRef { name, label: None, is_list: false }
     }
 
     pub fn terminal(value: String) -> Self {
-        Element::Terminal { value, label: None }
+        Element::Terminal { value, label: None, is_list: false }
     }
 
     pub fn string_literal(value: String) -> Self {
-        Element::StringLiteral { value, label: None }
+        Element::StringLiteral { value, label: None, is_list: false }
     }
 
     pub fn optional(element: Element) -> Self {
@@ -187,17 +190,41 @@ impl Element {
 
     pub fn with_label(self, label: String) -> Self {
         match self {
+            Element::RuleRef { name, is_list, .. } => Element::RuleRef {
+                name,
+                label: Some(label),
+                is_list,
+            },
+            Element::Terminal { value, is_list, .. } => Element::Terminal {
+                value,
+                label: Some(label),
+                is_list,
+            },
+            Element::StringLiteral { value, is_list, .. } => Element::StringLiteral {
+                value,
+                label: Some(label),
+                is_list,
+            },
+            other => other,
+        }
+    }
+    
+    pub fn with_list_label(self, label: String) -> Self {
+        match self {
             Element::RuleRef { name, .. } => Element::RuleRef {
                 name,
                 label: Some(label),
+                is_list: true,
             },
             Element::Terminal { value, .. } => Element::Terminal {
                 value,
                 label: Some(label),
+                is_list: true,
             },
             Element::StringLiteral { value, .. } => Element::StringLiteral {
                 value,
                 label: Some(label),
+                is_list: true,
             },
             other => other,
         }
@@ -255,6 +282,7 @@ mod tests {
         alt.add_element(Element::Terminal {
             value: "ID".to_string(),
             label: None,
+            is_list: false,
         });
         assert_eq!(alt.elements.len(), 1);
     }
@@ -264,9 +292,10 @@ mod tests {
         let elem = Element::RuleRef {
             name: "expr".to_string(),
             label: Some("e".to_string()),
+            is_list: false,
         };
         match elem {
-            Element::RuleRef { name, label } => {
+            Element::RuleRef { name, label, .. } => {
                 assert_eq!(name, "expr");
                 assert_eq!(label, Some("e".to_string()));
             }
@@ -279,9 +308,10 @@ mod tests {
         let elem = Element::Terminal {
             value: "ID".to_string(),
             label: None,
+            is_list: false,
         };
         match elem {
-            Element::Terminal { value, label } => {
+            Element::Terminal { value, label, .. } => {
                 assert_eq!(value, "ID");
                 assert_eq!(label, None);
             }

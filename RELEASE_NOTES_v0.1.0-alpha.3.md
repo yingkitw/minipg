@@ -1,6 +1,7 @@
-# Release Notes: minipg v0.1.0-alpha.2
+# Release Notes: minipg v0.1.0-alpha.3
 
-**Release Date**: October 17, 2025
+**Release Date**: October 17, 2025  
+**Published**: ✅ Available on crates.io
 
 ## 🎉 Highlights
 

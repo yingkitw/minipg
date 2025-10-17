@@ -37,6 +37,7 @@ pub enum TokenKind {
     LeftBracket,
     RightBracket,
     Equals,
+    PlusEquals,  // += for list labels
     Arrow,
 
     // Special
@@ -74,6 +75,7 @@ impl fmt::Display for TokenKind {
             TokenKind::LeftBracket => write!(f, "["),
             TokenKind::RightBracket => write!(f, "]"),
             TokenKind::Equals => write!(f, "="),
+            TokenKind::PlusEquals => write!(f, "+="),
             TokenKind::Arrow => write!(f, "->"),
             TokenKind::Eof => write!(f, "end of file"),
             TokenKind::Error => write!(f, "error"),

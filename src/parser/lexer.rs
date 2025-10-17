@@ -102,7 +102,13 @@ impl Lexer {
                     Token::new(TokenKind::Identifier, text, start_line, start_column)
                 } else {
                     self.advance();
-                    Token::new(TokenKind::Plus, "+".to_string(), start_line, start_column)
+                    // Check for +=
+                    if self.current_char() == '=' {
+                        self.advance();
+                        Token::new(TokenKind::PlusEquals, "+=".to_string(), start_line, start_column)
+                    } else {
+                        Token::new(TokenKind::Plus, "+".to_string(), start_line, start_column)
+                    }
                 }
             }
             '~' => {

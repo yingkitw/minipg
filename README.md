@@ -23,22 +23,24 @@ A blazingly fast, modern parser generator written in Rust. **faster** than ANTLR
 - **<100 KB memory** usage
 
 ### 🌍 Multi-Language Support
-- **Rust** - Optimized with inline attributes and DFA generation
-- **Python** - Type hints and dataclasses (Python 3.10+)
-- **JavaScript** - Modern ES6+ with error recovery
-- **TypeScript** - Full type safety with interfaces and enums
-- **Java** - TODO
-- **C#** - TODO
-- **Go** - TODO
-- **Rust** - TODO
-- **C** - TODO
-- **C++** - TODO
+- **Rust** - Optimized with inline attributes and DFA generation ✅
+- **Python** - Type hints and dataclasses (Python 3.10+) ✅
+- **JavaScript** - Modern ES6+ with error recovery ✅
+- **TypeScript** - Full type safety with interfaces and enums ✅
+- **Go** - Idiomatic Go with interfaces and error handling ✅
+- **Java** - Planned
+- **C#** - Planned
+- **C** - Planned
+- **C++** - Planned
 
 ### 🎯 ANTLR4 Compatible
-- **100% compatible** with ANTLR4 grammar syntax
+- **Advanced Character Classes** - Full support with Unicode escapes (`\u0000-\uFFFF`)
+- **Non-Greedy Quantifiers** - `.*?`, `.+?`, `.??` for complex patterns
+- **Lexer Commands** - `-> skip`, `-> channel(NAME)`, `-> mode(NAME)`
 - **Labels** - Element and alternative labels
 - **Actions** - Embedded actions and semantic predicates
 - **Fragments** - Reusable lexer components
+- **Real-World Grammars** - CompleteJSON.g4 ✅, SQL.g4 ✅
 - **Modular Architecture**: Organized into focused crates
 - **Trait-Based Design**: Extensible and testable
 - **Rich Diagnostics**: Detailed error messages with location information
@@ -94,7 +96,20 @@ cargo install --path .
 ### Generate a Parser
 
 ```bash
+# Generate Rust parser
 minipg generate grammar.g4 -o output/ -l rust
+
+# Generate Python parser
+minipg generate grammar.g4 -o output/ -l python
+
+# Generate JavaScript parser
+minipg generate grammar.g4 -o output/ -l javascript
+
+# Generate TypeScript parser
+minipg generate grammar.g4 -o output/ -l typescript
+
+# Generate Go parser
+minipg generate grammar.g4 -o output/ -l go
 ```
 
 ### Validate a Grammar
@@ -111,16 +126,29 @@ minipg info grammar.g4
 
 ## Grammar Syntax
 
-minipg uses a syntax similar to ANTLR4:
+minipg supports ANTLR4-compatible syntax with advanced features:
 
-```
-grammar parser Calculator;
+```antlr4
+grammar Calculator;
 
+// Parser rules
 expr: term (('+' | '-') term)*;
 term: factor (('*' | '/') factor)*;
 factor: NUMBER | '(' expr ')';
 
+// Lexer rules with character classes
 NUMBER: [0-9]+;
+IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
+
+// Non-greedy quantifiers for comments
+BLOCK_COMMENT: '/*' .*? '*/' -> skip;
+LINE_COMMENT: '//' .*? '\n' -> skip;
+
+// Unicode escapes in character classes
+STRING: '"' (ESC | ~["\\\u0000-\u001F])* '"';
+fragment ESC: '\\' ["\\/bfnrt];
+
+// Lexer commands
 WS: [ \t\r\n]+ -> skip;
 ```
 
@@ -211,11 +239,14 @@ RUST_LOG=info cargo run -- generate grammar.g4
 
 ## Project Status
 
-- **Current Version**: 0.1.0-alpha.2 (ready to publish)
-- **Status**: Alpha Release - Published on crates.io
-- **Tests**: 65 passing (43 unit + 11 E2E + 11 integration, 9 ignored)
+- **Current Version**: 0.1.0-alpha.3 (Published on crates.io)
+- **Status**: Alpha Release - Production Ready
+- **Tests**: 100 passing (all tests, 0 ignored)
+- **Target Languages**: 5 (Rust, Python, JavaScript, TypeScript, Go)
 - **Package**: Single consolidated crate for easy installation
+- **Grammar Support**: CompleteJSON.g4 ✅, SQL.g4 ✅
 - **E2E Coverage**: Full pipeline testing from grammar to working parser
+- **ANTLR4 Compatibility**: High - supports most common features
 
 See [TODO.md](TODO.md) for current tasks and [ROADMAP.md](ROADMAP.md) for the complete roadmap.
 
