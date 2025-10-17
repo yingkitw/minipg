@@ -105,6 +105,29 @@ impl Parser {
 
         let mut rule = Rule::new(name, rule_type);
         
+        // Parse arguments: rule[int x, String name]
+        if self.current_token.kind == TokenKind::LeftBracket {
+            self.advance();
+            self.parse_rule_arguments(&mut rule)?;
+            self.expect(TokenKind::RightBracket)?;
+        }
+        
+        // Parse returns: returns [Type value]
+        if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "returns" {
+            self.advance();
+            self.expect(TokenKind::LeftBracket)?;
+            self.parse_rule_returns(&mut rule)?;
+            self.expect(TokenKind::RightBracket)?;
+        }
+        
+        // Parse locals: locals [Type var]
+        if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "locals" {
+            self.advance();
+            self.expect(TokenKind::LeftBracket)?;
+            self.parse_rule_locals(&mut rule)?;
+            self.expect(TokenKind::RightBracket)?;
+        }
+        
         self.expect(TokenKind::Colon)?;
         
         // Parse alternatives
@@ -126,6 +149,100 @@ impl Parser {
         let mut rule = self.parse_rule()?;
         rule.set_fragment(true);
         Ok(rule)
+    }
+    
+    fn parse_rule_arguments(&mut self, rule: &mut Rule) -> Result<()> {
+        // Parse: Type name, Type name, ...
+        while self.current_token.kind != TokenKind::RightBracket && self.current_token.kind != TokenKind::Eof {
+            // Try to parse type (optional)
+            let mut arg_type = None;
+            let mut arg_name = String::new();
+            
+            if self.current_token.kind == TokenKind::Identifier {
+                let first = self.current_token.text.clone();
+                self.advance();
+                
+                // Check if there's another identifier (name after type)
+                if self.current_token.kind == TokenKind::Identifier {
+                    arg_type = Some(first);
+                    arg_name = self.current_token.text.clone();
+                    self.advance();
+                } else {
+                    // Just a name without type
+                    arg_name = first;
+                }
+            }
+            
+            rule.add_argument(arg_name, arg_type);
+            
+            // Check for comma
+            if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "," {
+                self.advance();
+            } else if self.current_token.kind != TokenKind::RightBracket {
+                break;
+            }
+        }
+        Ok(())
+    }
+    
+    fn parse_rule_returns(&mut self, rule: &mut Rule) -> Result<()> {
+        // Parse: Type name, Type name, ...
+        while self.current_token.kind != TokenKind::RightBracket && self.current_token.kind != TokenKind::Eof {
+            let mut return_type = None;
+            let mut return_name = String::new();
+            
+            if self.current_token.kind == TokenKind::Identifier {
+                let first = self.current_token.text.clone();
+                self.advance();
+                
+                if self.current_token.kind == TokenKind::Identifier {
+                    return_type = Some(first);
+                    return_name = self.current_token.text.clone();
+                    self.advance();
+                } else {
+                    return_name = first;
+                }
+            }
+            
+            rule.add_return(return_name, return_type);
+            
+            if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "," {
+                self.advance();
+            } else if self.current_token.kind != TokenKind::RightBracket {
+                break;
+            }
+        }
+        Ok(())
+    }
+    
+    fn parse_rule_locals(&mut self, rule: &mut Rule) -> Result<()> {
+        // Parse: Type name, Type name, ...
+        while self.current_token.kind != TokenKind::RightBracket && self.current_token.kind != TokenKind::Eof {
+            let mut local_type = None;
+            let mut local_name = String::new();
+            
+            if self.current_token.kind == TokenKind::Identifier {
+                let first = self.current_token.text.clone();
+                self.advance();
+                
+                if self.current_token.kind == TokenKind::Identifier {
+                    local_type = Some(first);
+                    local_name = self.current_token.text.clone();
+                    self.advance();
+                } else {
+                    local_name = first;
+                }
+            }
+            
+            rule.add_local(local_name, local_type);
+            
+            if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "," {
+                self.advance();
+            } else if self.current_token.kind != TokenKind::RightBracket {
+                break;
+            }
+        }
+        Ok(())
     }
 
     fn parse_alternative(&mut self) -> Result<Alternative> {
