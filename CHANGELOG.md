@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0-alpha.2] - 2025-10-17
+
+### Changed
+- **Consolidated to single crate**: Removed obsolete multi-crate structure, all code now in `src/`
+- **Improved test coverage**: 43 unit tests (up from 21), 54 total tests
+- **Better documentation**: Added KNOWN_LIMITATIONS.md and NEXT_PHASE.md
+
+### Added
+- **Character class AST support**: Added `CharClass` variant with negation and Unicode escape handling
+- **Enhanced parser**: Partial support for `~[...]` negated character classes (lexer work still needed)
+- **3 new character class tests**: Testing CharClass variants
+
+### Fixed
+- **Removed 7,560 lines of duplicate code**: Cleaned up obsolete crates folder
+- **Project size reduced**: More maintainable single-crate structure
+
+### Known Issues
+- Character class parsing requires lexer state machine (documented in KNOWN_LIMITATIONS.md)
+- 9 integration tests still ignored pending lexer improvements
+
 ## [0.1.0-alpha.1] - 2025-10-17
 
 ### Project Structure
