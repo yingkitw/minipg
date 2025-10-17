@@ -80,6 +80,16 @@ pub enum Element {
     Wildcard,
     /// End of file
     Eof,
+    /// Embedded action code
+    Action {
+        code: String,
+        language: Option<String>,
+    },
+    /// Semantic predicate
+    Predicate {
+        code: String,
+        language: Option<String>,
+    },
 }
 
 impl Element {
@@ -128,6 +138,34 @@ impl Element {
                 label: Some(label),
             },
             other => other,
+        }
+    }
+
+    pub fn action(code: String) -> Self {
+        Element::Action {
+            code,
+            language: None,
+        }
+    }
+
+    pub fn action_with_language(code: String, language: String) -> Self {
+        Element::Action {
+            code,
+            language: Some(language),
+        }
+    }
+
+    pub fn predicate(code: String) -> Self {
+        Element::Predicate {
+            code,
+            language: None,
+        }
+    }
+
+    pub fn predicate_with_language(code: String, language: String) -> Self {
+        Element::Predicate {
+            code,
+            language: Some(language),
         }
     }
 }

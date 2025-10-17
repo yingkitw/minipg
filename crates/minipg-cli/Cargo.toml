@@ -6,6 +6,10 @@ rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+description = "Command-line interface for minipg parser generator"
+readme = "../../README.md"
 
 [[bin]]
 name = "minipg"

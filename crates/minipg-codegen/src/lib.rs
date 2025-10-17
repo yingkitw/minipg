@@ -3,12 +3,16 @@
 pub mod rust;
 pub mod python;
 pub mod javascript;
+pub mod typescript;
 pub mod template;
 pub mod visitor_gen;
+pub mod dfa;
+pub mod lookup_table;
 
 pub use rust::RustCodeGenerator;
 pub use python::PythonCodeGenerator;
 pub use javascript::JavaScriptCodeGenerator;
+pub use typescript::TypeScriptCodeGenerator;
 
 use minipg_analysis::AnalysisResult;
 use minipg_core::{types::CodeGenConfig, CodeGenerator as CodeGeneratorTrait, Result};

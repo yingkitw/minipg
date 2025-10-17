@@ -9,14 +9,21 @@ members = [
     "crates/minipg-cli",
     "crates/minipg-benchmarks",
 ]
+exclude = ["crates/minipg-benchmarks"]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 edition = "2024"
 rust-version = "1.85"
 authors = ["minipg contributors"]
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/yourusername/minipg"
+license = "Apache-2.0"
+repository = "https://github.com/yingkitw/minipg"
+homepage = "https://github.com/yingkitw/minipg"
+documentation = "https://docs.rs/minipg"
+readme = "README.md"
+keywords = ["parser", "generator", "antlr4", "compiler", "lexer"]
+categories = ["parser-implementations", "development-tools", "compilers"]
+description = "A blazingly fast parser generator with ANTLR4 compatibility"
 
 [workspace.dependencies]
 # Internal crates

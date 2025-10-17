@@ -29,3 +29,8 @@ path = "../../benches/analysis_bench.rs"
 name = "codegen_bench"
 harness = false
 path = "../../benches/codegen_bench.rs"
+
+[[bench]]
+name = "codegen_benchmarks"
+harness = false
+path = "benches/codegen_benchmarks.rs"

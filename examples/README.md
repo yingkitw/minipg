@@ -2,32 +2,63 @@
 
 This directory contains example grammars demonstrating various features of minipg.
 
-## Examples
+## Available Examples
 
-### calculator.g4
+### Simple Examples
 
-A simple arithmetic calculator grammar demonstrating:
-- Parser rules
-- Lexer rules
-- Fragment rules
-- Basic operators
+#### calculator.g4
+A simple arithmetic expression calculator supporting:
+- Addition and subtraction
+- Multiplication and division
+- Parentheses for grouping
+- Integer numbers
 
-**Generate:**
-```bash
-minipg generate calculator.g4 -o output/
-```
+#### json.g4
+A basic JSON parser supporting:
+- Strings
+- Numbers
+- Booleans (true/false)
+- Null values
 
-### json.g4
+### Complex Examples (ANTLR4 Compatible)
 
-A simplified JSON parser demonstrating:
-- Value types
-- String and number literals
-- Boolean and null values
+#### CompleteJSON.g4
+Complete JSON grammar based on RFC 8259:
+- Objects with key-value pairs
+- Arrays
+- Strings with escape sequences and Unicode
+- Numbers (integers, floats, scientific notation)
+- Booleans and null
+- Proper whitespace handling
 
-**Generate:**
-```bash
-minipg generate json.g4 -o output/ --visitor
-```
+#### SQL.g4
+SQL query language subset:
+- SELECT statements with WHERE, ORDER BY, LIMIT
+- INSERT statements
+- UPDATE statements
+- DELETE statements
+- Operators and conditions
+- Comments (line and block)
+
+#### JavaSubset.g4
+Simplified Java language grammar:
+- Package and import declarations
+- Class and interface declarations
+- Fields, methods, and constructors
+- Statements (if, while, for, return, etc.)
+- Expressions with operators
+- Literals and identifiers
+- Comments
+
+#### PythonSubset.g4
+Simplified Python 3 grammar:
+- Import statements
+- Function and class definitions
+- Control flow (if, while, for, try)
+- Expressions and operators
+- List, dict, and tuple literals
+- String literals (including triple-quoted)
+- Indentation handling (simplified)
 
 ## Running Examples
 

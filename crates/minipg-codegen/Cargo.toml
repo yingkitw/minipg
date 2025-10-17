@@ -6,6 +6,10 @@ rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+description = "Code generation for target languages (Rust, Python, JS, TS) for minipg parser generator"
+readme = "../../README.md"
 
 [dependencies]
 minipg-core.workspace = true
@@ -17,3 +21,4 @@ serde_json.workspace = true
 
 [dev-dependencies]
 insta.workspace = true
+minipg-parser = { path = "../minipg-parser" }

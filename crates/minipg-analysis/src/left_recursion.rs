@@ -56,7 +56,7 @@ impl LeftRecursionDetector {
         }
     }
     
-    fn compute_first_set(&mut self, rule: &Rule, grammar: &Grammar) {
+    fn compute_first_set(&mut self, rule: &Rule, _grammar: &Grammar) {
         let mut first = HashSet::new();
         
         for alt in &rule.alternatives {
