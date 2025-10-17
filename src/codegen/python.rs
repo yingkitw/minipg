@@ -1,6 +1,6 @@
 //! Python code generator.
 
-use crate::ast::Grammar;
+use crate::ast::{Grammar, Rule};
 use crate::core::{types::CodeGenConfig, CodeGenerator as CodeGeneratorTrait, Result};
 
 /// Python code generator.
@@ -96,10 +96,86 @@ impl PythonCodeGenerator {
         
         // Generate parse methods for each rule
         for rule in grammar.parser_rules() {
-            code.push_str(&format!("    def parse_{}(self):\n", rule.name));
-            code.push_str("        # TODO: Implement rule parsing\n");
-            code.push_str("        pass\n\n");
+            code.push_str(&self.generate_rule_method(rule));
         }
+        
+        code
+    }
+    
+    fn generate_rule_method(&self, rule: &Rule) -> String {
+        let mut code = String::new();
+        
+        // Generate method signature
+        code.push_str(&format!("    def parse_{}(self", rule.name));
+        
+        // Add arguments
+        for arg in &rule.arguments {
+            code.push_str(", ");
+            code.push_str(&arg.name);
+            if let Some(arg_type) = &arg.arg_type {
+                code.push_str(&format!(": {}", arg_type));
+            }
+        }
+        
+        code.push_str(")");
+        
+        // Add return type annotation
+        if !rule.returns.is_empty() {
+            code.push_str(" -> ");
+            if rule.returns.len() == 1 {
+                if let Some(ret_type) = &rule.returns[0].return_type {
+                    code.push_str(ret_type);
+                } else {
+                    code.push_str("AstNode");
+                }
+            } else {
+                // Multiple returns - use tuple
+                code.push_str("tuple[");
+                for (i, ret) in rule.returns.iter().enumerate() {
+                    if i > 0 { code.push_str(", "); }
+                    if let Some(ret_type) = &ret.return_type {
+                        code.push_str(ret_type);
+                    } else {
+                        code.push_str("AstNode");
+                    }
+                }
+                code.push_str("]");
+            }
+        }
+        
+        code.push_str(":\n");
+        
+        // Generate docstring
+        code.push_str(&format!("        \"\"\"Parse {} rule.\n", rule.name));
+        if !rule.arguments.is_empty() {
+            code.push_str("        \n");
+            code.push_str("        Args:\n");
+            for arg in &rule.arguments {
+                let type_str = arg.arg_type.as_ref().map(|t| format!(" ({})", t)).unwrap_or_default();
+                code.push_str(&format!("            {}{}: Rule argument\n", arg.name, type_str));
+            }
+        }
+        if !rule.returns.is_empty() {
+            code.push_str("        \n");
+            code.push_str("        Returns:\n");
+            for ret in &rule.returns {
+                let type_str = ret.return_type.as_ref().map(|t| t.as_str()).unwrap_or("AstNode");
+                code.push_str(&format!("            {}: {}\n", ret.name, type_str));
+            }
+        }
+        code.push_str("        \"\"\"\n");
+        
+        // Generate local variables
+        for local in &rule.locals {
+            let type_str = local.local_type.as_ref().map(|t| format!(": {}", t)).unwrap_or_default();
+            code.push_str(&format!("        {}{} = None\n", local.name, type_str));
+        }
+        if !rule.locals.is_empty() {
+            code.push_str("\n");
+        }
+        
+        code.push_str("        # TODO: Implement rule parsing\n");
+        code.push_str("        pass\n\n");
         
         code
     }

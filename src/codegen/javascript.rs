@@ -1,6 +1,6 @@
 //! JavaScript code generator.
 
-use crate::ast::Grammar;
+use crate::ast::{Grammar, Rule};
 use crate::core::{types::CodeGenConfig, CodeGenerator as CodeGeneratorTrait, Result};
 
 /// JavaScript code generator.
@@ -115,14 +115,59 @@ impl JavaScriptCodeGenerator {
         
         // Generate parse methods for each rule
         for rule in grammar.parser_rules() {
-            let method_name = to_camel_case(&rule.name);
-            code.push_str(&format!("  parse{}() {{\n", capitalize(&method_name)));
-            code.push_str("    // TODO: Implement rule parsing\n");
-            code.push_str("    throw new Error('Not implemented');\n");
-            code.push_str("  }\n\n");
+            code.push_str(&self.generate_rule_method(rule));
         }
         
         code.push_str("}\n\n");
+        code
+    }
+    
+    fn generate_rule_method(&self, rule: &Rule) -> String {
+        let mut code = String::new();
+        let method_name = to_camel_case(&rule.name);
+        
+        // Generate JSDoc comment
+        code.push_str("  /**\n");
+        code.push_str(&format!("   * Parse {} rule.\n", rule.name));
+        if !rule.arguments.is_empty() {
+            for arg in &rule.arguments {
+                let type_str = arg.arg_type.as_ref().map(|t| format!("{{{}}}", t)).unwrap_or_else(|| "{*}".to_string());
+                code.push_str(&format!("   * @param {} {} - Rule argument\n", type_str, arg.name));
+            }
+        }
+        if !rule.returns.is_empty() {
+            if rule.returns.len() == 1 {
+                let ret_type = rule.returns[0].return_type.as_ref().map(|t| format!("{{{}}}", t)).unwrap_or_else(|| "{AstNode}".to_string());
+                code.push_str(&format!("   * @returns {} - {}\n", ret_type, rule.returns[0].name));
+            } else {
+                code.push_str("   * @returns {Array} - Tuple of return values\n");
+            }
+        }
+        code.push_str("   */\n");
+        
+        // Generate method signature
+        code.push_str(&format!("  parse{}(", capitalize(&method_name)));
+        
+        // Add arguments
+        for (i, arg) in rule.arguments.iter().enumerate() {
+            if i > 0 { code.push_str(", "); }
+            code.push_str(&arg.name);
+        }
+        
+        code.push_str(") {\n");
+        
+        // Generate local variables
+        for local in &rule.locals {
+            code.push_str(&format!("    let {};\n", local.name));
+        }
+        if !rule.locals.is_empty() {
+            code.push_str("\n");
+        }
+        
+        code.push_str("    // TODO: Implement rule parsing\n");
+        code.push_str("    throw new Error('Not implemented');\n");
+        code.push_str("  }\n\n");
+        
         code
     }
     

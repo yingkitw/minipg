@@ -1,6 +1,6 @@
 //! TypeScript code generator.
 
-use crate::ast::Grammar;
+use crate::ast::{Grammar, Rule};
 use crate::core::{types::CodeGenConfig, CodeGenerator as CodeGeneratorTrait, Result};
 
 /// TypeScript code generator.
@@ -121,14 +121,62 @@ impl TypeScriptCodeGenerator {
         
         // Generate parse methods for each rule
         for rule in grammar.parser_rules() {
-            let method_name = to_camel_case(&rule.name);
-            code.push_str(&format!("  parse{}(): any {{\n", capitalize(&method_name)));
-            code.push_str("    // TODO: Implement rule parsing\n");
-            code.push_str("    throw new Error('Not implemented');\n");
-            code.push_str("  }\n\n");
+            code.push_str(&self.generate_rule_method(rule));
         }
         
         code.push_str("}\n\n");
+        code
+    }
+    
+    fn generate_rule_method(&self, rule: &Rule) -> String {
+        let mut code = String::new();
+        let method_name = to_camel_case(&rule.name);
+        
+        // Generate method signature with TypeScript types
+        code.push_str(&format!("  parse{}(", capitalize(&method_name)));
+        
+        // Add arguments with types
+        for (i, arg) in rule.arguments.iter().enumerate() {
+            if i > 0 { code.push_str(", "); }
+            code.push_str(&arg.name);
+            code.push_str(": ");
+            code.push_str(arg.arg_type.as_ref().map(|t| t.as_str()).unwrap_or("any"));
+        }
+        
+        code.push_str(")");
+        
+        // Add return type
+        if rule.returns.is_empty() {
+            code.push_str(": any");
+        } else if rule.returns.len() == 1 {
+            let ret_type = rule.returns[0].return_type.as_ref().map(|t| t.as_str()).unwrap_or("any");
+            code.push_str(&format!(": {}", ret_type));
+        } else {
+            // Multiple returns - use tuple type
+            code.push_str(": [");
+            for (i, ret) in rule.returns.iter().enumerate() {
+                if i > 0 { code.push_str(", "); }
+                code.push_str(ret.return_type.as_ref().map(|t| t.as_str()).unwrap_or("any"));
+            }
+            code.push_str("]");
+        }
+        
+        code.push_str(" {\n");
+        
+        // Generate local variables with types
+        for local in &rule.locals {
+            let type_str = local.local_type.as_ref().map(|t| format!(": {}", t)).unwrap_or_else(|| ": any".to_string());
+            code.push_str(&format!("    let {}{};", local.name, type_str));
+            code.push_str("\n");
+        }
+        if !rule.locals.is_empty() {
+            code.push_str("\n");
+        }
+        
+        code.push_str("    // TODO: Implement rule parsing\n");
+        code.push_str("    throw new Error('Not implemented');\n");
+        code.push_str("  }\n\n");
+        
         code
     }
 }
