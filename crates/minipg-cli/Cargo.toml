@@ -16,11 +16,11 @@ name = "minipg"
 path = "src/main.rs"
 
 [dependencies]
-minipg-core.workspace = true
-minipg-ast.workspace = true
-minipg-parser.workspace = true
-minipg-analysis.workspace = true
-minipg-codegen.workspace = true
+minipg-core = { version = "0.1.0-alpha.1", path = "../minipg-core" }
+minipg-ast = { version = "0.1.0-alpha.1", path = "../minipg-ast" }
+minipg-parser = { version = "0.1.0-alpha.1", path = "../minipg-parser" }
+minipg-analysis = { version = "0.1.0-alpha.1", path = "../minipg-analysis" }
+minipg-codegen = { version = "0.1.0-alpha.1", path = "../minipg-codegen" }
 clap.workspace = true
 anyhow.workspace = true
 tracing.workspace = true

@@ -12,9 +12,9 @@ description = "Code generation for target languages (Rust, Python, JS, TS) for m
 readme = "../../README.md"
 
 [dependencies]
-minipg-core.workspace = true
-minipg-ast.workspace = true
-minipg-analysis.workspace = true
+minipg-core = { version = "0.1.0-alpha.1", path = "../minipg-core" }
+minipg-ast = { version = "0.1.0-alpha.1", path = "../minipg-ast" }
+minipg-analysis = { version = "0.1.0-alpha.1", path = "../minipg-analysis" }
 thiserror.workspace = true
 serde.workspace = true
 serde_json.workspace = true
