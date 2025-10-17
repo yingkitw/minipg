@@ -48,8 +48,67 @@ impl RustCodeGenerator {
     fn generate_rule_method(&self, rule: &Rule) -> String {
         let mut code = String::new();
         
+        // Generate documentation
         code.push_str(&format!("    /// Parse {} rule.\n", rule.name));
-        code.push_str(&format!("    pub fn parse_{}(&mut self) -> Result<AstNode> {{\n", rule.name));
+        if !rule.arguments.is_empty() {
+            code.push_str("    /// \n");
+            code.push_str("    /// # Arguments\n");
+            for arg in &rule.arguments {
+                let type_str = arg.arg_type.as_ref().map(|t| format!(": {}", t)).unwrap_or_default();
+                code.push_str(&format!("    /// * `{}{}` - Rule argument\n", arg.name, type_str));
+            }
+        }
+        if !rule.returns.is_empty() {
+            code.push_str("    /// \n");
+            code.push_str("    /// # Returns\n");
+            for ret in &rule.returns {
+                let type_str = ret.return_type.as_ref().map(|t| t.as_str()).unwrap_or("AstNode");
+                code.push_str(&format!("    /// * `{}` - {}\n", ret.name, type_str));
+            }
+        }
+        
+        // Generate function signature
+        code.push_str("    pub fn parse_");
+        code.push_str(&rule.name);
+        code.push_str("(&mut self");
+        
+        // Add arguments
+        for arg in &rule.arguments {
+            code.push_str(", ");
+            code.push_str(&arg.name);
+            code.push_str(": ");
+            code.push_str(arg.arg_type.as_ref().map(|t| t.as_str()).unwrap_or("String"));
+        }
+        
+        code.push_str(")");
+        
+        // Add return type
+        if rule.returns.is_empty() {
+            code.push_str(" -> Result<AstNode>");
+        } else if rule.returns.len() == 1 {
+            let ret_type = rule.returns[0].return_type.as_ref().map(|t| t.as_str()).unwrap_or("AstNode");
+            code.push_str(&format!(" -> Result<{}>", ret_type));
+        } else {
+            // Multiple returns - use tuple
+            code.push_str(" -> Result<(");
+            for (i, ret) in rule.returns.iter().enumerate() {
+                if i > 0 { code.push_str(", "); }
+                code.push_str(ret.return_type.as_ref().map(|t| t.as_str()).unwrap_or("AstNode"));
+            }
+            code.push_str(")>");
+        }
+        
+        code.push_str(" {\n");
+        
+        // Generate local variables
+        for local in &rule.locals {
+            let type_str = local.local_type.as_ref().map(|t| t.as_str()).unwrap_or("String");
+            code.push_str(&format!("        let mut {}: {};\n", local.name, type_str));
+        }
+        if !rule.locals.is_empty() {
+            code.push_str("\n");
+        }
+        
         code.push_str("        // TODO: Implement rule parsing\n");
         code.push_str("        unimplemented!()\n");
         code.push_str("    }\n\n");
