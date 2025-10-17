@@ -73,6 +73,10 @@ impl Lexer {
                 self.advance();
                 Token::new(TokenKind::Pipe, "|".to_string(), start_line, start_column)
             }
+            ',' => {
+                self.advance();
+                Token::new(TokenKind::Comma, ",".to_string(), start_line, start_column)
+            }
             '?' => {
                 self.advance();
                 Token::new(TokenKind::Question, "?".to_string(), start_line, start_column)

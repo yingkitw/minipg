@@ -176,7 +176,7 @@ impl Parser {
             rule.add_argument(arg_name, arg_type);
             
             // Check for comma
-            if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "," {
+            if self.current_token.kind == TokenKind::Comma {
                 self.advance();
             } else if self.current_token.kind != TokenKind::RightBracket {
                 break;
@@ -206,7 +206,7 @@ impl Parser {
             
             rule.add_return(return_name, return_type);
             
-            if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "," {
+            if self.current_token.kind == TokenKind::Comma {
                 self.advance();
             } else if self.current_token.kind != TokenKind::RightBracket {
                 break;
@@ -236,7 +236,7 @@ impl Parser {
             
             rule.add_local(local_name, local_type);
             
-            if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "," {
+            if self.current_token.kind == TokenKind::Comma {
                 self.advance();
             } else if self.current_token.kind != TokenKind::RightBracket {
                 break;

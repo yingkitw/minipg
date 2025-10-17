@@ -7,7 +7,7 @@ fn test_parse_rule_with_arguments() {
     let grammar = r#"
 grammar Test;
 
-rule[int x]: 'test';
+rule[int x, String name]: 'test';
 "#;
 
     let lexer = Lexer::new(grammar, "test.g4");
@@ -22,9 +22,11 @@ rule[int x]: 'test';
     
     let rule = &rules[0];
     assert_eq!(rule.name, "rule");
-    assert_eq!(rule.arguments.len(), 1);
+    assert_eq!(rule.arguments.len(), 2);
     assert_eq!(rule.arguments[0].name, "x");
     assert_eq!(rule.arguments[0].arg_type, Some("int".to_string()));
+    assert_eq!(rule.arguments[1].name, "name");
+    assert_eq!(rule.arguments[1].arg_type, Some("String".to_string()));
 }
 
 #[test]
