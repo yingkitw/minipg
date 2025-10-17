@@ -115,6 +115,10 @@ impl Lexer {
                 self.advance();
                 Token::new(TokenKind::Not, "~".to_string(), start_line, start_column)
             }
+            '@' => {
+                self.advance();
+                Token::new(TokenKind::At, "@".to_string(), start_line, start_column)
+            }
             '(' => {
                 self.advance();
                 Token::new(TokenKind::LeftParen, "(".to_string(), start_line, start_column)

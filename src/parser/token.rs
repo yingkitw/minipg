@@ -39,6 +39,7 @@ pub enum TokenKind {
     Equals,
     PlusEquals,  // += for list labels
     Arrow,
+    At,  // @ for named actions
 
     // Special
     Eof,
@@ -77,6 +78,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Equals => write!(f, "="),
             TokenKind::PlusEquals => write!(f, "+="),
             TokenKind::Arrow => write!(f, "->"),
+            TokenKind::At => write!(f, "@"),
             TokenKind::Eof => write!(f, "end of file"),
             TokenKind::Error => write!(f, "error"),
         }

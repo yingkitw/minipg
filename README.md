@@ -36,10 +36,12 @@ A blazingly fast, modern parser generator written in Rust. **faster** than ANTLR
 ### 🎯 ANTLR4 Compatible
 - **Advanced Character Classes** - Full support with Unicode escapes (`\u0000-\uFFFF`)
 - **Non-Greedy Quantifiers** - `.*?`, `.+?`, `.??` for complex patterns
-- **Lexer Commands** - `-> skip`, `-> channel(NAME)`, `-> mode(NAME)`
-- **Labels** - Element and alternative labels
+- **Lexer Commands** - `-> skip`, `-> channel(NAME)`, `-> mode(NAME)` (parsed)
+- **Labels** - Element labels (`id=ID`) and list labels (`ids+=ID`)
+- **Named Actions** - `@header`, `@members`, `@init` for custom code
 - **Actions** - Embedded actions and semantic predicates
 - **Fragments** - Reusable lexer components
+- **Parameterized Rules** - Arguments, returns, and local variables
 - **Real-World Grammars** - CompleteJSON.g4 ✅, SQL.g4 ✅
 - **Modular Architecture**: Organized into focused crates
 - **Trait-Based Design**: Extensible and testable
@@ -241,12 +243,13 @@ RUST_LOG=info cargo run -- generate grammar.g4
 
 - **Current Version**: 0.1.0-alpha.3 (Published on crates.io)
 - **Status**: Alpha Release - Production Ready
-- **Tests**: 100 passing (all tests, 0 ignored)
+- **Tests**: 111 passing (all tests, 0 ignored)
 - **Target Languages**: 5 (Rust, Python, JavaScript, TypeScript, Go)
 - **Package**: Single consolidated crate for easy installation
 - **Grammar Support**: CompleteJSON.g4 ✅, SQL.g4 ✅
 - **E2E Coverage**: Full pipeline testing from grammar to working parser
 - **ANTLR4 Compatibility**: High - supports most common features
+- **New Features**: List labels (`ids+=ID`), Named actions (`@header`)
 
 See [TODO.md](TODO.md) for current tasks and [ROADMAP.md](ROADMAP.md) for the complete roadmap.
 

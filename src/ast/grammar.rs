@@ -13,6 +13,8 @@ pub struct Grammar {
     pub options: HashMap<String, String>,
     pub rules: Vec<Rule>,
     pub imports: Vec<String>,
+    /// Named actions like @header, @members, etc.
+    pub named_actions: HashMap<String, String>,
 }
 
 impl Grammar {
@@ -23,6 +25,7 @@ impl Grammar {
             options: HashMap::new(),
             rules: Vec::new(),
             imports: Vec::new(),
+            named_actions: HashMap::new(),
         }
     }
 
@@ -36,6 +39,10 @@ impl Grammar {
 
     pub fn add_import(&mut self, import: String) {
         self.imports.push(import);
+    }
+
+    pub fn add_named_action(&mut self, name: String, code: String) {
+        self.named_actions.insert(name, code);
     }
 
     pub fn get_rule(&self, name: &str) -> Option<&Rule> {

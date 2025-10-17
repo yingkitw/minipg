@@ -104,7 +104,7 @@
 ### Recent Accomplishments
 - [x] **Published to crates.io** as v0.1.0-alpha.3 ✅
 - [x] **Consolidated to single crate** (removed 7,560 lines) ✅
-- [x] **100 tests passing** (all tests, 0 ignored!) ✅
+- [x] **111 tests passing** (all tests, 0 ignored!) ✅
 - [x] **5 target languages** (Rust, Python, JS, TS, Go) ✅
 - [x] **E2E test suite** covering full pipeline ✅
 - [x] **CharClass AST support** with negation ✅
@@ -115,7 +115,8 @@
 - [x] **Non-greedy quantifiers** (`.*?`, `.+?`, `.??`) ✅
 - [x] **Lexer commands** parsed and stored in AST ✅
 - [x] **Go code generator** - 5th target language ✅
-- [x] **List labels AST support** (`ids+=ID`) ✅
+- [x] **List labels** fully implemented (`ids+=ID`) ✅
+- [x] **Named actions** fully implemented (`@header`, `@members`) ✅
 
 ### Completed for v0.1.0-alpha.2
 - [x] **Lexer state machine** for character class tokenization ✅
@@ -128,6 +129,8 @@
   - [x] SQL.g4 - all 4 tests passing ✅
 - [x] Add support for lexer commands (`-> skip`, `-> channel(...)`) ✅
 - [x] Implement non-greedy quantifiers (`.*?`, `.+?`, `.??`) ✅
+- [x] Implement list labels (`ids+=ID`) ✅
+- [x] Implement named actions (`@header`, `@members`) ✅
 - [x] Prepare v0.1.0-alpha.3 release ✅
 - [x] Published v0.1.0-alpha.3 to crates.io ✅
 
@@ -138,19 +141,19 @@
    - [x] Non-greedy quantifiers ✅
    - [x] Grammar imports ✅
    - [x] Grammar options ✅
-   - [x] List labels (AST ready) ✅
-   - [ ] List labels (parser integration)
-   - [ ] Named actions (@header, @members)
+   - [x] List labels (fully implemented) ✅
+   - [x] Named actions (@header, @members) ✅
    - [ ] Lexer modes & channels (code generation)
+   - [ ] Action code generation
 2. **Phase 2**: Go Target Language ✅ (COMPLETE!)
    - [x] Create Go code generator ✅
    - [x] Idiomatic Go code ✅
    - [x] Support parameterized rules ✅
    - [x] Tests passing ✅
-3. **Phase 3**: Additional ANTLR4 Features (Current Focus)
-   - [ ] Parser integration for list labels
-   - [ ] Named actions support
+3. **Phase 3**: Code Generation Enhancements (Current Focus)
+   - [ ] Named actions code generation (insert into generated code)
    - [ ] Lexer mode code generation
+   - [ ] Action translation for target languages
 4. **Phase 4**: C Target Language (Future)
 5. **Phase 5**: C++ Target Language (Future)
 
@@ -195,8 +198,8 @@
 - [x] Parse rule arguments: `rule[int x, String name]` ✅
 - [x] Parse return values: `returns [Value result]` ✅
 - [x] Parse local variables: `locals [int temp]` ✅
-- [x] Parse list labels: `ids+=ID` (AST ready) ✅
-- [ ] Parser integration for list labels
+- [x] Parse list labels: `ids+=ID` ✅
+- [x] Parse named actions: `@header {...}` ✅
 
 ### CI/CD & Publishing
 - [x] Add badges to README ✅

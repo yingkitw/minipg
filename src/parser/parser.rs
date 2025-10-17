@@ -46,12 +46,14 @@ impl Parser {
 
         let mut grammar = Grammar::new(name, grammar_type);
 
-        // Parse options, imports, and rules
+        // Parse options, imports, named actions, and rules
         while self.current_token.kind != TokenKind::Eof {
             if self.current_token.kind == TokenKind::Options {
                 self.parse_options(&mut grammar)?;
             } else if self.current_token.kind == TokenKind::Import {
                 self.parse_import(&mut grammar)?;
+            } else if self.current_token.kind == TokenKind::At {
+                self.parse_named_action(&mut grammar)?;
             } else if self.current_token.kind == TokenKind::Identifier {
                 let rule = self.parse_rule()?;
                 grammar.add_rule(rule);
@@ -90,6 +92,35 @@ impl Parser {
         let import_name = self.expect_identifier()?;
         self.expect(TokenKind::Semicolon)?;
         grammar.add_import(import_name);
+        Ok(())
+    }
+
+    fn parse_named_action(&mut self, grammar: &mut Grammar) -> Result<()> {
+        self.expect(TokenKind::At)?;
+        let action_name = self.expect_identifier()?;
+        self.expect(TokenKind::LeftBrace)?;
+        
+        // Read the action code until we find the closing brace
+        let mut code = String::new();
+        let mut brace_count = 1;
+        
+        while brace_count > 0 && self.current_token.kind != TokenKind::Eof {
+            if self.current_token.kind == TokenKind::LeftBrace {
+                brace_count += 1;
+                code.push('{');
+            } else if self.current_token.kind == TokenKind::RightBrace {
+                brace_count -= 1;
+                if brace_count > 0 {
+                    code.push('}');
+                }
+            } else {
+                code.push_str(&self.current_token.text);
+                code.push(' ');
+            }
+            self.advance();
+        }
+        
+        grammar.add_named_action(action_name, code.trim().to_string());
         Ok(())
     }
 
@@ -300,15 +331,48 @@ impl Parser {
     }
 
     fn parse_element(&mut self) -> Result<Element> {
+        // Check for label (id=element or ids+=element)
+        let (label, is_list) = if self.current_token.kind == TokenKind::Identifier {
+            // Look ahead to see if next token is = or +=
+            let next_kind = self.peek_token.kind;
+            if next_kind == TokenKind::Equals || next_kind == TokenKind::PlusEquals {
+                // This is a label
+                let label_name = self.expect_identifier()?;
+                let is_list = self.current_token.kind == TokenKind::PlusEquals;
+                self.advance(); // consume = or +=
+                (Some(label_name), is_list)
+            } else {
+                (None, false)
+            }
+        } else {
+            (None, false)
+        };
+        
         let element = match self.current_token.kind {
             TokenKind::Identifier => {
                 let name = self.expect_identifier()?;
-                Element::rule_ref(name)
+                let mut elem = Element::rule_ref(name);
+                if let Some(lbl) = label {
+                    elem = if is_list {
+                        elem.with_list_label(lbl)
+                    } else {
+                        elem.with_label(lbl)
+                    };
+                }
+                elem
             }
             TokenKind::StringLiteral => {
                 let value = self.current_token.text.clone();
                 self.advance();
-                Element::string_literal(value)
+                let mut elem = Element::string_literal(value);
+                if let Some(lbl) = label {
+                    elem = if is_list {
+                        elem.with_list_label(lbl)
+                    } else {
+                        elem.with_label(lbl)
+                    };
+                }
+                elem
             }
             TokenKind::LeftParen => {
                 self.advance();

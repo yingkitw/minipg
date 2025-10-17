@@ -52,23 +52,34 @@ pub trait CodeGenerator {
 ### ast
 
 Abstract Syntax Tree module:
-- **Grammar**: Root node containing rules, options, and imports
-- **Rule**: Individual grammar rules (parser or lexer)
-- **Element**: Grammar elements (terminals, non-terminals, operators)
-- **Alternative**: Rule alternatives (sequences of elements)
+- **Grammar**: Root node containing rules, options, imports, and named actions
+- **Rule**: Individual grammar rules (parser or lexer) with arguments, returns, locals
+- **Element**: Grammar elements (terminals, non-terminals, operators) with labels
+- **Alternative**: Rule alternatives (sequences of elements) with lexer commands
 - **Visitor**: Visitor pattern for AST traversal
+- **LexerCommand**: Enum for lexer commands (Skip, Channel, Mode, etc.)
 
 The AST is designed to be:
 - Serializable (via serde)
 - Immutable by default
 - Easy to traverse and transform
+- Feature-complete for ANTLR4 compatibility
 
 ### parser
 
 Grammar file parsing module:
-- **Lexer**: Tokenizes grammar files
-- **Parser**: Builds AST from tokens
-- **Token**: Token definitions with location info
+- **Lexer**: Tokenizes grammar files with context-aware modes (CharClass mode)
+- **Parser**: Builds AST from tokens with full ANTLR4 feature support
+- **Token**: Token definitions with location info (40+ token types)
+
+Features supported:
+- Grammar imports and options
+- Named actions (@header, @members, etc.)
+- Rule arguments, returns, and locals
+- Element labels (id=ID) and list labels (ids+=ID)
+- Lexer commands (-> skip, -> channel, etc.)
+- Non-greedy quantifiers (.*?, .+?, .??)
+- Character classes with Unicode escapes
 
 The parser implements the `GrammarParser` trait from minipg-core.
 

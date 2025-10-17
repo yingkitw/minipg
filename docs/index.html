@@ -207,9 +207,10 @@
         <h1>🐷 minipg</h1>
         <p class="subtitle">A Blazingly Fast Parser Generator with ANTLR4 Compatibility</p>
         <div class="badges">
-            <span class="badge">✅ v0.1.0-alpha.2</span>
+            <span class="badge">✅ v0.1.0-alpha.3</span>
             <span class="badge">📦 Published on crates.io</span>
-            <span class="badge">✅ 65 tests passing</span>
+            <span class="badge">✅ 111 tests passing</span>
+            <span class="badge">🌍 5 Languages</span>
             <span class="badge">🔬 E2E tested</span>
             <span class="badge">📄 Apache-2.0</span>
         </div>
@@ -239,7 +240,7 @@
                 </div>
                 <div class="feature-card">
                     <h3>🌍 Multi-Language</h3>
-                    <p>Generate parsers for Rust, Python, JavaScript, and TypeScript.</p>
+                    <p>Generate parsers for Rust, Python, JavaScript, TypeScript, and Go.</p>
                 </div>
                 <div class="feature-card">
                     <h3>🚀 No Runtime Dependencies</h3>
@@ -251,7 +252,15 @@
                 </div>
                 <div class="feature-card">
                     <h3>✅ Well Tested</h3>
-                    <p>65 comprehensive tests covering all core functionality with E2E coverage.</p>
+                    <p>111 comprehensive tests covering all core functionality with E2E coverage.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🏷️ Advanced Features</h3>
+                    <p>List labels, named actions, parameterized rules, and non-greedy quantifiers.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📝 Real-World Ready</h3>
+                    <p>Successfully parses CompleteJSON.g4 and SQL.g4 grammars.</p>
                 </div>
             </div>
         </section>
@@ -263,7 +272,14 @@
             <pre><code>cargo install minipg</code></pre>
             
             <h3>Generate a Parser</h3>
-            <pre><code>minipg generate grammar.g4 -o output/ -l rust</code></pre>
+            <pre><code># Generate Rust parser
+minipg generate grammar.g4 -o output/ -l rust
+
+# Generate Python parser
+minipg generate grammar.g4 -o output/ -l python
+
+# Generate Go parser
+minipg generate grammar.g4 -o output/ -l go</code></pre>
             
             <h3>Example Grammar</h3>
             <pre><code>grammar Calculator;
@@ -290,7 +306,7 @@ WS: (' ' | '\t' | '\r' | '\n')+ -> skip;</code></pre>
                 <li><strong>ast</strong>: Abstract Syntax Tree definitions and visitor patterns</li>
                 <li><strong>parser</strong>: Grammar file parser (lexer + parser)</li>
                 <li><strong>analysis</strong>: Semantic analysis and validation</li>
-                <li><strong>codegen</strong>: Code generation for Rust, Python, JS, and TS</li>
+                <li><strong>codegen</strong>: Code generation for Rust, Python, JS, TS, and Go</li>
                 <li><strong>CLI</strong>: Command-line interface with binary</li>
             </ul>
             
