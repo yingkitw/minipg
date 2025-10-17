@@ -1,0 +1,25 @@
+# GitHub Pages Configuration for minipg
+
+title: minipg
+description: A blazingly fast parser generator with ANTLR4 compatibility
+theme: jekyll-theme-cayman
+show_downloads: true
+google_analytics: 
+
+# GitHub metadata
+repository: yingkitw/minipg
+github:
+  is_project_page: true
+  repository_url: https://github.com/yingkitw/minipg
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Exclude from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock

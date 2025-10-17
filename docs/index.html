@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="minipg - A blazingly fast parser generator with ANTLR4 compatibility">
+    <title>minipg - Modern Parser Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #161616;
+            background: #f4f4f4;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #161616 0%, #393939 100%);
+            color: #ffffff;
+            padding: 3rem 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        header .subtitle {
+            font-size: 1.3rem;
+            color: #c6c6c6;
+            margin-bottom: 1rem;
+        }
+        
+        header .badges {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        header .badge {
+            display: inline-block;
+            background: #0f62fe;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            margin: 0.2rem;
+        }
+        
+        nav {
+            background: #393939;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background 0.3s;
+            font-weight: 500;
+        }
+        
+        nav a:hover {
+            background: #525252;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        section {
+            background: #ffffff;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: #161616;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            border-bottom: 3px solid #0f62fe;
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            color: #393939;
+            margin: 1.5rem 0 1rem;
+            font-size: 1.5rem;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'IBM Plex Mono', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #161616;
+            color: #f4f4f4;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #0f62fe;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: #f4f4f4;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .feature-card {
+            padding: 1.5rem;
+            background: #f4f4f4;
+            border-radius: 8px;
+            border-left: 4px solid #0f62fe;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .feature-card h3 {
+            margin-top: 0;
+            font-size: 1.3rem;
+        }
+        
+        footer {
+            background: #161616;
+            color: #c6c6c6;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        footer a {
+            color: #78a9ff;
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: #0f62fe;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 0.5rem;
+            transition: background 0.3s;
+            font-weight: 500;
+        }
+        
+        .btn:hover {
+            background: #0353e9;
+        }
+        
+        .btn-secondary {
+            background: #393939;
+        }
+        
+        .btn-secondary:hover {
+            background: #525252;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🐷 minipg</h1>
+        <p class="subtitle">A Blazingly Fast Parser Generator with ANTLR4 Compatibility</p>
+        <div class="badges">
+            <span class="badge">✅ v0.1.0-alpha.2</span>
+            <span class="badge">📦 Published on crates.io</span>
+            <span class="badge">✅ 65 tests passing</span>
+            <span class="badge">🔬 E2E tested</span>
+            <span class="badge">📄 Apache-2.0</span>
+        </div>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#quickstart">Quick Start</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#examples">Examples</a></li>
+            <li><a href="#documentation">Documentation</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section id="features">
+            <h2>Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>⚡ Fast Generation</h3>
+                    <p>Sub-millisecond code generation for typical grammars with linear O(n) scaling.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔄 ANTLR4 Compatible</h3>
+                    <p>100% compatible with ANTLR4 grammar syntax - reuse existing grammars.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🌍 Multi-Language</h3>
+                    <p>Generate parsers for Rust, Python, JavaScript, and TypeScript.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🚀 No Runtime Dependencies</h3>
+                    <p>Generates standalone, self-contained parsers with no external dependencies.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🦀 Modern Rust</h3>
+                    <p>Built with Rust 2024 edition, leveraging latest language features.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>✅ Well Tested</h3>
+                    <p>65 comprehensive tests covering all core functionality with E2E coverage.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="quickstart">
+            <h2>Quick Start</h2>
+            
+            <h3>Installation</h3>
+            <pre><code>cargo install minipg</code></pre>
+            
+            <h3>Generate a Parser</h3>
+            <pre><code>minipg generate grammar.g4 -o output/ -l rust</code></pre>
+            
+            <h3>Example Grammar</h3>
+            <pre><code>grammar Calculator;
+
+expr: term (('+' | '-') term)*;
+term: factor (('*' | '/') factor)*;
+factor: NUMBER | '(' expr ')';
+
+NUMBER: DIGIT+;
+fragment DIGIT: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
+WS: (' ' | '\t' | '\r' | '\n')+ -> skip;</code></pre>
+            
+            <a href="https://github.com/yingkitw/minipg" class="btn">View on GitHub</a>
+            <a href="https://crates.io/crates/minipg" class="btn btn-secondary">View on crates.io</a>
+        </section>
+        
+        <section id="architecture">
+            <h2>Architecture</h2>
+            <p>minipg is organized as a single crate with modular structure for easy installation and maintenance:</p>
+            
+            <h3>Core Modules</h3>
+            <ul style="margin-left: 2rem; margin-top: 1rem; line-height: 2;">
+                <li><strong>core</strong>: Core traits, error types, and diagnostics</li>
+                <li><strong>ast</strong>: Abstract Syntax Tree definitions and visitor patterns</li>
+                <li><strong>parser</strong>: Grammar file parser (lexer + parser)</li>
+                <li><strong>analysis</strong>: Semantic analysis and validation</li>
+                <li><strong>codegen</strong>: Code generation for Rust, Python, JS, and TS</li>
+                <li><strong>CLI</strong>: Command-line interface with binary</li>
+            </ul>
+            
+            <h3>Key Benefits</h3>
+            <ul style="margin-left: 2rem; margin-top: 1rem; line-height: 2;">
+                <li>Single package installation - no complex dependency management</li>
+                <li>Fast compilation with modular organization</li>
+                <li>Clear separation of concerns for maintainability</li>
+                <li>Easy to integrate into your projects</li>
+            </ul>
+        </section>
+        
+        <section id="examples">
+            <h2>Examples</h2>
+            
+            <h3>Validate a Grammar</h3>
+            <pre><code>minipg validate grammar.g4</code></pre>
+            
+            <h3>Show Grammar Info</h3>
+            <pre><code>minipg info grammar.g4</code></pre>
+            
+            <h3>Generate with Options</h3>
+            <pre><code>minipg generate grammar.g4 \
+  --output ./generated \
+  --target-language rust \
+  --visitor \
+  --package my_parser</code></pre>
+        </section>
+        
+        <section id="documentation">
+            <h2>Documentation</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>📖 User Guide</h3>
+                    <p><a href="USER_GUIDE.html">Getting started with minipg</a></p>
+                </div>
+                <div class="feature-card">
+                    <h3>📝 Grammar Syntax</h3>
+                    <p><a href="GRAMMAR_SYNTAX.html">ANTLR4 grammar reference</a></p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔧 API Documentation</h3>
+                    <p><a href="https://docs.rs/minipg">Rust API docs on docs.rs</a></p>
+                </div>
+                <div class="feature-card">
+                    <h3>🌐 Multi-Language</h3>
+                    <p><a href="MULTI_LANGUAGE_PLAN.html">Language support plan</a></p>
+                </div>
+                <div class="feature-card">
+                    <h3>✅ ANTLR4 Compatibility</h3>
+                    <p><a href="ANTLR4_COMPATIBILITY.html">Compatibility status</a></p>
+                </div>
+                <div class="feature-card">
+                    <h3>📊 Comparison</h3>
+                    <p><a href="COMPARISON_SUMMARY.html">vs other tools</a></p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 minipg contributors | Apache-2.0 License</p>
+        <p style="margin-top: 0.5rem;">
+            <a href="https://github.com/yingkitw/minipg">GitHub</a> | 
+            <a href="https://crates.io/crates/minipg">crates.io</a> | 
+            <a href="https://docs.rs/minipg">docs.rs</a>
+        </p>
+    </footer>
+</body>
+</html>
