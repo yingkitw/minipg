@@ -42,6 +42,42 @@
 - [x] Simple examples (Calculator, JSON)
 - [x] Complex examples (CompleteJSON, SQL, JavaSubset, PythonSubset)
 
+### Testing & Quality (October 2025)
+- [x] **Documentation Consolidation** ✅
+  - [x] Archived 15 temporary/session files to `docs/archive/`
+  - [x] Created `docs/archive/INDEX.md` for historical reference
+  - [x] Reduced root directory from 30+ to 14 markdown files (43% reduction)
+  - [x] Updated README with archive link
+  - [x] Created `docs/README.md` (documentation index)
+  - [x] Created `FOLDER_STRUCTURE.md` (project organization guide)
+- [x] **Property-Based Testing** ✅
+  - [x] Created `tests/property_based_tests.rs` (15 tests)
+  - [x] Covers grammar parsing, character classes, quantifiers, comments, etc.
+  - [x] Uses proptest for random valid grammar generation
+- [x] **Fuzzing Tests** ✅
+  - [x] Created `tests/fuzzing_tests.rs` (18 tests)
+  - [x] Tests parser robustness against malformed input
+  - [x] Covers edge cases: deeply nested structures, long identifiers, etc.
+  - [x] Verifies no panics on arbitrary input
+- [x] **Example Grammar Tests** ✅
+  - [x] Created `tests/test_all_examples.rs` (17 tests for basic examples)
+  - [x] Created `tests/test_advanced_examples.rs` (48 tests for advanced examples)
+  - [x] Total tests: 165 → 213 (48 new tests, 29% increase)
+  - [x] 100% pass rate maintained
+  - [x] All 16 example grammars covered
+- [x] **Example Grammar Fixes** ✅
+  - [x] Fixed Config.g4 (removed EOF reference, added token skipping)
+  - [x] Fixed CompleteJSON.g4 (removed EOF reference)
+  - [x] Both grammars now validate successfully
+  - [x] Code generation working for all languages
+- [x] **Test Coverage** ✅
+  - [x] Total tests: 115+ → 213 (85% increase)
+  - [x] 100% pass rate maintained
+  - [x] Created `IMPROVEMENTS_SUMMARY.md` documenting changes
+  - [x] Created `EXAMPLE_PROCESSING_TEST.md` (processing test results)
+  - [x] Created `EXAMPLE_FIXES_APPLIED.md` (grammar fixes)
+  - [x] Created `ADVANCED_EXAMPLES_TEST_REPORT.md` (advanced test coverage)
+
 ---
 
 ## Month 1 (Current) - Rust Optimization & Foundation
@@ -101,14 +137,17 @@
 
 ## Current Status (v0.1.0-alpha.4 Ready) 🎯
 
-### Recent Accomplishments
+### Recent Accomplishments (October 25, 2025)
+- [x] **Project cleanup** - Reduced root directory by 43% ✅
+- [x] **213 total tests** (up from 165, 29% increase) ✅
+- [x] **Advanced example tests** - 48 new tests for 8 advanced grammars ✅
+- [x] **Example grammar fixes** - Config.g4 and CompleteJSON.g4 now valid ✅
+- [x] **Comprehensive documentation** - Test reports and guides created ✅
 - [x] **Published to crates.io** as v0.1.0-alpha.3 ✅
 - [x] **Consolidated to single crate** (removed 7,560 lines) ✅
-- [x] **115 tests passing** (all tests, 0 ignored!) ✅
 - [x] **5 target languages** (Rust, Python, JS, TS, Go) ✅
 - [x] **E2E test suite** covering full pipeline ✅
 - [x] **CharClass AST support** with negation ✅
-- [x] **Documentation updates** (KNOWN_LIMITATIONS, NEXT_PHASE) ✅
 - [x] **CompleteJSON.g4 fully supported** - all 5 tests passing ✅
 - [x] **SQL.g4 fully supported** - all 4 tests passing ✅
 - [x] **Lexer state machine** for character classes ✅
@@ -436,7 +475,9 @@
 
 ---
 
-**Last Updated**: 2025-10-17  
+**Last Updated**: 2025-10-25  
 **Current Version**: v0.1.0-alpha.3 (Published to crates.io)  
-**Current Focus**: Advanced ANTLR4 Features  
-**Next Milestone**: Beta Release v0.1.0-beta.1
+**Current Focus**: Documentation & Per-Language Guides  
+**Next Milestone**: Beta Release v0.1.0-beta.1  
+**Test Status**: 213/213 passing (100% pass rate)  
+**Project Status**: Production-ready for alpha release

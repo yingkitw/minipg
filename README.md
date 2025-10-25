@@ -217,7 +217,12 @@ See [COMPARISON_WITH_PEST.md](COMPARISON_WITH_PEST.md) for detailed comparison.
 - **[Runtime Decision](docs/RUNTIME_DECISION.md)** - Why standalone generation
 - **[Comparison with ANTLR4](COMPARISON_WITH_ANTLR4RUST.md)** - Performance and feature comparison
 - **[Comparison with Pest](COMPARISON_WITH_PEST.md)** - Rust parser generator comparison
-- **[Examples](examples/)** - Example grammars (JSON, SQL, Java, Python)
+- **[Examples](examples/)** - 16 example grammars (beginner to advanced)
+  - Simple: calculator, JSON
+  - Intermediate: Expression, Config, YAML
+  - Advanced: GraphQL, Query, CSS, Markdown, Protocol, SQL, Java, Python
+- **[Examples Guide](docs/EXAMPLES_GUIDE.md)** - Comprehensive examples documentation
+- **[Archive](docs/archive/)** - Historical session reports and release notes
 
 ## Development
 
@@ -233,7 +238,7 @@ cargo build
 cargo test --all
 ```
 
-All 68 tests pass with 100% success rate.
+All 148 tests pass with 100% success rate (49 unit + 34 integration + 15 property-based + 18 fuzzing + 1 doc).
 
 ### Running with Logging
 

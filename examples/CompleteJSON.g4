@@ -5,7 +5,7 @@ grammar CompleteJSON;
 
 // Parser Rules
 json
-    : value EOF
+    : value
     ;
 
 value
