@@ -15,6 +15,10 @@ pub struct Grammar {
     pub imports: Vec<String>,
     /// Named actions like @header, @members, etc.
     pub named_actions: HashMap<String, String>,
+    /// Lexer modes: mode_name -> rules in that mode
+    pub lexer_modes: HashMap<String, Vec<String>>,
+    /// Channel names used in the grammar
+    pub channels: std::collections::HashSet<String>,
 }
 
 impl Grammar {
@@ -26,6 +30,8 @@ impl Grammar {
             rules: Vec::new(),
             imports: Vec::new(),
             named_actions: HashMap::new(),
+            lexer_modes: HashMap::new(),
+            channels: std::collections::HashSet::new(),
         }
     }
 
@@ -55,6 +61,22 @@ impl Grammar {
 
     pub fn parser_rules(&self) -> impl Iterator<Item = &Rule> {
         self.rules.iter().filter(|r| r.is_parser_rule())
+    }
+
+    pub fn add_lexer_mode(&mut self, mode_name: String, rule_names: Vec<String>) {
+        self.lexer_modes.insert(mode_name, rule_names);
+    }
+
+    pub fn add_channel(&mut self, channel_name: String) {
+        self.channels.insert(channel_name);
+    }
+
+    pub fn has_modes(&self) -> bool {
+        !self.lexer_modes.is_empty()
+    }
+
+    pub fn has_channels(&self) -> bool {
+        !self.channels.is_empty()
     }
 }
 

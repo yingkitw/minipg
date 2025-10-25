@@ -2,8 +2,8 @@
 //!
 //! Generates idiomatic Go parsers from grammar definitions.
 
-use crate::ast::{Grammar, Rule, Element, Alternative};
-use crate::core::{CodeGenerator, types::CodeGenConfig, Error, Result};
+use crate::ast::{Grammar, Rule};
+use crate::core::{CodeGenerator, types::CodeGenConfig, Result};
 
 /// Go code generator.
 pub struct GoCodeGenerator;

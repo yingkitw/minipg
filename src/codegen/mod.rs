@@ -9,6 +9,8 @@ pub mod template;
 pub mod visitor_gen;
 pub mod dfa;
 pub mod lookup_table;
+pub mod modes;
+pub mod actions;
 
 pub use rust::RustCodeGenerator;
 pub use python::PythonCodeGenerator;
