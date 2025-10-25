@@ -360,7 +360,7 @@ fn capitalize(s: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::Grammar;
+    use crate::ast::{Grammar, Rule, Element, Alternative};
     use crate::core::types::GrammarType;
     
     #[test]
@@ -376,5 +376,166 @@ mod tests {
         assert!(code.contains("type TestParser struct"));
         assert!(code.contains("type Token struct"));
         assert!(code.contains("type ParseError struct"));
+    }
+
+    #[test]
+    fn test_go_codegen_with_rules() {
+        use crate::ast::RuleType;
+        let mut grammar = Grammar::new("Calculator".to_string(), GrammarType::Combined);
+        
+        // Add a parser rule
+        let mut expr_rule = Rule::new("expr".to_string(), RuleType::Parser);
+        let mut alt = Alternative::new();
+        alt.add_element(Element::terminal("NUMBER".to_string()));
+        expr_rule.alternatives.push(alt);
+        grammar.rules.push(expr_rule);
+        
+        let code_gen = GoCodeGenerator::new();
+        let config = CodeGenConfig::default();
+        
+        let code = code_gen.generate(&grammar, &config).expect("Failed to generate");
+        
+        assert!(code.contains("package calculator"));
+        assert!(code.contains("type CalculatorLexer struct"));
+        assert!(code.contains("type CalculatorParser struct"));
+        // Parser methods are generated for parser rules
+        assert!(code.contains("ParseExpr()"));
+    }
+
+    #[test]
+    fn test_go_codegen_error_interface() {
+        let grammar = Grammar::new("Test".to_string(), GrammarType::Combined);
+        let code_gen = GoCodeGenerator::new();
+        let config = CodeGenConfig::default();
+        
+        let code = code_gen.generate(&grammar, &config).expect("Failed to generate");
+        
+        // Verify error interface implementation
+        assert!(code.contains("func (e *ParseError) Error() string"));
+        assert!(code.contains("type ParseError struct"));
+        assert!(code.contains("Message  string"));
+        assert!(code.contains("Position int"));
+    }
+
+    #[test]
+    fn test_go_codegen_lexer_methods() {
+        let grammar = Grammar::new("Test".to_string(), GrammarType::Combined);
+        let code_gen = GoCodeGenerator::new();
+        let config = CodeGenConfig::default();
+        
+        let code = code_gen.generate(&grammar, &config).expect("Failed to generate");
+        
+        // Verify lexer methods
+        assert!(code.contains("func NewTestLexer(input string)"));
+        assert!(code.contains("func (l *TestLexer) NextToken()"));
+        assert!(code.contains("func (l *TestLexer) TokenizeAll()"));
+        assert!(code.contains("func (l *TestLexer) skipWhitespace()"));
+    }
+
+    #[test]
+    fn test_go_codegen_parser_constructor() {
+        let grammar = Grammar::new("Test".to_string(), GrammarType::Combined);
+        let code_gen = GoCodeGenerator::new();
+        let config = CodeGenConfig::default();
+        
+        let code = code_gen.generate(&grammar, &config).expect("Failed to generate");
+        
+        // Verify parser constructor
+        assert!(code.contains("func NewTestParser(input string)"));
+        assert!(code.contains("lexer := NewTestLexer(input)"));
+        assert!(code.contains("p.currentToken, _ = p.lexer.NextToken()"));
+    }
+
+    #[test]
+    fn test_go_codegen_token_types() {
+        use crate::ast::RuleType;
+        let mut grammar = Grammar::new("Test".to_string(), GrammarType::Combined);
+        
+        // Add lexer rules
+        let id_rule = Rule::new("ID".to_string(), RuleType::Lexer);
+        let num_rule = Rule::new("NUMBER".to_string(), RuleType::Lexer);
+        grammar.rules.push(id_rule);
+        grammar.rules.push(num_rule);
+        
+        let code_gen = GoCodeGenerator::new();
+        let config = CodeGenConfig::default();
+        
+        let code = code_gen.generate(&grammar, &config).expect("Failed to generate");
+        
+        // Verify token types
+        assert!(code.contains("type TokenKind int"));
+        assert!(code.contains("const ("));
+        assert!(code.contains("TokenEOF TokenKind = iota"));
+        assert!(code.contains("TokenID"));
+        assert!(code.contains("TokenNUMBER"));
+    }
+
+    #[test]
+    fn test_go_codegen_token_string_method() {
+        use crate::ast::RuleType;
+        let mut grammar = Grammar::new("Test".to_string(), GrammarType::Combined);
+        
+        // Add lexer rules
+        let id_rule = Rule::new("ID".to_string(), RuleType::Lexer);
+        grammar.rules.push(id_rule);
+        
+        let code_gen = GoCodeGenerator::new();
+        let config = CodeGenConfig::default();
+        
+        let code = code_gen.generate(&grammar, &config).expect("Failed to generate");
+        
+        // Verify String() method for TokenKind
+        assert!(code.contains("func (k TokenKind) String() string"));
+        assert!(code.contains("case TokenEOF:"));
+        assert!(code.contains("return \"EOF\""));
+        assert!(code.contains("case TokenID:"));
+        assert!(code.contains("return \"ID\""));
+    }
+
+    #[test]
+    fn test_go_codegen_idiomatic_go() {
+        let grammar = Grammar::new("Test".to_string(), GrammarType::Combined);
+        let code_gen = GoCodeGenerator::new();
+        let config = CodeGenConfig::default();
+        
+        let code = code_gen.generate(&grammar, &config).expect("Failed to generate");
+        
+        // Verify idiomatic Go patterns
+        // 1. Package declaration
+        assert!(code.contains("package test"));
+        
+        // 2. Proper imports
+        assert!(code.contains("import ("));
+        assert!(code.contains("\"fmt\""));
+        assert!(code.contains("\"strings\""));
+        
+        // 3. Exported types (PascalCase)
+        assert!(code.contains("type TestLexer struct"));
+        assert!(code.contains("type TestParser struct"));
+        assert!(code.contains("type Token struct"));
+        assert!(code.contains("type ParseError struct"));
+        
+        // 4. Error interface
+        assert!(code.contains("func (e *ParseError) Error() string"));
+        
+        // 5. Receiver methods
+        assert!(code.contains("func (l *TestLexer)"));
+        assert!(code.contains("func (k TokenKind)"));
+        
+        // 6. Constructor functions
+        assert!(code.contains("func NewTestLexer(input string)"));
+        assert!(code.contains("func NewTestParser(input string)"));
+    }
+
+    #[test]
+    fn test_go_codegen_target_language() {
+        let code_gen = GoCodeGenerator::new();
+        assert_eq!(code_gen.target_language(), "go");
+    }
+
+    #[test]
+    fn test_go_codegen_default() {
+        let code_gen = GoCodeGenerator::default();
+        assert_eq!(code_gen.target_language(), "go");
     }
 }

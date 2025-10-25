@@ -239,7 +239,7 @@ cargo build
 cargo test --all
 ```
 
-All 148 tests pass with 100% success rate (49 unit + 34 integration + 15 property-based + 18 fuzzing + 1 doc).
+All 96+ tests pass with 100% success rate (73 unit + 13 rule feature + 10 integration tests).
 
 ### Running with Logging
 
@@ -252,13 +252,19 @@ RUST_LOG=info cargo run -- generate grammar.g4
 - **Current Version**: 0.1.0-alpha.3 (Published on crates.io)
 - **Next Version**: 0.1.0-alpha.4 (Ready to publish)
 - **Status**: Alpha Release - Production Ready
-- **Tests**: 115 passing (all tests, 0 ignored, 100% pass rate)
+- **Tests**: 96+ passing (73 unit + 13 rule feature + 10 Go integration, 100% pass rate)
 - **Target Languages**: 5 (Rust, Python, JavaScript, TypeScript, Go)
 - **Package**: Single consolidated crate for easy installation
-- **Grammar Support**: CompleteJSON.g4 ✅, SQL.g4 ✅
+- **Grammar Support**: CompleteJSON.g4 ✅, SQL.g4 ✅, RuleFeatures.g4 ✅
 - **E2E Coverage**: Full pipeline testing from grammar to working parser
 - **ANTLR4 Compatibility**: High - supports most common features
-- **New Features**: List labels (`ids+=ID`), Named actions with code generation
+- **Latest Features**: 
+  - ✅ Go code generator (idiomatic, production-ready)
+  - ✅ Rule arguments: `rule[Type name]`
+  - ✅ Return values: `returns [Type name]`
+  - ✅ Local variables: `locals [Type name]`
+  - ✅ List labels (`ids+=ID`)
+  - ✅ Named actions with code generation
 
 See [TODO.md](TODO.md) for current tasks and [ROADMAP.md](ROADMAP.md) for the complete roadmap.
 
