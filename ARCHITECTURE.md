@@ -106,6 +106,8 @@ Code generation module for target languages:
 - **Template**: Simple template engine for code generation
 - **DfaBuilder**: Generates optimized DFA for tokenization
 - **LookupTableBuilder**: Creates const lookup tables for character classes
+- **modes**: Lexer mode stack management and channel routing for all languages
+- **actions**: Action code generation and language-specific translation
 
 The code generator produces:
 - Lexer implementation with optimized tokenization
@@ -115,6 +117,8 @@ The code generator produces:
 - Visitor/listener patterns (optional)
 - Documentation comments
 - **Named action insertion** - Custom code from `@header` and `@members`
+- **Lexer modes & channels** - Mode stack management and channel routing
+- **Action code generation** - Embedded actions and semantic predicates
 
 All 5 generators support:
 - Parameterized rules (arguments, returns, locals)
@@ -122,6 +126,10 @@ All 5 generators support:
 - List labels (`ids+=ID`)
 - Non-greedy quantifiers
 - Character classes with Unicode
+- **Lexer modes** - Mode switching, push/pop operations
+- **Channels** - Token channel routing
+- **Actions** - Embedded action code and semantic predicates
+- **Action translation** - Language-specific action conversion
 
 ### cli
 
