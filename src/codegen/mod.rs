@@ -5,6 +5,9 @@ pub mod python;
 pub mod javascript;
 pub mod typescript;
 pub mod go;
+pub mod c;
+pub mod cpp;
+pub mod java;
 pub mod template;
 pub mod visitor_gen;
 pub mod dfa;
@@ -17,6 +20,9 @@ pub use python::PythonCodeGenerator;
 pub use javascript::JavaScriptCodeGenerator;
 pub use typescript::TypeScriptCodeGenerator;
 pub use go::GoCodeGenerator;
+pub use c::CCodeGenerator;
+pub use cpp::CppCodeGenerator;
+pub use java::JavaCodeGenerator;
 
 use crate::analysis::AnalysisResult;
 use crate::core::{types::CodeGenConfig, CodeGenerator as CodeGeneratorTrait, Result};
@@ -51,6 +57,18 @@ impl CodeGenerator {
             }
             "go" => {
                 let generator = GoCodeGenerator::new();
+                generator.generate(&analysis.grammar, &self.config)
+            }
+            "c" => {
+                let generator = CCodeGenerator::new();
+                generator.generate(&analysis.grammar, &self.config)
+            }
+            "cpp" | "c++" => {
+                let generator = CppCodeGenerator::new();
+                generator.generate(&analysis.grammar, &self.config)
+            }
+            "java" => {
+                let generator = JavaCodeGenerator::new();
                 generator.generate(&analysis.grammar, &self.config)
             }
             _ => Err(crate::core::Error::codegen(format!(

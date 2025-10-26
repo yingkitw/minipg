@@ -51,8 +51,8 @@ pub use parser::{Lexer, Parser, GrammarParser};
 
 // Re-export analysis
 pub mod analysis;
-pub use analysis::{SemanticAnalyzer, GrammarValidator, AnalysisResult};
+pub use analysis::{SemanticAnalyzer, GrammarValidator, AnalysisResult, GrammarComposer};
 
 // Re-export codegen
 pub mod codegen;
-pub use codegen::{CodeGenerator, RustCodeGenerator, PythonCodeGenerator, JavaScriptCodeGenerator, TypeScriptCodeGenerator};
+pub use codegen::{CodeGenerator, RustCodeGenerator, PythonCodeGenerator, JavaScriptCodeGenerator, TypeScriptCodeGenerator, GoCodeGenerator, CCodeGenerator, CppCodeGenerator, JavaCodeGenerator};

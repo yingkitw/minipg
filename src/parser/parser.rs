@@ -46,7 +46,7 @@ impl Parser {
 
         let mut grammar = Grammar::new(name, grammar_type);
 
-        // Parse options, imports, named actions, and rules
+        // Parse options, imports, named actions, modes, and rules
         while self.current_token.kind != TokenKind::Eof {
             if self.current_token.kind == TokenKind::Options {
                 self.parse_options(&mut grammar)?;
@@ -54,11 +54,13 @@ impl Parser {
                 self.parse_import(&mut grammar)?;
             } else if self.current_token.kind == TokenKind::At {
                 self.parse_named_action(&mut grammar)?;
+            } else if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "mode" {
+                self.parse_mode(&mut grammar)?;
             } else if self.current_token.kind == TokenKind::Identifier {
-                let rule = self.parse_rule()?;
+                let rule = self.parse_rule(&mut grammar)?;
                 grammar.add_rule(rule);
             } else if self.current_token.kind == TokenKind::Fragment {
-                let rule = self.parse_fragment_rule()?;
+                let rule = self.parse_fragment_rule(&mut grammar)?;
                 grammar.add_rule(rule);
             } else {
                 return Err(Error::parse(
@@ -124,7 +126,40 @@ impl Parser {
         Ok(())
     }
 
-    fn parse_rule(&mut self) -> Result<Rule> {
+    fn parse_mode(&mut self, grammar: &mut Grammar) -> Result<()> {
+        // Parse: mode NAME;
+        self.expect(TokenKind::Identifier)?; // consume "mode"
+        let mode_name = self.expect_identifier()?;
+        self.expect(TokenKind::Semicolon)?;
+        
+        // Collect rules in this mode until we hit another mode or EOF
+        let mut mode_rules = Vec::new();
+        
+        while self.current_token.kind != TokenKind::Eof {
+            // Check if we've hit another mode declaration
+            if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "mode" {
+                break;
+            }
+            
+            // Parse rules in this mode
+            if self.current_token.kind == TokenKind::Identifier {
+                let rule = self.parse_rule(grammar)?;
+                mode_rules.push(rule.name.clone());
+                grammar.add_rule(rule);
+            } else if self.current_token.kind == TokenKind::Fragment {
+                let rule = self.parse_fragment_rule(grammar)?;
+                mode_rules.push(rule.name.clone());
+                grammar.add_rule(rule);
+            } else {
+                break;
+            }
+        }
+        
+        grammar.add_lexer_mode(mode_name, mode_rules);
+        Ok(())
+    }
+
+    fn parse_rule(&mut self, _grammar: &mut Grammar) -> Result<Rule> {
         let name = self.expect_identifier()?;
         
         // Determine if it's a lexer or parser rule based on first character
@@ -175,9 +210,9 @@ impl Parser {
         Ok(rule)
     }
 
-    fn parse_fragment_rule(&mut self) -> Result<Rule> {
+    fn parse_fragment_rule(&mut self, grammar: &mut Grammar) -> Result<Rule> {
         self.expect(TokenKind::Fragment)?;
-        let mut rule = self.parse_rule()?;
+        let mut rule = self.parse_rule(grammar)?;
         rule.set_fragment(true);
         Ok(rule)
     }

@@ -126,6 +126,28 @@ impl SemanticAnalyzer {
             );
         }
     }
+    
+    fn extract_channels(&self, grammar: &mut Grammar) {
+        // Extract channel names from lexer commands
+        let channels: Vec<String> = grammar.rules.iter()
+            .flat_map(|rule| rule.alternatives.iter())
+            .filter_map(|alt| {
+                if let Some(crate::ast::LexerCommand::Channel(channel_name)) = &alt.lexer_command {
+                    if !channel_name.is_empty() {
+                        Some(channel_name.clone())
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+            .collect();
+        
+        for channel in channels {
+            grammar.add_channel(channel);
+        }
+    }
 }
 
 impl Default for SemanticAnalyzer {
@@ -149,6 +171,10 @@ impl SemanticAnalyzerTrait for SemanticAnalyzer {
         analyzer.check_ambiguous_alternatives(input);
 
         let mut result = AnalysisResult::new(input.clone());
+        
+        // Extract channels from lexer commands
+        analyzer.extract_channels(&mut result.grammar);
+        
         result.diagnostics = analyzer.diagnostics;
 
         Ok(result)

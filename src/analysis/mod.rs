@@ -6,9 +6,11 @@ pub mod reachability;
 pub mod left_recursion;
 pub mod first_follow;
 pub mod ambiguity;
+pub mod composition;
 
 pub use semantic::SemanticAnalyzer;
 pub use validator::GrammarValidator;
+pub use composition::GrammarComposer;
 
 use crate::ast::Grammar;
 use crate::core::Diagnostic;
