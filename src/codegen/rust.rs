@@ -3,6 +3,7 @@
 use super::dfa::{DfaBuilder, generate_dfa_match};
 use super::lookup_table::{LookupTableBuilder, generate_optimized_char_match};
 use super::visitor_gen::{generate_listener, generate_visitor};
+use super::rule_body::{generate_rust_rule_body, RuleBodyContext};
 use crate::ast::{Grammar, Rule};
 use crate::core::{types::CodeGenConfig, CodeGenerator as CodeGeneratorTrait, Result};
 
@@ -118,8 +119,14 @@ impl RustCodeGenerator {
             code.push_str("\n");
         }
         
-        code.push_str("        // TODO: Implement rule parsing\n");
-        code.push_str("        unimplemented!()\n");
+        // Generate actual rule body using rule_body helper
+        let mut ctx = RuleBodyContext::new()
+            .with_indent(8)
+            .with_token_vars("self.tokens[self.position].kind".to_string(), 
+                           "self.tokens.get(self.position + 1).map(|t| &t.kind)".to_string());
+        let rule_body = generate_rust_rule_body(rule, &mut ctx);
+        code.push_str(&rule_body);
+        
         code.push_str("    }\n\n");
         
         code

@@ -56,3 +56,7 @@ pub use analysis::{SemanticAnalyzer, GrammarValidator, AnalysisResult, GrammarCo
 // Re-export codegen
 pub mod codegen;
 pub use codegen::{CodeGenerator, RustCodeGenerator, PythonCodeGenerator, JavaScriptCodeGenerator, TypeScriptCodeGenerator, GoCodeGenerator, CCodeGenerator, CppCodeGenerator, JavaCodeGenerator};
+
+// Re-export MCP server
+pub mod mcp;
+pub use mcp::{create_server, MinipgServer};

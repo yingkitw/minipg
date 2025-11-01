@@ -240,15 +240,35 @@ impl Lexer {
         text.push(escape_char);
         self.advance();
         
-        // Handle Unicode escapes: \uXXXX
+        // Handle Unicode escapes: \uXXXX or \u{XXXXXX}
         if escape_char == 'u' {
-            // Read 4 hex digits
-            for _ in 0..4 {
-                if self.is_at_end() || !self.current_char().is_ascii_hexdigit() {
-                    return Token::error("invalid unicode escape".to_string(), start_line, start_column);
-                }
-                text.push(self.current_char());
+            if self.current_char() == '{' {
+                // Extended Unicode escape: \u{XXXXXX}
+                text.push('{');
                 self.advance();
+                let mut digit_count = 0;
+                while !self.is_at_end() && self.current_char() != '}' && digit_count < 6 {
+                    if !self.current_char().is_ascii_hexdigit() {
+                        return Token::error("invalid hex digit in unicode escape".to_string(), start_line, start_column);
+                    }
+                    text.push(self.current_char());
+                    self.advance();
+                    digit_count += 1;
+                }
+                if self.is_at_end() || self.current_char() != '}' {
+                    return Token::error("unclosed unicode escape sequence".to_string(), start_line, start_column);
+                }
+                text.push('}');
+                self.advance();
+            } else {
+                // Standard Unicode escape: \uXXXX (4 hex digits)
+                for _ in 0..4 {
+                    if self.is_at_end() || !self.current_char().is_ascii_hexdigit() {
+                        return Token::error("invalid unicode escape: expected 4 hex digits".to_string(), start_line, start_column);
+                    }
+                    text.push(self.current_char());
+                    self.advance();
+                }
             }
         }
         // For other escapes like \n, \r, \t, \\, etc., we already consumed them

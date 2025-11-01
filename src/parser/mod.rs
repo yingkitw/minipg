@@ -4,6 +4,7 @@ pub mod lexer;
 pub mod parser;
 pub mod token;
 pub mod error_recovery;
+pub mod enhanced_errors;
 
 pub use lexer::Lexer;
 pub use parser::Parser;

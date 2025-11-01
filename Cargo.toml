@@ -3,7 +3,7 @@ name = "minipg"
 version = "0.1.2"
 edition = "2024"
 rust-version = "1.85"
-authors = ["minipg contributors"]
+authors = ["Ying Kit WONG"]
 license = "Apache-2.0"
 repository = "https://github.com/yingkitw/minipg"
 homepage = "https://github.com/yingkitw/minipg"
@@ -16,6 +16,10 @@ description = "A blazingly fast parser generator with ANTLR4 compatibility"
 [[bin]]
 name = "minipg"
 path = "src/main.rs"
+
+[[bin]]
+name = "minipg-mcp"
+path = "src/bin/minipg-mcp.rs"
 
 [dependencies]
 # Serialization
@@ -33,13 +37,23 @@ clap = { version = "4.5", features = ["derive"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+# MCP server
+rmcp = { version = "0.8", features = ["server", "macros", "transport-io"] }
+tokio = { version = "1.0", features = ["full"] }
+schemars = { version = "1.0", features = ["derive"] }
+
 [dev-dependencies]
 insta = "1.41"
 proptest = "1.6"
 criterion = "0.5"
+tempfile = "3.11"
 
 [[bench]]
 name = "codegen_bench"
+harness = false
+
+[[bench]]
+name = "performance_bench"
 harness = false
 
 [profile.release]

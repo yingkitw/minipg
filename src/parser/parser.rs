@@ -63,9 +63,19 @@ impl Parser {
                 let rule = self.parse_fragment_rule(&mut grammar)?;
                 grammar.add_rule(rule);
             } else {
-                return Err(Error::parse(
-                    format!("{}:{}", self.current_token.line, self.current_token.column),
-                    format!("unexpected token: {}", self.current_token.kind),
+                use super::enhanced_errors::create_enhanced_error;
+                let expected = vec![
+                    TokenKind::Options,
+                    TokenKind::Import,
+                    TokenKind::At,
+                    TokenKind::Identifier,
+                    TokenKind::Fragment,
+                ];
+                return Err(create_enhanced_error(
+                    &self.current_token,
+                    expected,
+                    Some("grammar"),
+                    None,
                 ));
             }
         }
@@ -120,6 +130,13 @@ impl Parser {
                 code.push(' ');
             }
             self.advance();
+        }
+        
+        if brace_count > 0 {
+            return Err(Error::parse(
+                format!("{}:{}", self.current_token.line, self.current_token.column),
+                format!("Unclosed named action '{}': expected '}}' before end of file", action_name),
+            ));
         }
         
         grammar.add_named_action(action_name, code.trim().to_string());
@@ -198,11 +215,29 @@ impl Parser {
         
         // Parse alternatives
         let alt = self.parse_alternative()?;
+        
+        // Check for empty alternative
+        if alt.elements.is_empty() && rule.alternatives.is_empty() {
+            return Err(Error::parse(
+                format!("{}:{}", self.current_token.line, self.current_token.column),
+                "Empty rule alternative: rule must have at least one element".to_string(),
+            ));
+        }
+        
         rule.add_alternative(alt);
         
         while self.current_token.kind == TokenKind::Pipe {
             self.advance();
             let alt = self.parse_alternative()?;
+            
+            // Check for empty alternative
+            if alt.elements.is_empty() {
+                return Err(Error::parse(
+                    format!("{}:{}", self.current_token.line, self.current_token.column),
+                    "Empty alternative detected. Did you mean to add content between '|'?".to_string(),
+                ));
+            }
+            
             rule.add_alternative(alt);
         }
         
@@ -415,7 +450,24 @@ impl Parser {
                 
                 while self.current_token.kind == TokenKind::Pipe {
                     self.advance();
-                    alternatives.push(self.parse_alternative()?);
+                    let alt = self.parse_alternative()?;
+                    
+                    // Check for empty alternative in group
+                    if alt.elements.is_empty() {
+                        return Err(Error::parse(
+                            format!("{}:{}", self.current_token.line, self.current_token.column),
+                            "Empty alternative in group. Did you mean to add content between '|'?".to_string(),
+                        ));
+                    }
+                    
+                    alternatives.push(alt);
+                }
+                
+                if self.current_token.kind == TokenKind::Eof {
+                    return Err(Error::parse(
+                        format!("{}:{}", self.current_token.line, self.current_token.column),
+                        "Unclosed group: expected ')' before end of file".to_string(),
+                    ));
                 }
                 
                 self.expect(TokenKind::RightParen)?;
@@ -425,6 +477,14 @@ impl Parser {
                 self.advance();
                 // Parse character class
                 let element = self.parse_char_class()?;
+                
+                if self.current_token.kind == TokenKind::Eof {
+                    return Err(Error::parse(
+                        format!("{}:{}", self.current_token.line, self.current_token.column),
+                        "Unclosed character class: expected ']' before end of file".to_string(),
+                    ));
+                }
+                
                 self.expect(TokenKind::RightBracket)?;
                 element
             }
@@ -440,9 +500,21 @@ impl Parser {
                 }
             }
             _ => {
-                return Err(Error::parse(
-                    format!("{}:{}", self.current_token.line, self.current_token.column),
-                    format!("unexpected token in element: {}", self.current_token.kind),
+                use super::enhanced_errors::create_enhanced_error;
+                let expected = vec![
+                    TokenKind::Identifier,
+                    TokenKind::StringLiteral,
+                    TokenKind::CharLiteral,
+                    TokenKind::LeftParen,
+                    TokenKind::LeftBracket,
+                    TokenKind::Dot,
+                    TokenKind::Not,
+                ];
+                return Err(create_enhanced_error(
+                    &self.current_token,
+                    expected,
+                    None,
+                    None,
                 ));
             }
         };
@@ -512,11 +584,19 @@ impl Parser {
                         || self.current_token.kind == TokenKind::CharLiteral
                         || self.current_token.kind == TokenKind::Identifier {
                         let end_char = self.parse_char_literal()?;
+                        
+                        // Validate character range
+                        use super::enhanced_errors::validate_char_class_range;
+                        validate_char_class_range(start_char, end_char)?;
+                        
                         ranges.push((start_char, end_char));
                     } else {
-                        return Err(Error::parse(
-                            format!("{}:{}", self.current_token.line, self.current_token.column),
-                            "expected character after range operator".to_string(),
+                        use super::enhanced_errors::create_enhanced_error;
+                        return Err(create_enhanced_error(
+                            &self.current_token,
+                            vec![TokenKind::StringLiteral, TokenKind::CharLiteral, TokenKind::Identifier],
+                            Some("character class range"),
+                            None,
                         ));
                     }
                 } else {
@@ -540,17 +620,18 @@ impl Parser {
     
     fn parse_char_literal(&mut self) -> Result<char> {
         let text = &self.current_token.text;
-        let ch = if text.starts_with("\\u") {
-            // Unicode escape: \uXXXX
-            let hex = &text[2..];
-            u32::from_str_radix(hex, 16)
-                .ok()
-                .and_then(|code| char::from_u32(code))
-                .ok_or_else(|| Error::parse(
+        use super::enhanced_errors::parse_unicode_escape;
+        
+        let ch = if text.starts_with("\\u{") || text.starts_with("\\u") {
+            // Unicode escape: \uXXXX or \u{XXXXXX}
+            parse_unicode_escape(text).map_err(|e| {
+                // Preserve line/column information
+                Error::parse(
                     format!("{}:{}", self.current_token.line, self.current_token.column),
-                    format!("invalid unicode escape: {}", text),
-                ))?
-        } else if text.starts_with('\\') && text.len() == 2 {
+                    format!("{}", e),
+                )
+            })?
+        } else if text.starts_with('\\') && text.len() >= 2 {
             // Simple escape sequences
             match text.chars().nth(1).unwrap() {
                 'n' => '\n',
@@ -559,10 +640,33 @@ impl Parser {
                 '\\' => '\\',
                 '\'' => '\'',
                 '"' => '"',
+                '0' => '\0',
+                'x' => {
+                    // Hex escape: \xXX
+                    if text.len() >= 4 {
+                        let hex = &text[2..4];
+                        u8::from_str_radix(hex, 16)
+                            .ok()
+                            .and_then(|b| char::from_u32(b as u32))
+                            .unwrap_or('\0')
+                    } else {
+                        return Err(Error::parse(
+                            format!("{}:{}", self.current_token.line, self.current_token.column),
+                            "incomplete hex escape sequence".to_string(),
+                        ));
+                    }
+                }
                 c => c,
             }
         } else {
-            text.chars().next().unwrap_or('\0')
+            let chars: Vec<char> = text.chars().collect();
+            if chars.is_empty() {
+                return Err(Error::parse(
+                    format!("{}:{}", self.current_token.line, self.current_token.column),
+                    "empty character literal".to_string(),
+                ));
+            }
+            chars[0]
         };
         
         self.advance();
@@ -586,9 +690,12 @@ impl Parser {
             self.advance();
             Ok(())
         } else {
-            Err(Error::parse(
-                format!("{}:{}", self.current_token.line, self.current_token.column),
-                format!("expected {}, found {}", kind, self.current_token.kind),
+            use super::enhanced_errors::create_enhanced_error;
+            Err(create_enhanced_error(
+                &self.current_token,
+                vec![kind],
+                None,
+                None,
             ))
         }
     }
@@ -599,9 +706,12 @@ impl Parser {
             self.advance();
             Ok(text)
         } else {
-            Err(Error::parse(
-                format!("{}:{}", self.current_token.line, self.current_token.column),
-                format!("expected identifier, found {}", self.current_token.kind),
+            use super::enhanced_errors::create_enhanced_error;
+            Err(create_enhanced_error(
+                &self.current_token,
+                vec![TokenKind::Identifier],
+                None,
+                None,
             ))
         }
     }
