@@ -22,16 +22,15 @@ A blazingly fast, modern parser generator written in Rust. **faster** than ANTLR
 - **Sub-millisecond** generation for typical grammars
 - **<100 KB memory** usage
 
-### 🌍 Multi-Language Support (5 Languages)
+### 🌍 Multi-Language Support (8 Languages)
 - **Rust** - Optimized with inline attributes and DFA generation ✅
 - **Python** - Type hints and dataclasses (Python 3.10+) ✅
 - **JavaScript** - Modern ES6+ with error recovery ✅
 - **TypeScript** - Full type safety with interfaces and enums ✅
 - **Go** - Idiomatic Go with interfaces and error handling ✅
-- **Java** - Planned for v0.2
-- **C#** - Planned for v0.3
-- **C** - Planned for v0.3
-- **C++** - Planned for v0.3
+- **Java** - Standalone .java files with proper package structure ✅
+- **C** - Standalone .c/.h files with manual memory management ✅
+- **C++** - Modern C++17+ with RAII and smart pointers ✅
 
 ### 🎯 ANTLR4 Compatible
 - **Advanced Character Classes** - Full support with Unicode escapes (`\u0000-\uFFFF`) ✅
@@ -75,7 +74,7 @@ minipg is organized as a single crate with modular structure:
 - **ast**: Abstract Syntax Tree definitions and visitor patterns
 - **parser**: Grammar file parser (lexer + parser)
 - **analysis**: Semantic analysis and validation
-- **codegen**: Code generation for target languages (Rust, Python, JS, TS)
+- **codegen**: Code generation for 8 target languages (Rust, Python, JS, TS, Go, Java, C, C++)
 - **CLI**: Command-line interface with binary
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed design documentation.
@@ -115,6 +114,15 @@ minipg generate grammar.g4 -o output/ -l typescript
 
 # Generate Go parser
 minipg generate grammar.g4 -o output/ -l go
+
+# Generate Java parser
+minipg generate grammar.g4 -o output/ -l java
+
+# Generate C parser
+minipg generate grammar.g4 -o output/ -l c
+
+# Generate C++ parser
+minipg generate grammar.g4 -o output/ -l cpp
 ```
 
 ### Validate a Grammar
@@ -168,7 +176,7 @@ minipg provides a modern alternative to ANTLR4 while maintaining full grammar co
 | **Language** | Rust | Java |
 | **Runtime Dependency** | None (standalone) | Requires runtime library |
 | **Grammar Compatibility** | 100% ANTLR4 compatible | Native |
-| **Multi-Language** | Rust, Python, JS, TS, Go, C, C++, Java | Java, Python, JS, C#, C++, Go, Swift |
+| **Multi-Language** | 8 languages (Rust, Python, JS, TS, Go, Java, C, C++) | Java, Python, JS, C#, C++, Go, Swift |
 | **Generation Speed** | Sub-millisecond | Seconds |
 
 **Key Advantages**:
@@ -239,7 +247,7 @@ cargo build
 cargo test --all
 ```
 
-All 96+ tests pass with 100% success rate (73 unit + 13 rule feature + 10 integration tests).
+All 102+ tests pass with 100% success rate.
 
 ### Running with Logging
 
@@ -249,24 +257,24 @@ RUST_LOG=info cargo run -- generate grammar.g4
 
 ## Project Status
 
-- **Current Version**: 0.1.0-alpha.3 (Published on crates.io)
-- **Next Version**: 0.1.0-alpha.4 (Ready to publish)
-- **Status**: Alpha Release - Production Ready
-- **Tests**: 96+ passing (73 unit + 13 rule feature + 10 Go integration, 100% pass rate)
-- **Target Languages**: 5 (Rust, Python, JavaScript, TypeScript, Go)
+- **Current Version**: 0.1.2 (Published on crates.io)
+- **Status**: Production Ready
+- **Tests**: 102+ passing (100% pass rate)
+- **Target Languages**: 8 (Rust, Python, JavaScript, TypeScript, Go, Java, C, C++)
 - **Package**: Single consolidated crate for easy installation
-- **Grammar Support**: CompleteJSON.g4 ✅, SQL.g4 ✅, RuleFeatures.g4 ✅
+- **Example Grammars**: 19 comprehensive examples covering various complexity levels
 - **E2E Coverage**: Full pipeline testing from grammar to working parser
 - **ANTLR4 Compatibility**: High - supports most common features
+- **MCP Server**: Model Context Protocol server for AI integration ✅
 - **Latest Features**: 
-  - ✅ Go code generator (idiomatic, production-ready)
-  - ✅ Rule arguments: `rule[Type name]`
-  - ✅ Return values: `returns [Type name]`
-  - ✅ Local variables: `locals [Type name]`
-  - ✅ List labels (`ids+=ID`)
-  - ✅ Named actions with code generation
+  - ✅ 8 target languages fully supported
+  - ✅ Java, C, and C++ code generators
+  - ✅ Grammar composition and imports
+  - ✅ Lexer modes and channels
+  - ✅ Action code generation and translation
+  - ✅ Comprehensive test suite with fuzzing
 
-See [TODO.md](TODO.md) for current tasks and [ROADMAP.md](ROADMAP.md) for the complete roadmap.
+See [TODO.md](TODO.md) for current tasks and development roadmap.
 
 ## License
 

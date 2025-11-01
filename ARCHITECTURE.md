@@ -96,18 +96,22 @@ Semantic analysis and validation module:
 
 ### codegen
 
-Code generation module for target languages:
+Code generation module for 8 target languages:
 - **CodeGenerator**: Main dispatcher for code generation
 - **RustCodeGenerator**: Rust-specific code generation with inline DFA
 - **PythonCodeGenerator**: Python code with type hints (3.10+)
 - **JavaScriptCodeGenerator**: Modern ES6+ JavaScript
 - **TypeScriptCodeGenerator**: TypeScript with full type safety
 - **GoCodeGenerator**: Idiomatic Go with interfaces
+- **JavaCodeGenerator**: Java with proper package structure
+- **CCodeGenerator**: C with manual memory management
+- **CppCodeGenerator**: Modern C++17+ with RAII and smart pointers
 - **Template**: Simple template engine for code generation
 - **DfaBuilder**: Generates optimized DFA for tokenization
 - **LookupTableBuilder**: Creates const lookup tables for character classes
 - **modes**: Lexer mode stack management and channel routing for all languages
 - **actions**: Action code generation and language-specific translation
+- **rule_body**: Rule body generation for parser implementation
 
 The code generator produces:
 - Lexer implementation with optimized tokenization
@@ -120,7 +124,7 @@ The code generator produces:
 - **Lexer modes & channels** - Mode stack management and channel routing
 - **Action code generation** - Embedded actions and semantic predicates
 
-All 5 generators support:
+All 8 generators support:
 - Parameterized rules (arguments, returns, locals)
 - Named actions (`@header` for imports, `@members` for fields)
 - List labels (`ids+=ID`)
@@ -139,6 +143,17 @@ Command-line interface module:
   - `generate`: Generate parser from grammar
   - `validate`: Validate grammar file
   - `info`: Show grammar information
+
+### mcp
+
+Model Context Protocol (MCP) server module:
+- **MinipgServer**: MCP server implementation using rmcp
+- **Tool Router**: Routes MCP tool calls to minipg operations
+- **Tools**: Exposes minipg functionality via MCP protocol
+  - `parse_grammar`: Parse grammar text into AST
+  - `generate_parser`: Generate parser code for target language
+  - `validate_grammar`: Validate grammar and return diagnostics
+- Enables AI assistants and tools to interact with minipg programmatically
 
 ## Processing Pipeline
 
@@ -165,10 +180,13 @@ Output Files
 
 ## Testing Strategy
 
-1. **Unit Tests**: Test individual components in isolation
+1. **Unit Tests**: Test individual components in isolation (102+ tests)
 2. **Snapshot Tests**: Use insta for regression testing
 3. **Integration Tests**: Test full pipeline end-to-end
-4. **Property Tests**: Planned for grammar validation
+4. **Property Tests**: Property-based testing with proptest for grammar validation
+5. **Fuzzing Tests**: Coverage-guided fuzzing for parser robustness
+6. **Large File Tests**: Memory profiling for GB+ grammars
+7. **Performance Benchmarks**: Comprehensive performance testing
 
 ## Extension Points
 
