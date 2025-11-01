@@ -1,21 +1,15 @@
-# Publishing Guide for minipg v0.1.0-alpha.1
+# Publishing Guide for minipg
 
 This document provides instructions for publishing minipg to crates.io.
 
 ## Pre-Publishing Checklist
 
-- [x] Version updated to `0.1.0-alpha.1` in Cargo.toml
-- [x] Pig mascot added to README
+- [x] Version updated in Cargo.toml
 - [x] Package has required metadata (description, homepage, documentation, readme)
-- [x] LICENSE file created (Apache-2.0)
+- [x] LICENSE file exists (Apache-2.0)
 - [x] `cargo build` passes
-- [x] `cargo test` passes (65 tests passing: 43 unit + 11 E2E + 11 integration, 9 ignored)
-- [x] Consolidated to single crate for easier publishing
-- [x] All documentation updated
-
-## Publishing (Single Crate)
-
-Since minipg is now a single consolidated crate, publishing is simple:
+- [x] `cargo test` passes (102+ tests, 100% pass rate)
+- [x] `cargo publish --dry-run` succeeds
 
 ## Publishing Commands
 
@@ -25,11 +19,15 @@ Since minipg is now a single consolidated crate, publishing is simple:
 cargo login
 ```
 
+Enter your crates.io API token when prompted. Get your token from: https://crates.io/me
+
 ### 2. Verify Package
 
 ```bash
 cargo publish --dry-run
 ```
+
+This verifies the package can be published without actually publishing it.
 
 ### 3. Publish
 
@@ -37,23 +35,63 @@ cargo publish --dry-run
 cargo publish
 ```
 
-That's it! Just one command to publish the entire package.
+## Troubleshooting HTTP2 Errors
+
+If you encounter `Error in the HTTP2 framing layer`:
+
+### Solution 1: Retry
+Network issues are often transient. Simply retry:
+```bash
+cargo publish
+```
+
+### Solution 2: Disable HTTP2 (use HTTP/1.1)
+Set environment variable to force HTTP/1.1:
+```bash
+CARGO_HTTP2=false cargo publish
+```
+
+### Solution 3: Check Network/Proxy
+- Ensure stable internet connection
+- Check if behind corporate proxy/firewall
+- Try from different network if possible
+
+### Solution 4: Use Alternative Method
+If persistent issues, try publishing via web interface:
+1. Create the crate on crates.io website first
+2. Then use `cargo publish`
 
 ## Post-Publishing
 
-After publishing:
+After successful publishing:
 
-1. Verify the crate is visible on crates.io: https://crates.io/crates/minipg
-2. Test installation: `cargo install minipg`
-3. Create a git tag: `git tag v0.1.0-alpha.1`
-4. Push the tag: `git push origin v0.1.0-alpha.1`
-5. Create a GitHub release with release notes from ALPHA_RELEASE_NOTES.md
+1. **Verify on crates.io**: https://crates.io/crates/minipg
+2. **Test installation**: 
+   ```bash
+   cargo install minipg
+   ```
+3. **Create git tag**:
+   ```bash
+   git tag v0.1.3
+   git push origin v0.1.3
+   ```
+4. **Create GitHub release** with release notes from CHANGELOG.md
+
+## Current Status
+
+- **Current Version**: 0.1.3
+- **Status**: Ready for publishing
+- **Tests**: 102+ tests passing (100% pass rate)
+- **Build**: ✅ Success
+- **Dry-run**: ✅ Success
 
 ## Notes
 
-- This is an **alpha release** - expect breaking changes
-- Single consolidated crate for easy installation
-- Version: 0.1.0-alpha.2
-- 65 tests passing (43 unit + 11 E2E + 11 integration, 9 ignored)
-- Comprehensive E2E testing: grammar → parser → code generation
-- Repository: https://github.com/yingkitw/minipg
+- Version numbers should follow semantic versioning (major.minor.patch)
+- For alpha/beta releases, use version like `0.1.3-alpha.1`
+- Always test with `--dry-run` before actual publish
+- Check crates.io status if experiencing persistent issues
+
+---
+
+**Last Updated**: Current
