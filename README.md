@@ -274,7 +274,7 @@ RUST_LOG=info cargo run -- generate grammar.g4
 
 ## Project Status
 
-- **Current Version**: 0.1.3 (Published on crates.io)
+- **Current Version**: 0.1.4 (Published on crates.io)
 - **Status**: Production Ready - All Tests Passing ✅
 - **Test Suite**: **186+ tests** with **100% pass rate**
   - ✅ All grammar parsing tests pass
