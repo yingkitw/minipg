@@ -1,8 +1,9 @@
 //! C code generator for minipg.
 
-use crate::ast::Grammar;
+use crate::ast::{Grammar, Rule};
 use crate::core::{CodeGenerator, Result};
 use crate::core::types::CodeGenConfig;
+use super::pattern_match::generate_simple_pattern_match;
 
 /// C code generator.
 pub struct CCodeGenerator;
@@ -155,10 +156,57 @@ impl CCodeGenerator {
         code.push_str("    if (!lexer || lexer->position >= lexer->length) {\n");
         code.push_str("        return make_token(TOKEN_EOF, \"\", lexer->line, lexer->column, 0);\n");
         code.push_str("    }\n");
-        code.push_str("    // TODO: Implement lexer logic\n");
+        code.push_str("    // Try to match lexer rules in order\n");
+        code.push_str("    // Simple pattern matching (can be optimized with DFA later)\n");
+        
+        // Generate token matching logic for each lexer rule
+        let lexer_rules: Vec<_> = grammar.lexer_rules()
+            .filter(|r| !r.is_fragment)
+            .collect();
+        
+        if !lexer_rules.is_empty() {
+            code.push_str("    // Try each lexer rule\n");
+            for (i, rule) in lexer_rules.iter().enumerate() {
+                if i == 0 {
+                    code.push_str("    if (");
+                } else {
+                    code.push_str("    } else if (");
+                }
+                
+                code.push_str(&format!("lexer_match_{}(lexer)", rule.name.to_lowercase()));
+                code.push_str(") {\n");
+                code.push_str("        size_t len = lexer->position - start_pos;\n");
+                code.push_str("        char *text = safe_malloc(len + 1);\n");
+                code.push_str("        memcpy(text, lexer->input + start_pos, len);\n");
+                code.push_str("        text[len] = '\\0';\n");
+                code.push_str(&format!("        return make_token(TOKEN_{}, text, lexer->line, lexer->column, len);\n", rule.name.to_uppercase()));
+            }
+            code.push_str("    }\n\n");
+        }
+        
+        code.push_str("    // Error recovery: skip invalid character\n");
+        code.push_str("    if (lexer->position < lexer->length) {\n");
+        code.push_str("        char invalid_char = lexer->input[lexer->position];\n");
+        code.push_str("        lexer->position++;\n");
+        code.push_str("        return make_token(TOKEN_ERROR, \"\", lexer->line, lexer->column, 0);\n");
+        code.push_str("    }\n\n");
+        
         code.push_str("    return make_token(TOKEN_EOF, \"\", lexer->line, lexer->column, 0);\n");
         code.push_str("}\n\n");
 
+        // Generate match helper functions for each lexer rule
+        let lexer_rules: Vec<_> = grammar.lexer_rules()
+            .filter(|r| !r.is_fragment)
+            .collect();
+        
+        if !lexer_rules.is_empty() {
+            code.push_str("// Helper functions for pattern matching\n");
+            for rule in lexer_rules {
+                code.push_str(&generate_simple_pattern_match(rule, "c"));
+                code.push_str("\n");
+            }
+        }
+        
         code.push_str("Token lexer_peek_token(Lexer *lexer) {\n");
         code.push_str("    size_t saved_pos = lexer->position;\n");
         code.push_str("    Token token = lexer_next_token(lexer);\n");
@@ -198,11 +246,93 @@ impl CCodeGenerator {
         // Parser rule implementations
         for rule in grammar.parser_rules() {
             code.push_str(&format!("ParseError* parse_{}(Parser *parser) {{\n", rule.name));
-            code.push_str("    // TODO: Implement rule parsing\n");
+            
+            // Generate local variables
+            for local in &rule.locals {
+                let local_type = local.local_type.as_ref().map(|t| t.as_str()).unwrap_or("void*");
+                code.push_str(&format!("    {} {};\n", local_type, local.name));
+            }
+            
+            // Generate parser logic for alternatives
+            if rule.alternatives.len() > 1 {
+                code.push_str("    // Try each alternative\n");
+                for (i, alt) in rule.alternatives.iter().enumerate() {
+                    if i == 0 {
+                        code.push_str("    // Try first alternative\n");
+                    } else {
+                        code.push_str("    // Try next alternative\n");
+                    }
+                    
+                    // Generate code for this alternative
+                    for element in &alt.elements {
+                        code.push_str(&self.generate_element_code_c(element, rule));
+                    }
+                    
+                    if i < rule.alternatives.len() - 1 {
+                        code.push_str("    // If failed, try next alternative\n");
+                    }
+                }
+            } else if let Some(alt) = rule.alternatives.first() {
+                for element in &alt.elements {
+                    code.push_str(&self.generate_element_code_c(element, rule));
+                }
+            } else {
+                code.push_str("    // Empty rule - always succeeds\n");
+            }
+            
             code.push_str("    return NULL;\n");
             code.push_str("}\n\n");
         }
 
+        code
+    }
+    
+    fn generate_element_code_c(&self, element: &crate::ast::Element, _rule: &Rule) -> String {
+        let mut code = String::new();
+        
+        match element {
+            crate::ast::Element::RuleRef { name, label, is_list } => {
+                if *is_list {
+                    if let Some(lbl) = label {
+                        code.push_str(&format!("    // TODO: Implement list collection for {}\n", lbl));
+                        code.push_str(&format!("    // ParseError *err = parse_{}(parser);\n", name));
+                        code.push_str("    // if (err) return err;\n");
+                    } else {
+                        code.push_str(&format!("    ParseError *err = parse_{}(parser);\n", name));
+                        code.push_str("    if (err) return err;\n");
+                    }
+                } else {
+                    if let Some(lbl) = label {
+                        code.push_str(&format!("    // TODO: Store result in {}\n", lbl));
+                    }
+                    code.push_str(&format!("    ParseError *err = parse_{}(parser);\n", name));
+                    code.push_str("    if (err) return err;\n");
+                }
+            }
+            crate::ast::Element::Terminal { value, label, is_list } => {
+                if *is_list {
+                    if let Some(lbl) = label {
+                        code.push_str(&format!("    // TODO: Implement list collection for {}\n", lbl));
+                    }
+                    code.push_str(&format!("    while (parser->current_token.kind == TOKEN_{}) {{\n", value.to_uppercase()));
+                    code.push_str("        parser_advance(parser);\n");
+                    code.push_str("    }\n");
+                } else {
+                    code.push_str(&format!("    if (parser->current_token.kind != TOKEN_{}) {{\n", value.to_uppercase()));
+                    code.push_str("        // TODO: Create proper error\n");
+                    code.push_str("        return NULL; // Error handling needed\n");
+                    code.push_str("    }\n");
+                    if let Some(lbl) = label {
+                        code.push_str(&format!("    // TODO: Store token in {}\n", lbl));
+                    }
+                    code.push_str("    parser_advance(parser);\n");
+                }
+            }
+            _ => {
+                code.push_str("    // TODO: Handle other element types\n");
+            }
+        }
+        
         code
     }
 }

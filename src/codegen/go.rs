@@ -4,6 +4,7 @@
 
 use crate::ast::{Grammar, Rule};
 use crate::core::{CodeGenerator, types::CodeGenConfig, Result};
+use super::pattern_match::generate_simple_pattern_match;
 
 /// Go code generator.
 pub struct GoCodeGenerator;
@@ -150,12 +151,66 @@ impl GoCodeGenerator {
         code.push_str("\t\t\tPosition: startPos,\n");
         code.push_str("\t\t}, nil\n");
         code.push_str("\t}\n\n");
-        code.push_str("\t// TODO: Implement tokenization logic\n");
+        code.push_str("\t// Try to match lexer rules in order\n");
+        code.push_str("\t// Simple pattern matching (can be optimized with DFA later)\n");
+        
+        // Generate token matching logic for each lexer rule
+        let lexer_rules: Vec<_> = grammar.lexer_rules()
+            .filter(|r| !r.is_fragment)
+            .collect();
+        
+        if !lexer_rules.is_empty() {
+            code.push_str("\t// Try each lexer rule\n");
+            for (i, rule) in lexer_rules.iter().enumerate() {
+                if i == 0 {
+                    code.push_str("\tif ");
+                } else {
+                    code.push_str("\t} else if ");
+                }
+                
+                // Generate simple pattern matching
+                // For now, generate a basic check - can be enhanced later
+                code.push_str(&format!("l.match_{}() {{\n", rule.name.to_lowercase()));
+                code.push_str("\t\t\ttext := l.input[startPos:l.position]\n");
+                code.push_str(&format!("\t\t\treturn &Token{{\n"));
+                code.push_str(&format!("\t\t\t\tKind:     Token{},\n", rule.name));
+                code.push_str("\t\t\t\tText:     text,\n");
+                code.push_str("\t\t\t\tPosition: startPos,\n");
+                code.push_str("\t\t\t}, nil\n");
+            }
+            code.push_str("\t}\n\n");
+        } else {
+            code.push_str("\t// No lexer rules defined\n");
+        }
+        
+        code.push_str("\t// Error recovery: skip invalid character\n");
+        code.push_str("\tif l.position < len(l.input) {\n");
+        code.push_str("\t\tinvalidChar := string(l.input[l.position])\n");
+        code.push_str("\t\tl.position++\n");
+        code.push_str("\t\treturn nil, &ParseError{\n");
+        code.push_str("\t\t\tMessage:  fmt.Sprintf(\"Unexpected character: '%s'\", invalidChar),\n");
+        code.push_str("\t\t\tPosition: startPos,\n");
+        code.push_str("\t\t}\n");
+        code.push_str("\t}\n");
+        
         code.push_str("\treturn nil, &ParseError{\n");
-        code.push_str("\t\tMessage:  \"Tokenization not yet implemented\",\n");
+        code.push_str("\t\tMessage:  \"Unexpected end of input\",\n");
         code.push_str("\t\tPosition: startPos,\n");
         code.push_str("\t}\n");
         code.push_str("}\n\n");
+        
+        // Generate match helper methods for each lexer rule (after NextToken method)
+        let lexer_rules_for_helpers: Vec<_> = grammar.lexer_rules()
+            .filter(|r| !r.is_fragment)
+            .collect();
+        
+        if !lexer_rules_for_helpers.is_empty() {
+            code.push_str("// Helper methods for pattern matching\n");
+            for rule in lexer_rules_for_helpers {
+                code.push_str(&generate_simple_pattern_match(rule, "go"));
+                code.push_str("\n");
+            }
+        }
         
         // TokenizeAll method
         code.push_str("// TokenizeAll tokenizes all input and returns all tokens and errors.\n");
@@ -293,22 +348,136 @@ impl GoCodeGenerator {
             code.push_str("\n");
         }
         
-        code.push_str("\t// TODO: Implement parser logic\n");
+        // Generate parser logic for alternatives
+        if rule.alternatives.len() > 1 {
+            code.push_str("\t// Try each alternative\n");
+            for (i, alt) in rule.alternatives.iter().enumerate() {
+                if i == 0 {
+                    code.push_str("\t// Try first alternative\n");
+                } else {
+                    code.push_str("\t// Try next alternative\n");
+                }
+                
+                // Generate code for this alternative
+                code.push_str(&self.generate_alternative_body(alt, rule));
+                
+                if i < rule.alternatives.len() - 1 {
+                    code.push_str("\t// If failed, try next alternative\n");
+                }
+            }
+            code.push_str("\t// All alternatives failed\n");
+        } else if let Some(alt) = rule.alternatives.first() {
+            code.push_str(&self.generate_alternative_body(alt, rule));
+        } else {
+            code.push_str("\t// Empty rule - always succeeds\n");
+        }
         
+        // Return statement
         if rule.returns.is_empty() {
             code.push_str("\treturn nil\n");
         } else if rule.returns.len() == 1 {
-            code.push_str("\treturn nil, nil\n");
+            let ret_name = &rule.returns[0].name;
+            code.push_str(&format!("\treturn {}, nil\n", ret_name));
         } else {
             code.push_str("\treturn ");
-            for (i, _) in rule.returns.iter().enumerate() {
+            for (i, ret) in rule.returns.iter().enumerate() {
                 if i > 0 { code.push_str(", "); }
-                code.push_str("nil");
+                code.push_str(&ret.name);
             }
             code.push_str(", nil\n");
         }
         
         code.push_str("}\n\n");
+        
+        code
+    }
+    
+    fn generate_alternative_body(&self, alt: &crate::ast::Alternative, rule: &Rule) -> String {
+        let mut code = String::new();
+        
+        // Generate code for each element in sequence
+        for element in &alt.elements {
+            code.push_str(&self.generate_element_code(element, rule));
+        }
+        
+        code
+    }
+    
+    fn generate_element_code(&self, element: &crate::ast::Element, _rule: &Rule) -> String {
+        let mut code = String::new();
+        
+        match element {
+            crate::ast::Element::RuleRef { name, label, is_list } => {
+                if *is_list {
+                    if let Some(lbl) = label {
+                        code.push_str(&format!("\tvar {} []interface{{}}\n", lbl));
+                        code.push_str(&format!("\tfor {{\n"));
+                        code.push_str(&format!("\t\tresult, err := p.Parse{}()\n", capitalize(name)));
+                        code.push_str(&format!("\t\tif err != nil {{\n"));
+                        code.push_str(&format!("\t\t\tbreak\n"));
+                        code.push_str(&format!("\t\t}}\n"));
+                        code.push_str(&format!("\t\t{} = append({}, result)\n", lbl, lbl));
+                        code.push_str(&format!("\t}}\n"));
+                    } else {
+                        code.push_str(&format!("\tfor {{\n"));
+                        code.push_str(&format!("\t\t_, err := p.Parse{}()\n", capitalize(name)));
+                        code.push_str(&format!("\t\tif err != nil {{\n"));
+                        code.push_str(&format!("\t\t\tbreak\n"));
+                        code.push_str(&format!("\t\t}}\n"));
+                        code.push_str(&format!("\t}}\n"));
+                    }
+                } else {
+                    if let Some(lbl) = label {
+                        code.push_str(&format!("\t{}, err := p.Parse{}()\n", lbl, capitalize(name)));
+                        code.push_str(&format!("\tif err != nil {{\n"));
+                        code.push_str(&format!("\t\treturn err\n"));
+                        code.push_str(&format!("\t}}\n"));
+                    } else {
+                        code.push_str(&format!("\tif err := p.Parse{}(); err != nil {{\n", capitalize(name)));
+                        code.push_str(&format!("\t\treturn err\n"));
+                        code.push_str(&format!("\t}}\n"));
+                    }
+                }
+            }
+            crate::ast::Element::Terminal { value, label, is_list } => {
+                if *is_list {
+                    if let Some(lbl) = label {
+                        code.push_str(&format!("\tvar {} []*Token\n", lbl));
+                        code.push_str(&format!("\tfor p.currentToken != nil && p.currentToken.Kind == Token{} {{\n", value));
+                        code.push_str(&format!("\t\t{} = append({}, p.currentToken)\n", lbl, lbl));
+                        code.push_str(&format!("\t\tvar err error\n"));
+                        code.push_str(&format!("\t\tp.currentToken, err = p.lexer.NextToken()\n"));
+                        code.push_str(&format!("\t\tif err != nil {{\n"));
+                        code.push_str(&format!("\t\t\tbreak\n"));
+                        code.push_str(&format!("\t\t}}\n"));
+                        code.push_str(&format!("\t}}\n"));
+                    } else {
+                        code.push_str(&format!("\tfor p.currentToken != nil && p.currentToken.Kind == Token{} {{\n", value));
+                        code.push_str(&format!("\t\tvar err error\n"));
+                        code.push_str(&format!("\t\tp.currentToken, err = p.lexer.NextToken()\n"));
+                        code.push_str(&format!("\t\tif err != nil {{\n"));
+                        code.push_str(&format!("\t\t\tbreak\n"));
+                        code.push_str(&format!("\t\t}}\n"));
+                        code.push_str(&format!("\t}}\n"));
+                    }
+                } else {
+                    code.push_str(&format!("\tif p.currentToken == nil || p.currentToken.Kind != Token{} {{\n", value));
+                    code.push_str(&format!("\t\treturn fmt.Errorf(\"expected token {}, got %%v\", p.currentToken)\n", value));
+                    code.push_str(&format!("\t}}\n"));
+                    if let Some(lbl) = label {
+                        code.push_str(&format!("\t{} := p.currentToken\n", lbl));
+                    }
+                    code.push_str(&format!("\tvar err error\n"));
+                    code.push_str(&format!("\tp.currentToken, err = p.lexer.NextToken()\n"));
+                    code.push_str(&format!("\tif err != nil {{\n"));
+                    code.push_str(&format!("\t\treturn err\n"));
+                    code.push_str(&format!("\t}}\n"));
+                }
+            }
+            _ => {
+                code.push_str("\t// TODO: Handle other element types\n");
+            }
+        }
         
         code
     }

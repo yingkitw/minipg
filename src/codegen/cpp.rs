@@ -1,8 +1,9 @@
 //! C++ code generator for minipg.
 
-use crate::ast::Grammar;
+use crate::ast::{Grammar, Rule};
 use crate::core::{CodeGenerator, Result};
 use crate::core::types::CodeGenConfig;
+use super::pattern_match::generate_simple_pattern_match;
 
 /// C++ code generator.
 pub struct CppCodeGenerator;
@@ -65,6 +66,19 @@ impl CppCodeGenerator {
         code.push_str("    Lexer(const std::string& src);\n");
         code.push_str("    Token next_token();\n");
         code.push_str("    Token peek_token();\n");
+        
+        // Generate match method declarations
+        let lexer_rules: Vec<_> = grammar.lexer_rules()
+            .filter(|r| !r.is_fragment)
+            .collect();
+        
+        if !lexer_rules.is_empty() {
+            code.push_str("\n    // Pattern matching helpers\n");
+            for rule in &lexer_rules {
+                code.push_str(&format!("    bool match_{}();\n", rule.name.to_lowercase()));
+            }
+        }
+        
         code.push_str("};\n\n");
 
         // Parser exception
@@ -114,9 +128,58 @@ impl CppCodeGenerator {
         code.push_str("    if (position >= input.length()) {\n");
         code.push_str("        return Token(TokenType::Eof, \"\", line, column, 0);\n");
         code.push_str("    }\n");
-        code.push_str("    // TODO: Implement lexer logic\n");
+        code.push_str("    // Try to match lexer rules in order\n");
+        code.push_str("    size_t start_pos = position;\n");
+        
+        // Generate token matching logic for each lexer rule
+        let lexer_rules: Vec<_> = grammar.lexer_rules()
+            .filter(|r| !r.is_fragment)
+            .collect();
+        
+        if !lexer_rules.is_empty() {
+            code.push_str("    // Try each lexer rule\n");
+            for (i, rule) in lexer_rules.iter().enumerate() {
+                if i == 0 {
+                    code.push_str("    if (");
+                } else {
+                    code.push_str("    } else if (");
+                }
+                
+                code.push_str(&format!("match_{}()", rule.name.to_lowercase()));
+                code.push_str(") {\n");
+                code.push_str("        std::string text = input.substr(start_pos, position - start_pos);\n");
+                code.push_str(&format!("        return Token(TokenType::{}, text, line, column, text.length());\n", rule.name));
+            }
+            code.push_str("    }\n\n");
+        }
+        
+        code.push_str("    // Error recovery: skip invalid character\n");
+        code.push_str("    if (position < input.length()) {\n");
+        code.push_str("        char invalid_char = input[position];\n");
+        code.push_str("        position++;\n");
+        code.push_str("        return Token(TokenType::Error, std::string(1, invalid_char), line, column, 1);\n");
+        code.push_str("    }\n\n");
+        
         code.push_str("    return Token(TokenType::Eof, \"\", line, column, 0);\n");
         code.push_str("}\n\n");
+        
+        // Generate match helper methods
+        if !lexer_rules.is_empty() {
+            code.push_str("// Helper methods for pattern matching\n");
+            for rule in lexer_rules {
+                code.push_str(&format!("bool Lexer::match_{}() {{\n", rule.name.to_lowercase()));
+                code.push_str("    size_t start_pos = position;\n");
+                
+                if let Some(alt) = rule.alternatives.first() {
+                    for element in &alt.elements {
+                        code.push_str(&super::pattern_match::generate_element_match_cpp(element, "    "));
+                    }
+                }
+                
+                code.push_str("    return position > start_pos;\n");
+                code.push_str("}\n\n");
+            }
+        }
 
         code.push_str("Token Lexer::peek_token() {\n");
         code.push_str("    size_t saved_pos = position;\n");

@@ -1,8 +1,9 @@
 //! Java code generator for minipg.
 
-use crate::ast::Grammar;
+use crate::ast::{Grammar, Rule};
 use crate::core::{CodeGenerator, Result};
 use crate::core::types::CodeGenConfig;
+use super::pattern_match::generate_simple_pattern_match;
 
 /// Java code generator.
 pub struct JavaCodeGenerator;
@@ -76,9 +77,50 @@ impl JavaCodeGenerator {
         code.push_str("        if (position >= input.length()) {\n");
         code.push_str("            return new Token(TokenType.EOF, \"\", line, column, 0);\n");
         code.push_str("        }\n");
-        code.push_str("        // TODO: Implement lexer logic\n");
+        code.push_str("        // Try to match lexer rules in order\n");
+        code.push_str("        int startPos = position;\n");
+        
+        // Generate token matching logic for each lexer rule
+        let lexer_rules: Vec<_> = grammar.lexer_rules()
+            .filter(|r| !r.is_fragment)
+            .collect();
+        
+        if !lexer_rules.is_empty() {
+            code.push_str("        // Try each lexer rule\n");
+            for (i, rule) in lexer_rules.iter().enumerate() {
+                if i == 0 {
+                    code.push_str("        if (");
+                } else {
+                    code.push_str("        } else if (");
+                }
+                
+                code.push_str(&format!("match_{}()", rule.name.to_lowercase()));
+                code.push_str(") {\n");
+                code.push_str("            String text = input.substring(startPos, position);\n");
+                code.push_str(&format!("            return new Token(TokenType.{}, text, line, column, text.length());\n", rule.name));
+            }
+            code.push_str("        }\n\n");
+        }
+        
+        code.push_str("        // Error recovery: skip invalid character\n");
+        code.push_str("        if (position < input.length()) {\n");
+        code.push_str("            char invalidChar = input.charAt(position);\n");
+        code.push_str("            position++;\n");
+        code.push_str("            return new Token(TokenType.ERROR, String.valueOf(invalidChar), line, column, 1);\n");
+        code.push_str("        }\n\n");
+        
         code.push_str("        return new Token(TokenType.EOF, \"\", line, column, 0);\n");
         code.push_str("    }\n\n");
+        
+        // Generate match helper methods
+        if !lexer_rules.is_empty() {
+            code.push_str("    // Helper methods for pattern matching\n");
+            for rule in lexer_rules {
+                let mut pattern_code = generate_simple_pattern_match(rule, "java");
+                code.push_str(&pattern_code);
+                code.push_str("\n");
+            }
+        }
         code.push_str("    public Token peekToken() {\n");
         code.push_str("        int savedPos = position;\n");
         code.push_str("        Token token = nextToken();\n");

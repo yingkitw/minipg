@@ -15,6 +15,9 @@ pub mod lookup_table;
 pub mod modes;
 pub mod actions;
 pub mod rule_body;
+pub mod common;
+pub mod registry;
+pub mod pattern_match;
 
 pub use rust::RustCodeGenerator;
 pub use python::PythonCodeGenerator;
@@ -26,56 +29,34 @@ pub use cpp::CppCodeGenerator;
 pub use java::JavaCodeGenerator;
 
 use crate::analysis::AnalysisResult;
-use crate::core::{types::CodeGenConfig, CodeGenerator as CodeGeneratorTrait, Result};
+use crate::core::{types::CodeGenConfig, Result};
+
+pub use registry::LanguageRegistry;
 
 /// Main code generator dispatcher.
 pub struct CodeGenerator {
     config: CodeGenConfig,
+    registry: LanguageRegistry,
 }
 
 impl CodeGenerator {
     pub fn new(config: CodeGenConfig) -> Self {
-        Self { config }
+        Self {
+            config,
+            registry: LanguageRegistry::new(),
+        }
+    }
+    
+    /// Create with a custom registry (for testing or extensions).
+    pub fn with_registry(config: CodeGenConfig, registry: LanguageRegistry) -> Self {
+        Self { config, registry }
     }
 
     pub fn generate_from_analysis(&self, analysis: &AnalysisResult) -> Result<String> {
-        match self.config.target_language.as_str() {
-            "rust" => {
-                let generator = RustCodeGenerator::new();
-                generator.generate(&analysis.grammar, &self.config)
-            }
-            "python" => {
-                let generator = PythonCodeGenerator::new();
-                generator.generate(&analysis.grammar, &self.config)
-            }
-            "javascript" | "js" => {
-                let generator = JavaScriptCodeGenerator::new();
-                generator.generate(&analysis.grammar, &self.config)
-            }
-            "typescript" | "ts" => {
-                let generator = TypeScriptCodeGenerator::new();
-                generator.generate(&analysis.grammar, &self.config)
-            }
-            "go" => {
-                let generator = GoCodeGenerator::new();
-                generator.generate(&analysis.grammar, &self.config)
-            }
-            "c" => {
-                let generator = CCodeGenerator::new();
-                generator.generate(&analysis.grammar, &self.config)
-            }
-            "cpp" | "c++" => {
-                let generator = CppCodeGenerator::new();
-                generator.generate(&analysis.grammar, &self.config)
-            }
-            "java" => {
-                let generator = JavaCodeGenerator::new();
-                generator.generate(&analysis.grammar, &self.config)
-            }
-            _ => Err(crate::core::Error::codegen(format!(
-                "unsupported target language: {}",
-                self.config.target_language
-            ))),
-        }
+        self.registry.generate(
+            &self.config.target_language,
+            &analysis.grammar,
+            &self.config,
+        )
     }
 }
