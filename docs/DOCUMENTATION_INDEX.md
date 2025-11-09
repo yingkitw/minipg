@@ -18,7 +18,14 @@ Complete guide to minipg documentation organized by category.
 
 ### Reference
 - **[KNOWN_LIMITATIONS.md](../KNOWN_LIMITATIONS.md)** - Current limitations and workarounds
-- **[PUBLISHING.md](../PUBLISHING.md)** - Publishing guide for crates.io
+- **[PUBLISHING.md](PUBLISHING.md)** - Publishing guide for crates.io
+- **[SECURITY_AUDIT.md](SECURITY_AUDIT.md)** - Security audit and best practices
+- **[MCP_SERVER.md](MCP_SERVER.md)** - MCP server documentation
+- **[REAL_WORLD_GRAMMARS.md](REAL_WORLD_GRAMMARS.md)** - Real-world grammar examples
+- **[GRAMMARS_V4_TEST_RESULTS.md](GRAMMARS_V4_TEST_RESULTS.md)** - Test results against grammars-v4
+- **[CODE_GENERATION_IMPROVEMENTS.md](CODE_GENERATION_IMPROVEMENTS.md)** - Code generation improvements
+- **[SIMPLIFICATION_PLAN.md](SIMPLIFICATION_PLAN.md)** - Codebase simplification plan
+- **[SIMPLIFICATION_PROGRESS.md](SIMPLIFICATION_PROGRESS.md)** - Simplification progress tracking
 
 ## 📖 Detailed Documentation (docs/ folder)
 

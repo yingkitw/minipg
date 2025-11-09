@@ -235,11 +235,18 @@ pub fn validate_unicode_escape(hex: &str) -> Result<char, Error> {
             format!("Invalid hex digits in unicode escape: \\u{}", hex),
         ))?;
 
-    char::from_u32(code)
-        .ok_or_else(|| Error::parse(
-            format!("unicode escape"),
-            format!("Invalid Unicode code point: U+{:04X}", code),
-        ))
+    // Allow surrogate pairs (U+D800 to U+DFFF) even though they're not valid Unicode scalars
+    // Some grammars use them, and they're valid in UTF-16
+    if code >= 0xD800 && code <= 0xDFFF {
+        // Return replacement character for surrogate pairs
+        Ok('\u{FFFD}')
+    } else {
+        char::from_u32(code)
+            .ok_or_else(|| Error::parse(
+                format!("unicode escape"),
+                format!("Invalid Unicode code point: U+{:04X}", code),
+            ))
+    }
 }
 
 /// Parse Unicode escape sequences (supports both \uXXXX and \u{XXXXXX})
@@ -266,11 +273,17 @@ pub fn parse_unicode_escape(text: &str) -> Result<char, Error> {
                 format!("Invalid hex digits in unicode escape: \\u{{{}}}", hex),
             ))?;
 
-        char::from_u32(code)
-            .ok_or_else(|| Error::parse(
-                format!("unicode escape"),
-                format!("Invalid Unicode code point: U+{:04X}", code),
-            ))
+        // Allow surrogate pairs (U+D800 to U+DFFF) even though they're not valid Unicode scalars
+        if code >= 0xD800 && code <= 0xDFFF {
+            // Return replacement character for surrogate pairs
+            Ok('\u{FFFD}')
+        } else {
+            char::from_u32(code)
+                .ok_or_else(|| Error::parse(
+                    format!("unicode escape"),
+                    format!("Invalid Unicode code point: U+{:04X}", code),
+                ))
+        }
     } else if text.starts_with("\\u") {
         // Standard Unicode escape: \uXXXX
         let hex = &text[2..];

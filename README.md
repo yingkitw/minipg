@@ -178,7 +178,7 @@ minipg provides a modern alternative to ANTLR4 while maintaining full grammar co
 - 📦 **Smaller footprint** - <100 KB memory usage
 - 🔧 **Easy integration** - no Java runtime required
 
-See [COMPARISON_WITH_ANTLR4RUST.md](COMPARISON_WITH_ANTLR4RUST.md) for detailed comparison.
+See [docs/archive/COMPARISON_WITH_ANTLR4RUST.md](docs/archive/COMPARISON_WITH_ANTLR4RUST.md) for detailed comparison.
 
 ### vs Pest
 
@@ -205,7 +205,7 @@ minipg and Pest serve different needs in the Rust parsing ecosystem:
 - Compile-time grammar validation
 - Tight Rust macro integration
 
-See [COMPARISON_WITH_PEST.md](COMPARISON_WITH_PEST.md) for detailed comparison.
+See [docs/archive/COMPARISON_WITH_PEST.md](docs/archive/COMPARISON_WITH_PEST.md) for detailed comparison.
 
 ## Documentation
 
@@ -216,8 +216,8 @@ See [COMPARISON_WITH_PEST.md](COMPARISON_WITH_PEST.md) for detailed comparison.
 - **[ANTLR4 Compatibility](docs/ANTLR4_COMPATIBILITY.md)** - Full ANTLR4 grammar support
 - **[Multi-Language Plan](docs/MULTI_LANGUAGE_PLAN.md)** - Target language support roadmap
 - **[Runtime Decision](docs/RUNTIME_DECISION.md)** - Why standalone generation
-- **[Comparison with ANTLR4](COMPARISON_WITH_ANTLR4RUST.md)** - Performance and feature comparison
-- **[Comparison with Pest](COMPARISON_WITH_PEST.md)** - Rust parser generator comparison
+- **[Comparison with ANTLR4](docs/archive/COMPARISON_WITH_ANTLR4RUST.md)** - Performance and feature comparison
+- **[Comparison with Pest](docs/archive/COMPARISON_WITH_PEST.md)** - Rust parser generator comparison
 - **[Examples](examples/)** - 16 example grammars (beginner to advanced)
   - Simple: calculator, JSON
   - Intermediate: Expression, Config, YAML
@@ -266,7 +266,7 @@ RUST_LOG=info cargo run -- generate grammar.g4
   - ✅ List labels (`ids+=ID`)
   - ✅ Named actions with code generation
 
-See [TODO.md](TODO.md) for current tasks and [ROADMAP.md](ROADMAP.md) for the complete roadmap.
+See [TODO.md](TODO.md) for current tasks and [docs/archive/ROADMAP.md](docs/archive/ROADMAP.md) for the complete roadmap.
 
 ## License
 

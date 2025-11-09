@@ -1,9 +1,8 @@
 //! C++ code generator for minipg.
 
-use crate::ast::{Grammar, Rule};
+use crate::ast::Grammar;
 use crate::core::{CodeGenerator, Result};
 use crate::core::types::CodeGenConfig;
-use super::pattern_match::generate_simple_pattern_match;
 
 /// C++ code generator.
 pub struct CppCodeGenerator;

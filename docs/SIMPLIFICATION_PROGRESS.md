@@ -67,7 +67,7 @@
 
 ### Phase 3: Test File Consolidation ✅ COMPLETE
 **Status**: Completed
-**Result**: Reduced from 25 files to 14 files (44% reduction)
+**Result**: Reduced from 25 files to 12 files (52% reduction)
 
 **Consolidations Completed**:
 1. ✅ **Example Tests** → `tests/test_examples.rs`
@@ -75,8 +75,8 @@
    - Result: 4 files → 1 file (75% reduction)
 
 2. ✅ **Feature Tests** → `tests/test_features.rs`
-   - Merged: `test_rule_features.rs`, `test_list_labels.rs`, `test_named_actions.rs`, `test_named_actions_codegen.rs`, `test_lexer_modes_parsing.rs`, `test_modes_channels_actions.rs`, `test_unicode_escape.rs`
-   - Result: 7 files → 1 file (86% reduction)
+   - Merged: `test_rule_features.rs`, `test_list_labels.rs`, `test_named_actions.rs`, `test_named_actions_codegen.rs`, `test_lexer_modes_parsing.rs`, `test_modes_channels_actions.rs`, `test_unicode_escape.rs`, `parser_advanced_features.rs`, `codegen_parameterized_rules.rs`
+   - Result: 9 files → 1 file (89% reduction)
 
 3. ✅ **Compatibility Tests** → `tests/test_compatibility.rs`
    - Merged: `test_antlr4_compatibility.rs`, `test_antlr4_test_suite.rs`, `test_grammars_v4_compatibility.rs`
@@ -88,7 +88,7 @@
 
 **New Test File**: `tests/test_grammars_v4_all.rs` - Comprehensive testing against grammars-v4 repository
 
-**Total Reduction**: 18 files merged into 4 files + 1 new file = 5 files (net reduction of 13 files)
+**Total Reduction**: 20 files merged into 4 files + 1 new file = 5 files (net reduction of 15 files)
 
 ## Impact Summary
 
@@ -137,15 +137,17 @@
 
 ### After Simplification (Current)
 - Documentation files: ~40 (43% reduction) ✅
-- Test files: 14 (44% reduction from 25) ✅
+- Test files: 12 (52% reduction from 25) ✅
 - Code generators: 8 (all with functional structure + pattern matching infrastructure) ✅
 - Language addition: Register in LanguageRegistry ✅
+- Code warnings: Fixed unused imports ✅
 
 ### Target (After Full Execution)
 - Documentation files: ~35 (50% reduction) ✅ Achieved 43%
-- Test files: ~12 (52% reduction) ✅ Achieved 44% (excellent progress)
+- Test files: ~12 (52% reduction) ✅ Achieved 52% (target met!)
 - Code generators: 8+ (all complete, easy to add more) ✅ Infrastructure ready, pattern matching implemented
 - Language addition: Implement trait + register ✅
+- Code quality: No warnings ✅
 
 ---
 

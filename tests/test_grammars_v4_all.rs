@@ -21,10 +21,17 @@ use std::process::Command;
 
 const GRAMMARS_V4_REPO: &str = "https://github.com/antlr/grammars-v4.git";
 const GRAMMARS_V4_DIR: &str = "grammars-v4-cache";
+const GRAMMARS_V2_DIR: &str = "grammars-v2-cache";
+
 
 /// Get the path to the grammars-v4 repository (cloned or cached)
 fn get_grammars_v4_path() -> PathBuf {
     PathBuf::from(GRAMMARS_V4_DIR)
+}
+
+/// Get the path to the grammars-v2 repository (cloned or cached)
+fn get_grammars_v2_path() -> PathBuf {
+    PathBuf::from(GRAMMARS_V2_DIR)
 }
 
 /// Clone or update the grammars-v4 repository
@@ -343,5 +350,79 @@ fn test_grammars_by_category() {
     println!("OVERALL RESULTS");
     println!("{}", "=".repeat(80));
     overall_stats.print_summary();
+}
+
+/// Test all grammars from grammars-v2-cache repository
+/// 
+/// Usage:
+///   cargo test --test test_grammars_v4_all test_all_grammars_v2 -- --ignored
+/// 
+/// Or set GRAMMARS_CACHE_DIR environment variable to use a custom path:
+///   GRAMMARS_CACHE_DIR=/path/to/grammars-v2-cache cargo test --test test_grammars_v4_all test_all_grammars_v2 -- --ignored
+#[test]
+#[ignore] // Ignore by default - requires cached grammars. Run with: cargo test --test test_grammars_v4_all test_all_grammars_v2 -- --ignored
+fn test_all_grammars_v2() {
+    // Check for environment variable override first
+    let cache_path = if let Ok(dir) = std::env::var("GRAMMARS_CACHE_DIR") {
+        PathBuf::from(dir)
+    } else {
+        get_grammars_v2_path()
+    };
+    
+    if !cache_path.exists() {
+        eprintln!("Skipping test: grammars-v2-cache directory not found at {}", cache_path.display());
+        eprintln!("Please ensure grammars-v2-cache directory exists, or set GRAMMARS_CACHE_DIR environment variable");
+        return;
+    }
+    
+    println!("Finding all .g4 files in {}...", cache_path.display());
+    let g4_files = match find_g4_files(&cache_path) {
+        Ok(files) => files,
+        Err(e) => {
+            panic!("Failed to find .g4 files: {}", e);
+        }
+    };
+    
+    println!("Found {} grammar files", g4_files.len());
+    
+    if g4_files.is_empty() {
+        eprintln!("No .g4 files found in {}", cache_path.display());
+        return;
+    }
+    
+    let mut stats = TestStats::default();
+    stats.total = g4_files.len();
+    
+    for (idx, file_path) in g4_files.iter().enumerate() {
+        let relative_path = file_path.strip_prefix(&cache_path)
+            .unwrap_or(file_path)
+            .display()
+            .to_string();
+        
+        print!("[{}/{}] Testing {}... ", idx + 1, stats.total, relative_path);
+        
+        match test_grammar_file(file_path) {
+            Ok(()) => {
+                println!("✓");
+                stats.passed += 1;
+            }
+            Err(e) => {
+                println!("✗");
+                stats.failed += 1;
+                stats.errors.push((relative_path, e));
+            }
+        }
+    }
+    
+    println!("\n{}", "=".repeat(80));
+    println!("GRAMMARS-V2 TEST SUMMARY");
+    println!("{}", "=".repeat(80));
+    stats.print_summary();
+    
+    // Fail the test if too many grammars failed
+    let failure_rate = stats.failed as f64 / stats.total as f64;
+    if failure_rate > 0.1 {
+        panic!("Too many grammars failed ({:.1}% failure rate)", failure_rate * 100.0);
+    }
 }
 

@@ -1,6 +1,6 @@
 //! Java code generator for minipg.
 
-use crate::ast::{Grammar, Rule};
+use crate::ast::Grammar;
 use crate::core::{CodeGenerator, Result};
 use crate::core::types::CodeGenConfig;
 use super::pattern_match::generate_simple_pattern_match;
@@ -116,7 +116,7 @@ impl JavaCodeGenerator {
         if !lexer_rules.is_empty() {
             code.push_str("    // Helper methods for pattern matching\n");
             for rule in lexer_rules {
-                let mut pattern_code = generate_simple_pattern_match(rule, "java");
+                let pattern_code = generate_simple_pattern_match(rule, "java");
                 code.push_str(&pattern_code);
                 code.push_str("\n");
             }

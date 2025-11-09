@@ -4,7 +4,7 @@ use super::token::{Token, TokenKind};
 
 /// Lexer mode for context-aware tokenization
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum LexerMode {
+pub enum LexerMode {
     /// Normal mode - default tokenization
     Normal,
     /// Character class mode - inside [...]
@@ -25,6 +25,8 @@ pub struct Lexer {
     mode: LexerMode,
     mode_stack: Vec<LexerMode>,
     last_token_kind: Option<TokenKind>,
+    /// When false, '[' will not enter CharClass mode
+    pub disable_char_class_mode: bool,
 }
 
 impl Lexer {
@@ -38,18 +40,23 @@ impl Lexer {
             mode: LexerMode::Normal,
             mode_stack: Vec::new(),
             last_token_kind: None,
+            disable_char_class_mode: false,
         }
     }
     
-    fn push_mode(&mut self, mode: LexerMode) {
+    pub fn push_mode(&mut self, mode: LexerMode) {
         self.mode_stack.push(self.mode);
         self.mode = mode;
     }
     
-    fn pop_mode(&mut self) {
+    pub fn pop_mode(&mut self) {
         if let Some(prev_mode) = self.mode_stack.pop() {
             self.mode = prev_mode;
         }
+    }
+    
+    pub fn mode(&self) -> LexerMode {
+        self.mode
     }
 
     pub fn next_token(&mut self) -> Token {
@@ -137,20 +144,15 @@ impl Lexer {
             }
             '[' => {
                 self.advance();
-                // Enter character class mode in lexer rule contexts
-                // In ANTLR4, [...] is always a character class in lexer rules
-                // Common contexts: after : (rule start), | (alternative), ~ (negation), ( (grouping), ] (after another char class), ? * + (after quantifiers)
-                if matches!(self.last_token_kind, 
-                    Some(TokenKind::Colon) | Some(TokenKind::Pipe) | Some(TokenKind::Not) | 
-                    Some(TokenKind::LeftParen) | Some(TokenKind::RightBracket) | 
-                    Some(TokenKind::Question) | Some(TokenKind::Star) | Some(TokenKind::Plus)) {
+                // Enter CharClass mode on [ unless disabled
+                if !self.disable_char_class_mode {
                     self.push_mode(LexerMode::CharClass);
                 }
                 Token::new(TokenKind::LeftBracket, "[".to_string(), start_line, start_column)
             }
             ']' => {
                 self.advance();
-                // Exit character class mode
+                // Auto-pop CharClass mode if we're in it (for auto-entered character classes)
                 if self.mode == LexerMode::CharClass {
                     self.pop_mode();
                 }
@@ -206,9 +208,42 @@ impl Lexer {
                 self.advance();
                 Token::new(TokenKind::Identifier, text, start_line, start_column)
             }
-            '\\' if self.mode == LexerMode::CharClass => {
-                // Handle escape sequences in character classes
-                self.lex_escape_sequence(start_line, start_column)
+            '<' => {
+                // Angle bracket - can be used in actions like <assoc = right>
+                // In CharClass mode, treat as literal character
+                if self.mode == LexerMode::CharClass {
+                    let text = ch.to_string();
+                    self.advance();
+                    Token::new(TokenKind::Identifier, text, start_line, start_column)
+                } else {
+                    // Outside character class, treat as action delimiter (skip for now)
+                    // We'll handle it in the parser
+                    self.advance();
+                    Token::new(TokenKind::Identifier, "<".to_string(), start_line, start_column)
+                }
+            }
+            '>' => {
+                // Angle bracket closing - can be used in actions
+                // In CharClass mode, treat as literal character
+                if self.mode == LexerMode::CharClass {
+                    let text = ch.to_string();
+                    self.advance();
+                    Token::new(TokenKind::Identifier, text, start_line, start_column)
+                } else {
+                    // Outside character class, treat as action delimiter
+                    self.advance();
+                    Token::new(TokenKind::Identifier, ">".to_string(), start_line, start_column)
+                }
+            }
+            '\\' => {
+                // Handle escape sequences - works in both normal and CharClass mode
+                if self.mode == LexerMode::CharClass {
+                    // In character class mode, handle escape sequences
+                    self.lex_escape_sequence(start_line, start_column)
+                } else {
+                    // Outside character class, also handle escape sequences (for string literals)
+                    self.lex_escape_sequence(start_line, start_column)
+                }
             }
             _ if self.mode == LexerMode::CharClass => {
                 // In CharClass mode, treat any other character as a literal character
@@ -268,6 +303,31 @@ impl Lexer {
                     }
                     text.push(self.current_char());
                     self.advance();
+                }
+            }
+        } else if escape_char == 'x' {
+            // Hex escape: \xXX or \xXXXX (1-4 hex digits)
+            let mut digit_count = 0;
+            while !self.is_at_end() && self.current_char().is_ascii_hexdigit() && digit_count < 4 {
+                text.push(self.current_char());
+                self.advance();
+                digit_count += 1;
+            }
+            if digit_count == 0 {
+                return Token::error("invalid hex escape: expected hex digits".to_string(), start_line, start_column);
+            }
+        } else if escape_char.is_ascii_digit() {
+            // Octal escape: \0, \00, \000 (1-3 octal digits)
+            // We already consumed the first digit, so continue with up to 2 more
+            let mut digit_count = 1;
+            while !self.is_at_end() && self.current_char().is_ascii_digit() && digit_count < 3 {
+                let ch = self.current_char();
+                if ch >= '0' && ch <= '7' {
+                    text.push(ch);
+                    self.advance();
+                    digit_count += 1;
+                } else {
+                    break; // Not octal, stop
                 }
             }
         }
@@ -405,6 +465,12 @@ impl Lexer {
                         }
                     } else {
                         break;
+                    }
+                }
+                '#' => {
+                    // Inline comment (ANTLR4 style) - skip to end of line
+                    while !self.is_at_end() && self.current_char() != '\n' {
+                        self.advance();
                     }
                 }
                 _ => break,

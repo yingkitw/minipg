@@ -301,7 +301,7 @@ fn test_empty_alternative_variations() {
 fn test_error_message_with_context() {
     let grammar = r#"
         grammar Test;
-        rule1: TOKEN1
+        rule1: TOKEN1 ;;
         rule2: TOKEN2 ;
     "#;
     
