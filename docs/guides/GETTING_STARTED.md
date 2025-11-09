@@ -212,9 +212,9 @@ match lexer.next_token() {
    - [SQL Parser](../examples/05-SQL-PARSER.md)
 
 3. **Advanced Features**
-   - [ANTLR4 Actions](../reports/ANTLR4_ACTIONS_SUPPORT.md)
-   - [Error Recovery](#)
-   - [Performance Tuning](../reports/PERFORMANCE_REPORT.md)
+   - [ANTLR4 Compatibility](../ANTLR4_COMPATIBILITY.md) - Full ANTLR4 feature support
+   - [Grammar Syntax Reference](../GRAMMAR_SYNTAX.md) - Complete syntax guide
+   - [Examples Guide](../EXAMPLES_GUIDE.md) - Comprehensive examples
 
 ## Troubleshooting
 
