@@ -1,15 +1,31 @@
-//! # minipg - A blazingly fast parser generator
+//! # minipg - A blazingly fast parser generator with incremental parsing
 //!
-//! minipg is a modern parser generator with ANTLR4 compatibility, written in Rust.
-//! It generates standalone parsers for multiple target languages without runtime dependencies.
+//! minipg is a modern parser generator with ANTLR4 compatibility and **incremental parsing** capabilities.
+//! It generates standalone parsers for 9 target languages without runtime dependencies, and provides
+//! complete infrastructure for replacing Tree-sitter in editor integration.
 //!
 //! ## Features
 //!
-//! - **Multi-Language Support**: Generate parsers for Rust, Python, JavaScript, and TypeScript
-//! - **ANTLR4 Compatible**: 100% compatible with ANTLR4 grammar syntax
-//! - **Fast Generation**: Sub-millisecond code generation for typical grammars
-//! - **Standalone Code**: No runtime dependencies - generates self-contained parsers
-//! - **Modern Architecture**: Built with Rust 2024, modular design
+//! ### ⚡ Incremental Parsing (v0.1.5)
+//! - **Position Tracking**: Byte offsets and line/column for every AST node
+//! - **Edit Tracking**: Insert, delete, replace operations with automatic point calculation
+//! - **Fast Re-parsing**: Foundation for <10ms incremental edits
+//! - **Query Language**: Tree-sitter-compatible S-expression queries for pattern matching
+//!
+//! ### 🌍 Multi-Language Support (9 Languages)
+//! - **Rust**, **Python**, **JavaScript**, **TypeScript**, **Go**, **Java**, **C**, **C++**
+//! - **Tree-sitter**: Grammar.js for editor syntax highlighting
+//!
+//! ### 🎯 ANTLR4 Compatible
+//! - Advanced character classes with Unicode escapes
+//! - Non-greedy quantifiers, lexer modes & channels
+//! - Rule arguments, returns, and local variables
+//! - Named actions, grammar imports, and more
+//!
+//! ### 🚀 Performance
+//! - Sub-millisecond code generation for typical grammars
+//! - <100 KB memory usage
+//! - Target: <10ms for incremental edits
 //!
 //! ## Example
 //!
