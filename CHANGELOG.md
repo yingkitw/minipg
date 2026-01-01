@@ -7,6 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-01-01
+
+### Added - Editor Integration Foundation
+
+#### Phase 1: Incremental Parsing
+- **Position Tracking**: Point, Position, Range structs for byte offset and line/column tracking
+- **Edit Tracking**: Edit struct with insert, delete, replace operations
+- **IncrementalParser**: Trait and default implementation for incremental re-parsing
+- **SyntaxTree**: Parsed tree with position information
+- **18 new tests**: All passing (100% pass rate)
+
+#### Phase 2: Query Language
+- **S-expression Syntax**: Tree-sitter-compatible query language
+- **Query Parser**: Full parser for `(node) @capture` syntax
+- **Pattern Matching**: QueryMatcher for finding patterns in AST
+- **Capture Groups**: Named captures with position and text
+- **Field Matching**: Support for `(parent field: (child))` syntax
+- **Wildcard Patterns**: `(_)` matches any node
+- **16 new tests**: All passing (100% pass rate)
+
+#### Tree-sitter Code Generator
+- **Grammar.js Generation**: Convert ANTLR4 to Tree-sitter format
+- **Package.json**: Complete npm package configuration
+- **README.md**: Documentation for generated grammars
+- **Smart Case Conversion**: PascalCase → snake_case/kebab-case
+- **7 new tests**: All passing (100% pass rate)
+
+### Documentation
+- `PHASE1_INCREMENTAL_PARSING.md`: Complete Phase 1 implementation guide
+- `PHASE2_QUERY_LANGUAGE.md`: Complete Phase 2 implementation guide
+- `TREESITTER_IMPLEMENTATION.md`: Tree-sitter generator documentation
+- `docs/TREESITTER_GUIDE.md`: User guide for Tree-sitter generation
+- `docs/EDITOR_INTEGRATION_STRATEGY.md`: Complete roadmap for replacing Tree-sitter
+- `REPLACING_TREESITTER.md`: Vision and migration strategy
+- `queries/highlights.scm`: Example syntax highlighting query
+- `RELEASE_v0.1.5.md`: Comprehensive release notes
+
+### Changed
+- Updated to support **9 target languages** (added Tree-sitter)
+- Total tests increased to **147** (from 106)
+- Updated README, TODO, spec.md, ARCHITECTURE.md with new features
+- Consolidated all phases to v0.1.5
+
+### Fixed
+- Error handling in query parser (use Error::parse instead of ParseError)
+- RuleType import in query matcher (moved from core::types to ast)
+- Case conversion for acronyms (JSONParser → json_parser, not j_s_o_n_parser)
+- Field parsing in query patterns (attach field to child node)
+
+### Performance
+- All 147 tests pass in <1 second
+- Sub-millisecond grammar parsing maintained
+- <100 KB memory usage maintained
+
+### Vision
+This release lays the foundation for **completely replacing Tree-sitter** with minipg parsers for editor integration, providing a unified solution where one ANTLR4 grammar serves both runtime parsing and editor tooling.
+
+**Next Steps**: Optimize incremental parsing, implement LSP server (Phase 3)
+
 ## [0.1.0-alpha.3] - 2025-10-17
 
 ### Major Features

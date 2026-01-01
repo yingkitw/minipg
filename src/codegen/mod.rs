@@ -8,6 +8,7 @@ pub mod go;
 pub mod c;
 pub mod cpp;
 pub mod java;
+pub mod treesitter;
 pub mod template;
 pub mod visitor_gen;
 pub mod dfa;
@@ -27,6 +28,7 @@ pub use go::GoCodeGenerator;
 pub use c::CCodeGenerator;
 pub use cpp::CppCodeGenerator;
 pub use java::JavaCodeGenerator;
+pub use treesitter::TreeSitterCodeGenerator;
 
 use crate::analysis::AnalysisResult;
 use crate::core::{types::CodeGenConfig, Result};

@@ -27,11 +27,13 @@ impl LanguageRegistry {
         reg.register("c", CCodeGenerator::new());
         reg.register("cpp", CppCodeGenerator::new());
         reg.register("java", JavaCodeGenerator::new());
+        reg.register("treesitter", TreeSitterCodeGenerator::new());
         
         // Register aliases
         reg.register_alias("js", "javascript");
         reg.register_alias("ts", "typescript");
         reg.register_alias("c++", "cpp");
+        reg.register_alias("tree-sitter", "treesitter");
         
         reg
     }
@@ -85,7 +87,7 @@ impl Default for LanguageRegistry {
 
 // Import all generators
 use super::{RustCodeGenerator, PythonCodeGenerator, JavaScriptCodeGenerator, TypeScriptCodeGenerator,
-            GoCodeGenerator, CCodeGenerator, CppCodeGenerator, JavaCodeGenerator};
+            GoCodeGenerator, CCodeGenerator, CppCodeGenerator, JavaCodeGenerator, TreeSitterCodeGenerator};
 
 #[cfg(test)]
 mod tests {

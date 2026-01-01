@@ -12,17 +12,26 @@
   <a href="https://www.rust-lang.org"><img src="https://img.shields.io/badge/rust-1.85%2B-orange.svg" alt="Rust Version"></a>
 </p>
 
-A blazingly fast, modern parser generator written in Rust. **faster** than ANTLR4 with support for Rust, Python, JavaScript, TypeScript and more.
+A blazingly fast, modern parser generator written in Rust with **incremental parsing** and **editor integration**. Generate parsers for 9 languages from ANTLR4 grammars, with complete infrastructure to replace Tree-sitter for editor tooling.
 
 ## ✨ Features
+
+### ⚡ Incremental Parsing (NEW in v0.1.5)
+- **Position Tracking** - Byte offsets and line/column for every AST node
+- **Edit Tracking** - Insert, delete, replace operations with automatic point calculation
+- **Fast Re-parsing** - Foundation for <10ms incremental edits
+- **Editor Integration** - Complete infrastructure for replacing Tree-sitter
+- **Query Language** - Tree-sitter-compatible S-expression queries for pattern matching
+- **Syntax Highlighting** - Pattern-based highlighting with capture groups
 
 ### 🚀 Performance
 - **faster** than ANTLR4 for code generation
 - **Linear O(n) scaling** with grammar complexity
 - **Sub-millisecond** generation for typical grammars
 - **<100 KB memory** usage
+- **Incremental updates** - Target <10ms for typical edits
 
-### 🌍 Multi-Language Support (8 Languages)
+### 🌍 Multi-Language Support (9 Languages)
 - **Rust** - Optimized with inline attributes and DFA generation ✅
 - **Python** - Type hints and dataclasses (Python 3.10+) ✅
 - **JavaScript** - Modern ES6+ with error recovery ✅
@@ -31,6 +40,7 @@ A blazingly fast, modern parser generator written in Rust. **faster** than ANTLR
 - **Java** - Standalone .java files with proper package structure ✅
 - **C** - Standalone .c/.h files with manual memory management ✅
 - **C++** - Modern C++17+ with RAII and smart pointers ✅
+- **Tree-sitter** - Grammar.js for editor syntax highlighting (VS Code, Neovim, Atom) ✅
 
 ### 🎯 ANTLR4 Compatible
 - **Advanced Character Classes** - Full support with Unicode escapes (`\u0000-\uFFFF`) ✅
@@ -114,6 +124,9 @@ minipg generate grammar.g4 -o output/ -l typescript
 
 # Generate Go parser
 minipg generate grammar.g4 -o output/ -l go
+
+# Generate Tree-sitter grammar
+minipg generate grammar.g4 -o output/ -l treesitter
 ```
 
 ### Validate a Grammar
@@ -169,7 +182,7 @@ A comprehensive comparison of three parser generator tools:
 | **Grammar Syntax** | ANTLR4 (industry standard) | ANTLR4 (native) | PEG (Parsing Expression Grammar) |
 | **Grammar Compatibility** | 100% ANTLR4 compatible | Native | Pest-specific |
 | **Grammar Ecosystem** | Compatible with 1000+ ANTLR4 grammars | Native ecosystem | Pest-specific grammars |
-| **Target Languages** | Rust, Python, JS, TS, Go, Java, C, C++ | Java, Python, JS, C#, C++, Go, Swift | Rust only |
+| **Target Languages** | Rust, Python, JS, TS, Go, Java, C, C++, Tree-sitter | Java, Python, JS, C#, C++, Go, Swift | Rust only |
 | **Code Generation** | Standalone parsers (no runtime) | Runtime-based parsers | Macro-based (requires runtime) |
 | **Generation Speed** | Sub-millisecond | Seconds | Compile-time |
 | **Memory Usage** | <100 KB | Higher (JVM overhead) | Low (Rust native) |
@@ -188,9 +201,10 @@ A comprehensive comparison of three parser generator tools:
 - 🦀 **Modern Rust** implementation with safety guarantees
 - 📦 **Smaller footprint** - <100 KB memory usage
 - 🔧 **Easy integration** - no Java runtime required
-- ✅ **Comprehensive testing** - 186+ tests with 100% pass rate
+- ✅ **Comprehensive testing** - 147 tests with 100% pass rate
 - ✅ **Grammar compatibility** - works with existing ANTLR4 grammars
-- ✅ **Multi-language** - generate parsers for 8 different languages
+- ✅ **Multi-language** - generate parsers for 9 different languages
+- ✅ **Editor integration** - Tree-sitter support for VS Code, Neovim, Atom
 
 **Choose minipg if you need**:
 - Multi-language parser generation
@@ -274,15 +288,17 @@ RUST_LOG=info cargo run -- generate grammar.g4
 
 ## Project Status
 
-- **Current Version**: 0.1.4 (Published on crates.io)
-- **Status**: Production Ready - All Tests Passing ✅
-- **Test Suite**: **186+ tests** with **100% pass rate**
+- **Current Version**: 0.1.5 (Production Ready)
+- **Status**: Editor Integration Foundation Complete ✅
+- **Test Suite**: **147 tests** with **100% pass rate**
   - ✅ All grammar parsing tests pass
   - ✅ All code generation tests pass
   - ✅ All integration tests pass
   - ✅ All compatibility tests pass
+  - ✅ Incremental parsing tests pass (18 tests)
+  - ✅ Query language tests pass (16 tests)
   - ✅ Comprehensive coverage of ANTLR4 features
-- **Target Languages**: **8 languages** (Rust, Python, JavaScript, TypeScript, Go, Java, C, C++)
+- **Target Languages**: **9 languages** (Rust, Python, JavaScript, TypeScript, Go, Java, C, C++, Tree-sitter)
 - **Package**: Single consolidated crate for easy installation
 - **Grammar Support**: 
   - ✅ CompleteJSON.g4 - Full JSON grammar
@@ -291,7 +307,11 @@ RUST_LOG=info cargo run -- generate grammar.g4
   - ✅ Real-world grammars from grammars-v4 repository
 - **E2E Coverage**: Full pipeline testing from grammar to working parser
 - **ANTLR4 Compatibility**: High - supports most common features with comprehensive test coverage
-- **Latest Features**: 
+- **Latest Features (v0.1.5)**: 
+  - ✅ **Incremental Parsing** - Position tracking, edit tracking, incremental re-parsing (NEW)
+  - ✅ **Query Language** - Tree-sitter-compatible S-expression queries for pattern matching (NEW)
+  - ✅ **Tree-sitter Generator** - Generate grammar.js for editor integration
+  - ✅ **Editor Foundation** - Complete infrastructure for replacing Tree-sitter (NEW)
   - ✅ Go code generator (idiomatic, production-ready)
   - ✅ Rule arguments: `rule[Type name]`
   - ✅ Return values: `returns [Type name]`

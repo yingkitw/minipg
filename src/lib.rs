@@ -49,6 +49,14 @@ pub use ast::{Grammar, Rule, Alternative, Element};
 pub mod parser;
 pub use parser::{Lexer, Parser, GrammarParser};
 
+// Re-export incremental parsing
+pub mod incremental;
+pub use incremental::{Point, Position, Range, Edit, IncrementalParser, SyntaxTree, DefaultIncrementalParser};
+
+// Re-export query language
+pub mod query;
+pub use query::{QueryParser, Pattern, PatternNode, QueryMatcher, CaptureGroup};
+
 // Re-export analysis
 pub mod analysis;
 pub use analysis::{SemanticAnalyzer, GrammarValidator, AnalysisResult, GrammarComposer};
