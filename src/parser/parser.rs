@@ -181,7 +181,7 @@ impl Parser {
         
         while self.current_token.kind != TokenKind::RightBrace && self.current_token.kind != TokenKind::Eof {
             if self.current_token.kind == TokenKind::Identifier {
-                let token_name = self.expect_identifier()?;
+                let _token_name = self.expect_identifier()?;
                 // Tokens are just identifiers, we can store them if needed
                 // For now, just skip them
             }
@@ -512,7 +512,7 @@ impl Parser {
             
             // Try to parse type (optional)
             let mut arg_type = None;
-            let mut arg_name = String::new();
+            let mut _arg_name = String::new();
             
             if self.current_token.kind == TokenKind::Identifier {
                 let first = self.current_token.text.clone();
@@ -521,18 +521,18 @@ impl Parser {
                 // Check if there's another identifier (name after type)
                 if self.current_token.kind == TokenKind::Identifier {
                     arg_type = Some(first);
-                    arg_name = self.current_token.text.clone();
+                    _arg_name = self.current_token.text.clone();
                     self.advance();
                 } else {
                     // Just a name without type
-                    arg_name = first;
+                    _arg_name = first;
                 }
             } else {
                 // Not an identifier - might be end bracket
                 break;
             }
             
-            rule.add_argument(arg_name, arg_type);
+            rule.add_argument(_arg_name, arg_type);
             
             // Check for comma or closing bracket
             if self.current_token.kind == TokenKind::Comma {
@@ -560,7 +560,7 @@ impl Parser {
             }
             
             let mut return_type = None;
-            let mut return_name = String::new();
+            let mut _return_name = String::new();
             
             if self.current_token.kind == TokenKind::Identifier {
                 let first = self.current_token.text.clone();
@@ -570,11 +570,11 @@ impl Parser {
                 // Make sure we're not at the end bracket
                 if self.current_token.kind == TokenKind::Identifier {
                     return_type = Some(first);
-                    return_name = self.current_token.text.clone();
+                    _return_name = self.current_token.text.clone();
                     self.advance();
                 } else {
                     // Single identifier - treat as name only
-                    return_name = first;
+                    _return_name = first;
                 }
             } else {
                 // Not an identifier - might be end bracket or malformed
@@ -582,7 +582,7 @@ impl Parser {
                 break;
             }
             
-            rule.add_return(return_name, return_type);
+            rule.add_return(_return_name, return_type);
             
             // Check for comma (multiple returns) or closing bracket
             if self.current_token.kind == TokenKind::Comma {
@@ -608,7 +608,7 @@ impl Parser {
             }
             
             let mut local_type = None;
-            let mut local_name = String::new();
+            let mut _local_name = String::new();
             
             if self.current_token.kind == TokenKind::Identifier {
                 let first = self.current_token.text.clone();
@@ -616,17 +616,17 @@ impl Parser {
                 
                 if self.current_token.kind == TokenKind::Identifier {
                     local_type = Some(first);
-                    local_name = self.current_token.text.clone();
+                    _local_name = self.current_token.text.clone();
                     self.advance();
                 } else {
-                    local_name = first;
+                    _local_name = first;
                 }
             } else {
                 // Not an identifier - might be end bracket
                 break;
             }
             
-            rule.add_local(local_name, local_type);
+            rule.add_local(_local_name, local_type);
             
             // Check for comma or closing bracket
             if self.current_token.kind == TokenKind::Comma {
