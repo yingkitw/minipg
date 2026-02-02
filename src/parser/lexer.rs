@@ -64,16 +64,21 @@ impl Lexer {
         if self.mode != LexerMode::CharClass {
             self.skip_whitespace_and_comments();
         } else {
-            // In CharClass mode, only skip whitespace, not comments
-            self.skip_whitespace();
+            // In CharClass mode, only skip spaces and tabs, not newlines
+            while self.current_char() == ' ' || self.current_char() == '\t' {
+                self.advance();
+            }
         }
 
         if self.is_at_end() {
-            return Token::eof(self.line, self.column);
+            return Token::new(TokenKind::Eof, "".to_string(), self.line, self.column);
         }
 
         let start_line = self.line;
         let start_column = self.column;
+        
+        // Save the last token kind before generating the next one
+        let _prev_token_kind = self.last_token_kind;
         let ch = self.current_char();
 
         let token = match ch {
@@ -144,8 +149,14 @@ impl Lexer {
             }
             '[' => {
                 self.advance();
-                // Enter CharClass mode on [ unless disabled
-                if !self.disable_char_class_mode {
+                // Enter CharClass mode on [ unless:
+                // 1. Explicitly disabled
+                // 2. Last token was an identifier (likely rule arguments: rule[args])
+                // 3. Last token was 'returns' or 'locals' (likely returns[type] or locals[type])
+                let should_enter_charclass = !self.disable_char_class_mode 
+                    && self.last_token_kind != Some(TokenKind::Identifier);
+                
+                if should_enter_charclass {
                     self.push_mode(LexerMode::CharClass);
                 }
                 Token::new(TokenKind::LeftBracket, "[".to_string(), start_line, start_column)

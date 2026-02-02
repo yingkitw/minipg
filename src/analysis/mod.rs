@@ -7,10 +7,13 @@ pub mod left_recursion;
 pub mod first_follow;
 pub mod ambiguity;
 pub mod composition;
+pub mod hooks;
 
 pub use semantic::SemanticAnalyzer;
 pub use validator::GrammarValidator;
 pub use composition::GrammarComposer;
+pub use hooks::{AnalysisHook, HookRegistry, AnalysisContext, HookResult};
+pub use hooks::{NamingConventionHook, ComplexityHook};
 
 use crate::ast::Grammar;
 use crate::core::Diagnostic;

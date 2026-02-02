@@ -59,7 +59,6 @@ fn test_ambiguity_detection_simple() {
 }
 
 #[test]
-#[ignore] // Parser doesn't allow empty alternatives
 fn test_ambiguity_detection_empty_alternatives() {
     let grammar_text = r#"
         grammar Test;
@@ -394,7 +393,6 @@ fn test_grammar_validation_duplicate_rule() {
 }
 
 #[test]
-#[ignore] // Parser doesn't allow empty alternatives
 fn test_grammar_validation_empty_rule() {
     let grammar_text = r#"
         grammar Test;

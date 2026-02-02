@@ -54,6 +54,16 @@ impl CodeGenerator {
         Self { config, registry }
     }
 
+    /// Generate parser code from an analyzed grammar.
+    ///
+    /// This is the main entry point for code generation. It uses the configured
+    /// target language and registry to dispatch to the appropriate code generator.
+    ///
+    /// # Arguments
+    /// * `analysis` - The analysis result containing the validated grammar
+    ///
+    /// # Returns
+    /// * `Result<String>` - The generated parser code, or an error if generation fails
     pub fn generate_from_analysis(&self, analysis: &AnalysisResult) -> Result<String> {
         self.registry.generate(
             &self.config.target_language,

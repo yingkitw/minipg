@@ -33,7 +33,6 @@ fn parse_grammar(grammar_text: &str) -> Grammar {
 // ============================================================================
 
 #[test]
-#[ignore] // Parser doesn't fully support rule arguments yet
 fn test_parse_rule_with_arguments() {
     let grammar_text = r#"
         grammar Test;
@@ -54,7 +53,6 @@ fn test_parse_rule_with_arguments() {
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support rule returns yet
 fn test_parse_rule_with_returns() {
     let grammar_text = r#"
         grammar Test;
@@ -75,7 +73,6 @@ fn test_parse_rule_with_returns() {
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support rule locals yet
 fn test_parse_rule_with_locals() {
     let grammar_text = r#"
         grammar Test;
@@ -96,7 +93,6 @@ fn test_parse_rule_with_locals() {
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support all rule features yet
 fn test_parse_rule_with_all_features() {
     let grammar_text = r#"
         grammar Test;
@@ -139,7 +135,6 @@ ID: [a-zA-Z]+;
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support rule returns yet
 fn test_rust_codegen_multiple_returns() {
     let grammar = r#"
 grammar Test;
@@ -183,7 +178,6 @@ ID: [a-zA-Z]+;
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support rule locals yet
 fn test_rust_codegen_with_locals() {
     let grammar = r#"
 grammar Test;
@@ -205,7 +199,6 @@ ID: [a-zA-Z]+;
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support all rule features yet
 fn test_rust_codegen_with_all_features() {
     let grammar = r#"
 grammar Test;
@@ -486,7 +479,6 @@ SAFE: ~["];
 // ============================================================================
 
 #[test]
-#[ignore] // Parser doesn't fully support rule arguments yet
 fn test_rust_codegen_with_arguments() {
     let grammar_text = r#"
         grammar Calculator;
@@ -507,7 +499,6 @@ fn test_rust_codegen_with_arguments() {
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support rule returns yet
 fn test_python_codegen_with_returns() {
     let grammar_text = r#"
         grammar Calculator;
@@ -527,7 +518,6 @@ fn test_python_codegen_with_returns() {
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support rule locals yet
 fn test_javascript_codegen_with_locals() {
     let grammar_text = r#"
         grammar Calculator;
@@ -551,7 +541,6 @@ fn test_javascript_codegen_with_locals() {
 // ============================================================================
 
 #[test]
-#[ignore] // Parser doesn't fully support all rule features yet
 fn test_complex_grammar_with_all_features() {
     let grammar_text = r#"
         grammar Complex;

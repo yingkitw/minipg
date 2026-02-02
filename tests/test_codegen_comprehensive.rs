@@ -52,7 +52,6 @@ fn test_go_codegen_basic() {
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support rule arguments yet
 fn test_go_codegen_with_arguments() {
     let grammar_text = r#"
         grammar Test;
@@ -76,7 +75,6 @@ fn test_go_codegen_with_arguments() {
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support rule returns yet
 fn test_go_codegen_with_returns() {
     let grammar_text = r#"
         grammar Test;
@@ -100,7 +98,6 @@ fn test_go_codegen_with_returns() {
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support rule locals yet
 fn test_go_codegen_with_locals() {
     let grammar_text = r#"
         grammar Test;
@@ -155,7 +152,6 @@ fn test_c_codegen_basic() {
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support rule arguments yet
 fn test_c_codegen_with_arguments() {
     let grammar_text = r#"
         grammar Test;
@@ -208,7 +204,6 @@ fn test_cpp_codegen_basic() {
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support rule arguments yet
 fn test_cpp_codegen_with_arguments() {
     let grammar_text = r#"
         grammar Test;
@@ -261,7 +256,6 @@ fn test_java_codegen_basic() {
 }
 
 #[test]
-#[ignore] // Parser doesn't fully support rule arguments yet
 fn test_java_codegen_with_arguments() {
     let grammar_text = r#"
         grammar Test;

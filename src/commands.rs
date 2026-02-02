@@ -13,6 +13,16 @@ use std::fs;
 use std::path::Path;
 use tracing::{error, info};
 
+/// Execute the CLI command based on the parsed arguments.
+///
+/// This is the main entry point for CLI command execution. It dispatches
+/// to the appropriate command handler based on the user's input.
+///
+/// # Arguments
+/// * `cli` - The parsed CLI arguments containing the command to execute
+///
+/// # Returns
+/// * `Result<()>` - Ok(()) if successful, or an error if command execution fails
 pub fn execute(cli: Cli) -> Result<()> {
     match cli.command {
         Commands::Generate {
@@ -28,6 +38,18 @@ pub fn execute(cli: Cli) -> Result<()> {
     }
 }
 
+/// Generate a parser from the given grammar file.
+///
+/// # Arguments
+/// * `input` - Path to the grammar file (.g4 format)
+/// * `output` - Directory where generated parser code will be written
+/// * `target_language` - Target programming language for code generation
+/// * `package` - Optional package/module name for generated code
+/// * `visitor` - Whether to generate visitor pattern
+/// * `listener` - Whether to generate listener pattern
+///
+/// # Returns
+/// * `Result<()>` - Ok(()) if successful, or an error if generation fails
 fn generate_command(
     input: impl AsRef<Path>,
     output: impl AsRef<Path>,
@@ -93,6 +115,16 @@ fn generate_command(
     Ok(())
 }
 
+/// Validate a grammar file and report any issues.
+///
+/// This function parses and analyzes the grammar file, reporting any
+/// semantic issues or validation errors found.
+///
+/// # Arguments
+/// * `input` - Path to the grammar file to validate
+///
+/// # Returns
+/// * `Result<()>` - Ok(()) if validation passes, or an error if issues are found
 fn validate_command(input: impl AsRef<Path>) -> Result<()> {
     let input = input.as_ref();
     info!("Validating grammar: {}", input.display());
@@ -133,6 +165,16 @@ fn validate_command(input: impl AsRef<Path>) -> Result<()> {
     Ok(())
 }
 
+/// Display information about a grammar file.
+///
+/// This function parses the grammar and displays useful information
+/// such as rule names, token types, and grammar statistics.
+///
+/// # Arguments
+/// * `input` - Path to the grammar file to analyze
+///
+/// # Returns
+/// * `Result<()>` - Ok(()) if successful, or an error if parsing fails
 fn info_command(input: impl AsRef<Path>) -> Result<()> {
     let input = input.as_ref();
     info!("Analyzing grammar: {}", input.display());

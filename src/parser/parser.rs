@@ -343,15 +343,16 @@ impl Parser {
         let mut rule = Rule::new(name, rule_type);
 
         // Parse arguments: rule[int x, String name]
-        // Disable CharClass mode for rule arguments
-        let old_disable = self.lexer.disable_char_class_mode;
-        self.lexer.disable_char_class_mode = true;
+        // Check if we have arguments before disabling char class mode
         if self.current_token.kind == TokenKind::LeftBracket {
-            self.advance();
+            // Disable CharClass mode for rule arguments
+            let old_disable = self.lexer.disable_char_class_mode;
+            self.lexer.disable_char_class_mode = true;
+            self.advance(); // consume [
             self.parse_rule_arguments(&mut rule)?;
             self.expect(TokenKind::RightBracket)?;
+            self.lexer.disable_char_class_mode = old_disable;
         }
-        self.lexer.disable_char_class_mode = old_disable;
         
         // Parse returns: returns [Type value] or returns[Type value] (space optional)
         // Only parse as returns clause if followed by [
@@ -360,11 +361,12 @@ impl Parser {
             if self.peek_token.kind == TokenKind::LeftBracket {
                 self.advance(); // consume "returns"
                 // Disable CharClass mode for returns clause
+                let old_disable = self.lexer.disable_char_class_mode;
                 self.lexer.disable_char_class_mode = true;
                 self.advance(); // consume [
-            self.parse_rule_returns(&mut rule)?;
+                self.parse_rule_returns(&mut rule)?;
                 // parse_rule_returns should leave us at ], so consume it
-            self.expect(TokenKind::RightBracket)?;
+                self.expect(TokenKind::RightBracket)?;
                 self.lexer.disable_char_class_mode = old_disable;
             }
             // If not followed by [, it's a rule name, so continue parsing as rule
@@ -377,10 +379,11 @@ impl Parser {
             if self.peek_token.kind == TokenKind::LeftBracket {
                 self.advance(); // consume "locals"
                 // Disable CharClass mode for locals clause
+                let old_disable = self.lexer.disable_char_class_mode;
                 self.lexer.disable_char_class_mode = true;
                 self.advance(); // consume [
-            self.parse_rule_locals(&mut rule)?;
-            self.expect(TokenKind::RightBracket)?;
+                self.parse_rule_locals(&mut rule)?;
+                self.expect(TokenKind::RightBracket)?;
                 self.lexer.disable_char_class_mode = old_disable;
             }
             // If not followed by [, it's a rule name, so continue parsing as rule
@@ -394,25 +397,13 @@ impl Parser {
         self.expect(TokenKind::Colon)?;
         
         // Parse alternatives
-        // Empty alternatives are not allowed in these test cases
+        // Empty alternatives are allowed in ANTLR4 (epsilon productions)
         let alt = self.parse_alternative()?;
-        if alt.elements.is_empty() {
-            return Err(Error::parse(
-                format!("{}:{}", self.current_token.line, self.current_token.column),
-                "Empty alternative not allowed".to_string(),
-            ));
-        }
         rule.add_alternative(alt);
 
         while self.current_token.kind == TokenKind::Pipe {
             self.advance();
             let alt = self.parse_alternative()?;
-            if alt.elements.is_empty() {
-                return Err(Error::parse(
-                    format!("{}:{}", self.current_token.line, self.current_token.column),
-                    "Empty alternative not allowed".to_string(),
-                ));
-            }
             rule.add_alternative(alt);
         }
         
