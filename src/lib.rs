@@ -1,104 +1,29 @@
-//! # minipg - A blazingly fast parser generator with incremental parsing
+//! # minipg - Minimal Parser Generator
 //!
-//! minipg is a modern parser generator with ANTLR4 compatibility and **incremental parsing** capabilities.
-//! It generates standalone parsers for 9 target languages without runtime dependencies, and provides
-//! complete infrastructure for replacing Tree-sitter in editor integration.
-//!
-//! ## Features
-//!
-//! ### ⚡ Incremental Parsing (v0.1.6)
-//! - **Position Tracking**: Byte offsets and line/column for every AST node
-//! - **Edit Tracking**: Insert, delete, replace operations with automatic point calculation
-//! - **Fast Re-parsing**: <5ms incremental edits with subtree caching
-//! - **Lazy Parsing**: Parse visible regions first for better performance
-//! - **Parallel Parsing**: Process multiple files concurrently
-//! - **Query Language**: Tree-sitter-compatible S-expression queries for pattern matching
-//!
-//! ### 🔌 Extensibility (v0.1.6)
-//! - **Custom Analysis Hooks**: Add your own semantic analysis passes
-//! - **Hook Registry**: Manage and enable/disable custom hooks
-//! - **Performance Metrics**: Track parse times and incremental reuse
-//!
-//! ### 🌍 Multi-Language Support (9 Languages)
-//! - **Rust**, **Python**, **JavaScript**, **TypeScript**, **Go**, **Java**, **C**, **C++**
-//! - **Tree-sitter**: Grammar.js for editor syntax highlighting
-//!
-//! ### 🎯 ANTLR4 Compatible
-//! - Advanced character classes with Unicode escapes
-//! - Non-greedy quantifiers, lexer modes & channels
-//! - Rule arguments, returns, and local variables
-//! - Named actions, grammar imports, and more
-//!
-//! ### 🚀 Performance
-//! - Sub-millisecond code generation for typical grammars
-//! - <100 KB memory usage
-//! - **<5ms incremental edits** with subtree reuse
-//! - Lazy parsing for large files
-//! - Parallel processing for multiple files
-//!
-//! ## Example
-//!
-//! ```rust,no_run
-//! use minipg::parser::{Lexer, Parser};
-//! use minipg::codegen::RustCodeGenerator;
-//! use minipg::core::{types::CodeGenConfig, CodeGenerator};
-//!
-//! let grammar_source = r#"
-//!     grammar Calculator;
-//!     expr: term (('+' | '-') term)*;
-//!     term: factor (('*' | '/') factor)*;
-//!     factor: NUMBER | '(' expr ')';
-//!     NUMBER: [0-9]+;
-//! "#;
-//!
-//! // Parse the grammar
-//! let lexer = Lexer::new(grammar_source, "calculator.g4");
-//! let mut parser = Parser::new(lexer);
-//! let grammar = parser.parse().expect("Failed to parse grammar");
-//!
-//! // Generate Rust code
-//! let generator = RustCodeGenerator::new();
-//! let config = CodeGenConfig::default();
-//! let code = generator.generate(&grammar, &config).expect("Failed to generate code");
-//! ```
+//! A modern parser generator supporting ANTLR4 grammars with code generation
+//! for Rust, Python, and JavaScript.
 
-// Re-export core types
-pub mod core;
-pub use core::*;
+// Core types and traits
+pub mod diagnostic;
+pub mod error;
+pub mod traits;
+pub mod types;
 
-// Re-export AST types
+// ANTLR4 parser and AST
 pub mod ast;
-pub use ast::{Grammar, Rule, Alternative, Element};
-
-// Re-export parser
 pub mod parser;
-pub use parser::{Lexer, Parser, GrammarParser};
 
-// Re-export incremental parsing
-pub mod incremental;
-pub use incremental::{
-    Point, Position, Range, Edit, IncrementalParser, SyntaxTree, DefaultIncrementalParser,
-    LazyParser, LazyConfig, ParsedRegion,
-    ParallelParser, ParseJob, ParseResult,
-    ParseMetrics, IncrementalConfig,
-};
-
-// Re-export query language
-pub mod query;
-pub use query::{QueryParser, Pattern, PatternNode, QueryMatcher, CaptureGroup};
-
-// Re-export analysis
+// Analysis and code generation
 pub mod analysis;
-pub use analysis::{
-    SemanticAnalyzer, GrammarValidator, AnalysisResult, GrammarComposer,
-    AnalysisHook, HookRegistry, AnalysisContext, HookResult,
-    NamingConventionHook, ComplexityHook,
-};
-
-// Re-export codegen
 pub mod codegen;
-pub use codegen::{CodeGenerator, RustCodeGenerator, PythonCodeGenerator, JavaScriptCodeGenerator, TypeScriptCodeGenerator, GoCodeGenerator, CCodeGenerator, CppCodeGenerator, JavaCodeGenerator};
 
-// Re-export MCP server
-pub mod mcp;
-pub use mcp::{create_server, MinipgServer};
+// CLI (only for binary)
+#[cfg(feature = "cli")]
+pub mod cli;
+
+// Re-exports for convenience
+pub use diagnostic::{Diagnostic, DiagnosticSeverity, Location};
+pub use error::{Error, Result};
+pub use traits::{CodeGenerator, GrammarParser, GrammarValidator, SemanticAnalyzer};
+pub use types::{CodeGenConfig, GrammarType, Point, Position, Range, SymbolTable};
+pub use ast::Grammar;

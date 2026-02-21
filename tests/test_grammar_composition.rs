@@ -2,8 +2,8 @@
 
 use minipg::analysis::GrammarComposer;
 use minipg::ast::Grammar;
-use minipg::core::types::GrammarType;
-use minipg::core::GrammarParser;
+use minipg::types::GrammarType;
+use minipg::GrammarParser;
 
 #[test]
 fn test_grammar_composer_new() {

@@ -1,17 +1,17 @@
 //! Grammar parser implementation.
 
+pub mod enhanced_errors;
+pub mod error_recovery;
 pub mod lexer;
 pub mod parser;
 pub mod token;
-pub mod error_recovery;
-pub mod enhanced_errors;
 
 pub use lexer::Lexer;
 pub use parser::Parser;
 pub use token::{Token, TokenKind};
 
 use crate::ast::Grammar;
-use crate::core::{GrammarParser as GrammarParserTrait, Result};
+use crate::{GrammarParser as GrammarParserTrait, Result};
 use std::path::Path;
 
 /// Main grammar parser.

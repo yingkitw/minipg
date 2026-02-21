@@ -13,7 +13,7 @@
 //! 3. Grammars-v4 - Real-world grammar subsets
 
 use minipg::parser::GrammarParser;
-use minipg::core::GrammarParser as GrammarParserTrait;
+use minipg::GrammarParser as GrammarParserTrait;
 
 fn parse_grammar(grammar_text: &str) -> minipg::ast::Grammar {
     let parser = GrammarParser::new();
@@ -562,11 +562,11 @@ fn test_grammars_v4_code_generation_all_languages() {
     
     let grammar = parse_grammar(grammar_text);
     
-    // Test code generation for all 8 languages
-    let languages = vec!["rust", "python", "javascript", "typescript", "go", "c", "cpp", "java"];
+    // Test code generation for all supported languages (core generators only)
+    let languages = vec!["rust", "python", "javascript"];
     
     for lang in languages {
-        let config = minipg::core::types::CodeGenConfig {
+        let config = minipg::types::CodeGenConfig {
             target_language: lang.to_string(),
             output_directory: ".".to_string(),
             package_name: None,

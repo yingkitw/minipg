@@ -1,37 +1,25 @@
 //! Code generation for parser generators.
 
-pub mod rust;
-pub mod python;
-pub mod javascript;
-pub mod typescript;
-pub mod go;
-pub mod c;
-pub mod cpp;
-pub mod java;
-pub mod treesitter;
-pub mod template;
-pub mod visitor_gen;
+pub mod actions;
+pub mod common;
 pub mod dfa;
+pub mod javascript;
 pub mod lookup_table;
 pub mod modes;
-pub mod actions;
-pub mod rule_body;
-pub mod common;
-pub mod registry;
 pub mod pattern_match;
+pub mod python;
+pub mod registry;
+pub mod rule_body;
+pub mod rust;
+pub mod template;
+pub mod visitor_gen;
 
-pub use rust::RustCodeGenerator;
-pub use python::PythonCodeGenerator;
 pub use javascript::JavaScriptCodeGenerator;
-pub use typescript::TypeScriptCodeGenerator;
-pub use go::GoCodeGenerator;
-pub use c::CCodeGenerator;
-pub use cpp::CppCodeGenerator;
-pub use java::JavaCodeGenerator;
-pub use treesitter::TreeSitterCodeGenerator;
+pub use python::PythonCodeGenerator;
+pub use rust::RustCodeGenerator;
 
 use crate::analysis::AnalysisResult;
-use crate::core::{types::CodeGenConfig, Result};
+use crate::{types::CodeGenConfig, Result};
 
 pub use registry::LanguageRegistry;
 
@@ -48,7 +36,7 @@ impl CodeGenerator {
             registry: LanguageRegistry::new(),
         }
     }
-    
+
     /// Create with a custom registry (for testing or extensions).
     pub fn with_registry(config: CodeGenConfig, registry: LanguageRegistry) -> Self {
         Self { config, registry }

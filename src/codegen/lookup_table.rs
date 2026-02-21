@@ -48,7 +48,7 @@ impl LookupTableBuilder {
 
     fn analyze_element(&mut self, element: &crate::ast::Element, rule_name: &str) {
         use crate::ast::Element;
-        
+
         match element {
             Element::Terminal { value, .. } | Element::StringLiteral { value, .. } => {
                 // Add each character to the lookup table
@@ -56,7 +56,8 @@ impl LookupTableBuilder {
                     if !self.char_to_class.contains_key(&ch) {
                         let class_id = self.next_class_id;
                         self.char_to_class.insert(ch, class_id);
-                        self.class_names.insert(class_id, format!("{}_{}", rule_name, ch.escape_default()));
+                        self.class_names
+                            .insert(class_id, format!("{}_{}", rule_name, ch.escape_default()));
                         self.next_class_id += 1;
                     }
                 }
@@ -67,7 +68,8 @@ impl LookupTableBuilder {
                     if !self.char_to_class.contains_key(&ch) {
                         let class_id = self.next_class_id;
                         self.char_to_class.insert(ch, class_id);
-                        self.class_names.insert(class_id, format!("{}_range", rule_name));
+                        self.class_names
+                            .insert(class_id, format!("{}_range", rule_name));
                         self.next_class_id += 1;
                     }
                 }
@@ -79,10 +81,10 @@ impl LookupTableBuilder {
                     }
                 }
             }
-            Element::Optional { element, .. } |
-            Element::ZeroOrMore { element, .. } |
-            Element::OneOrMore { element, .. } |
-            Element::Not { element } => {
+            Element::Optional { element, .. }
+            | Element::ZeroOrMore { element, .. }
+            | Element::OneOrMore { element, .. }
+            | Element::Not { element } => {
                 self.analyze_element(element, rule_name);
             }
             _ => {}
@@ -95,25 +97,29 @@ impl LookupTableBuilder {
 
         code.push_str("    /// Character class lookup table.\n");
         code.push_str("    /// \n");
-        code.push_str("    /// Maps each character to its character class ID for efficient matching.\n");
-        code.push_str("    /// This table is generated at compile time and stored as a const array.\n");
+        code.push_str(
+            "    /// Maps each character to its character class ID for efficient matching.\n",
+        );
+        code.push_str(
+            "    /// This table is generated at compile time and stored as a const array.\n",
+        );
         code.push_str("    const CHAR_CLASS_TABLE: [u8; 256] = [\n");
 
         // Generate lookup table for ASCII characters (0-255)
         for i in 0..256 {
             let ch = i as u8 as char;
             let class_id = self.char_to_class.get(&ch).copied().unwrap_or(255);
-            
+
             if i % 16 == 0 {
                 code.push_str("        ");
             }
-            
+
             code.push_str(&format!("{:3}", class_id));
-            
+
             if i < 255 {
                 code.push_str(", ");
             }
-            
+
             if i % 16 == 15 {
                 code.push_str(&format!(" // 0x{:02X}-0x{:02X}\n", i - 15, i));
             }
@@ -149,7 +155,10 @@ impl LookupTableBuilder {
         code.push_str("        match name {\n");
 
         for token_name in token_names {
-            code.push_str(&format!("            \"{}\" => TokenKind::{},\n", token_name, token_name));
+            code.push_str(&format!(
+                "            \"{}\" => TokenKind::{},\n",
+                token_name, token_name
+            ));
         }
 
         code.push_str("            _ => TokenKind::Eof,\n");
@@ -203,7 +212,9 @@ pub fn generate_optimized_char_match(_table: &LookupTableBuilder) -> String {
 
     code.push_str("    /// Check if character is in a range using lookup table.\n");
     code.push_str("    #[inline]\n");
-    code.push_str("    fn is_in_range(&self, ch: char, start_class: u8, end_class: u8) -> bool {\n");
+    code.push_str(
+        "    fn is_in_range(&self, ch: char, start_class: u8, end_class: u8) -> bool {\n",
+    );
     code.push_str("        let class = Self::get_char_class(ch);\n");
     code.push_str("        class >= start_class && class <= end_class\n");
     code.push_str("    }\n\n");

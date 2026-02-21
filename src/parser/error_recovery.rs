@@ -6,7 +6,7 @@ use super::token::TokenKind;
 pub trait RecoveryStrategy {
     /// Check if we should attempt recovery at this token.
     fn should_recover(&self, kind: TokenKind) -> bool;
-    
+
     /// Get synchronization tokens for recovery.
     fn sync_tokens(&self) -> &[TokenKind];
 }
@@ -21,7 +21,7 @@ impl RecoveryStrategy for DefaultRecovery {
             TokenKind::Semicolon | TokenKind::RightBrace | TokenKind::Eof
         )
     }
-    
+
     fn sync_tokens(&self) -> &[TokenKind] {
         &[
             TokenKind::Semicolon,
@@ -47,16 +47,16 @@ impl RecoveryContext {
             in_panic_mode: false,
         }
     }
-    
+
     pub fn add_error(&mut self, error: String) {
         self.errors.push(error);
         self.in_panic_mode = true;
     }
-    
+
     pub fn exit_panic_mode(&mut self) {
         self.in_panic_mode = false;
     }
-    
+
     pub fn has_errors(&self) -> bool {
         !self.errors.is_empty()
     }

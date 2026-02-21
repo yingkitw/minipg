@@ -118,7 +118,9 @@ pub fn generate_python_mode_methods(grammar: &Grammar) -> String {
 
     code.push_str("    def current_mode(self) -> str:\n");
     code.push_str("        \"\"\"Get current lexer mode.\"\"\"\n");
-    code.push_str("        return self.mode_stack[-1] if self.mode_stack else \"DEFAULT_MODE\"\n\n");
+    code.push_str(
+        "        return self.mode_stack[-1] if self.mode_stack else \"DEFAULT_MODE\"\n\n",
+    );
 
     code.push_str("    def switch_mode(self, mode: str) -> None:\n");
     code.push_str("        \"\"\"Switch to a different mode.\"\"\"\n");
@@ -175,7 +177,9 @@ pub fn generate_javascript_mode_methods(grammar: &Grammar) -> String {
     let mut code = String::new();
 
     code.push_str("    currentMode() {\n");
-    code.push_str("        return this.modeStack[this.modeStack.length - 1] || \"DEFAULT_MODE\";\n");
+    code.push_str(
+        "        return this.modeStack[this.modeStack.length - 1] || \"DEFAULT_MODE\";\n",
+    );
     code.push_str("    }\n\n");
 
     code.push_str("    switchMode(mode) {\n");
@@ -236,7 +240,9 @@ pub fn generate_typescript_mode_methods(grammar: &Grammar) -> String {
     let mut code = String::new();
 
     code.push_str("    currentMode(): string {\n");
-    code.push_str("        return this.modeStack[this.modeStack.length - 1] || \"DEFAULT_MODE\";\n");
+    code.push_str(
+        "        return this.modeStack[this.modeStack.length - 1] || \"DEFAULT_MODE\";\n",
+    );
     code.push_str("    }\n\n");
 
     code.push_str("    switchMode(mode: string): void {\n");

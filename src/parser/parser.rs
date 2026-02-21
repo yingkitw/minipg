@@ -3,7 +3,7 @@
 use super::lexer::Lexer;
 use super::token::{Token, TokenKind};
 use crate::ast::{Alternative, Element, Grammar, Rule};
-use crate::core::{types::GrammarType, Error, Result};
+use crate::{types::GrammarType, Error, Result};
 
 /// Parser for grammar files.
 pub struct Parser {
@@ -27,12 +27,12 @@ impl Parser {
         self.parse_grammar()
     }
 
-    fn parse_grammar(&mut self) -> Result<Grammar> {
+    pub fn parse_grammar(&mut self) -> Result<Grammar> {
         // Support both patterns:
         // 1. grammar [lexer|parser] <name> ;
         // 2. parser grammar <name> ;
         // 3. lexer grammar <name> ;
-        
+
         let grammar_type = if self.current_token.kind == TokenKind::Parser {
             // Pattern: parser grammar Name;
             self.advance();
@@ -45,17 +45,17 @@ impl Parser {
             GrammarType::Lexer
         } else {
             // Pattern: grammar [lexer|parser] Name;
-        self.expect(TokenKind::Grammar)?;
-        
+            self.expect(TokenKind::Grammar)?;
+
             // Check for optional type modifier after grammar keyword
             if self.current_token.kind == TokenKind::Lexer {
-            self.advance();
-            GrammarType::Lexer
-        } else if self.current_token.kind == TokenKind::Parser {
-            self.advance();
-            GrammarType::Parser
-        } else {
-            GrammarType::Combined
+                self.advance();
+                GrammarType::Lexer
+            } else if self.current_token.kind == TokenKind::Parser {
+                self.advance();
+                GrammarType::Parser
+            } else {
+                GrammarType::Combined
             }
         };
 
@@ -70,20 +70,26 @@ impl Parser {
                 // Check if this is "options" as a rule name or as a declaration
                 // If followed by {, it's a declaration; if followed by :, it's a rule name
                 if self.peek_token.kind == TokenKind::LeftBrace {
-                self.parse_options(&mut grammar)?;
+                    self.parse_options(&mut grammar)?;
                 } else {
                     let rule = self.parse_rule(&mut grammar)?;
                     grammar.add_rule(rule);
                 }
             } else if self.current_token.kind == TokenKind::Import {
                 self.parse_import(&mut grammar)?;
-            } else if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "channels" {
+            } else if self.current_token.kind == TokenKind::Identifier
+                && self.current_token.text == "channels"
+            {
                 self.parse_channels(&mut grammar)?;
-            } else if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "tokens" {
+            } else if self.current_token.kind == TokenKind::Identifier
+                && self.current_token.text == "tokens"
+            {
                 self.parse_tokens(&mut grammar)?;
             } else if self.current_token.kind == TokenKind::At {
                 self.parse_named_action(&mut grammar)?;
-            } else if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "mode" {
+            } else if self.current_token.kind == TokenKind::Identifier
+                && self.current_token.text == "mode"
+            {
                 self.parse_mode(&mut grammar)?;
             } else if self.current_token.kind == TokenKind::Identifier {
                 let rule = self.parse_rule(&mut grammar)?;
@@ -91,7 +97,9 @@ impl Parser {
             } else if self.current_token.kind == TokenKind::Fragment {
                 let rule = self.parse_fragment_rule(&mut grammar)?;
                 grammar.add_rule(rule);
-            } else if self.current_token.kind == TokenKind::Parser || self.current_token.kind == TokenKind::Lexer {
+            } else if self.current_token.kind == TokenKind::Parser
+                || self.current_token.kind == TokenKind::Lexer
+            {
                 // Keywords can be rule names
                 let rule = self.parse_rule(&mut grammar)?;
                 grammar.add_rule(rule);
@@ -134,18 +142,18 @@ impl Parser {
 
     fn parse_import(&mut self, grammar: &mut Grammar) -> Result<()> {
         self.expect(TokenKind::Import)?;
-        
+
         // Parse first import name
         let import_name = self.expect_identifier()?;
         grammar.add_import(import_name);
-        
+
         // Parse additional comma-separated imports
         while self.current_token.kind == TokenKind::Comma {
             self.advance(); // consume comma
             let import_name = self.expect_identifier()?;
             grammar.add_import(import_name);
         }
-        
+
         self.expect(TokenKind::Semicolon)?;
         Ok(())
     }
@@ -153,13 +161,15 @@ impl Parser {
     fn parse_channels(&mut self, grammar: &mut Grammar) -> Result<()> {
         self.expect(TokenKind::Identifier)?; // consume "channels"
         self.expect(TokenKind::LeftBrace)?;
-        
-        while self.current_token.kind != TokenKind::RightBrace && self.current_token.kind != TokenKind::Eof {
+
+        while self.current_token.kind != TokenKind::RightBrace
+            && self.current_token.kind != TokenKind::Eof
+        {
             if self.current_token.kind == TokenKind::Identifier {
                 let channel_name = self.expect_identifier()?;
                 grammar.add_channel(channel_name);
             }
-            
+
             // Skip comma or semicolon
             if self.current_token.kind == TokenKind::Comma {
                 self.advance();
@@ -170,7 +180,7 @@ impl Parser {
                 break;
             }
         }
-        
+
         self.expect(TokenKind::RightBrace)?;
         Ok(())
     }
@@ -178,14 +188,16 @@ impl Parser {
     fn parse_tokens(&mut self, _grammar: &mut Grammar) -> Result<()> {
         self.expect(TokenKind::Identifier)?; // consume "tokens"
         self.expect(TokenKind::LeftBrace)?;
-        
-        while self.current_token.kind != TokenKind::RightBrace && self.current_token.kind != TokenKind::Eof {
+
+        while self.current_token.kind != TokenKind::RightBrace
+            && self.current_token.kind != TokenKind::Eof
+        {
             if self.current_token.kind == TokenKind::Identifier {
                 let _token_name = self.expect_identifier()?;
                 // Tokens are just identifiers, we can store them if needed
                 // For now, just skip them
             }
-            
+
             // Skip comma or semicolon
             if self.current_token.kind == TokenKind::Comma {
                 self.advance();
@@ -195,27 +207,30 @@ impl Parser {
                 break;
             }
         }
-        
+
         self.expect(TokenKind::RightBrace)?;
         Ok(())
     }
 
     fn parse_named_action(&mut self, grammar: &mut Grammar) -> Result<()> {
         self.expect(TokenKind::At)?;
-        
+
         // Parse action name, which may include namespace prefix (e.g., parser::members, lexer::members)
         let mut action_name = String::new();
-        
+
         // Handle namespace prefixes: parser::, lexer::, etc.
         // Note: "parser" and "lexer" might be tokenized as keywords, so check for both Identifier and keyword tokens
-        if self.current_token.kind == TokenKind::Identifier || 
-           self.current_token.kind == TokenKind::Parser || 
-           self.current_token.kind == TokenKind::Lexer {
+        if self.current_token.kind == TokenKind::Identifier
+            || self.current_token.kind == TokenKind::Parser
+            || self.current_token.kind == TokenKind::Lexer
+        {
             action_name.push_str(&self.current_token.text);
             self.advance();
-            
+
             // Check for namespace separator ::
-            if self.current_token.kind == TokenKind::Colon && self.peek_token.kind == TokenKind::Colon {
+            if self.current_token.kind == TokenKind::Colon
+                && self.peek_token.kind == TokenKind::Colon
+            {
                 self.advance(); // consume first :
                 self.advance(); // consume second :
                 action_name.push_str("::");
@@ -227,7 +242,9 @@ impl Parser {
                 }
                 // If no identifier after ::, that's okay - use what we have (e.g., @parser::members)
             }
-        } else if self.current_token.kind == TokenKind::Colon && self.peek_token.kind == TokenKind::Colon {
+        } else if self.current_token.kind == TokenKind::Colon
+            && self.peek_token.kind == TokenKind::Colon
+        {
             // Handle case like @::members (unlikely but possible)
             self.advance(); // consume first :
             self.advance(); // consume second :
@@ -247,13 +264,13 @@ impl Parser {
                 ));
             }
         }
-        
+
         self.expect(TokenKind::LeftBrace)?;
-        
+
         // Read the action code until we find the closing brace
         let mut code = String::new();
         let mut brace_count = 1;
-        
+
         while brace_count > 0 && self.current_token.kind != TokenKind::Eof {
             if self.current_token.kind == TokenKind::LeftBrace {
                 brace_count += 1;
@@ -269,14 +286,17 @@ impl Parser {
             }
             self.advance();
         }
-        
+
         if brace_count > 0 {
             return Err(Error::parse(
                 format!("{}:{}", self.current_token.line, self.current_token.column),
-                format!("Unclosed named action '{}': expected '}}' before end of file", action_name),
+                format!(
+                    "Unclosed named action '{}': expected '}}' before end of file",
+                    action_name
+                ),
             ));
         }
-        
+
         grammar.add_named_action(action_name, code.trim().to_string());
         Ok(())
     }
@@ -286,16 +306,17 @@ impl Parser {
         self.expect(TokenKind::Identifier)?; // consume "mode"
         let mode_name = self.expect_identifier()?;
         self.expect(TokenKind::Semicolon)?;
-        
+
         // Collect rules in this mode until we hit another mode or EOF
         let mut mode_rules = Vec::new();
-        
+
         while self.current_token.kind != TokenKind::Eof {
             // Check if we've hit another mode declaration
-            if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "mode" {
+            if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "mode"
+            {
                 break;
             }
-            
+
             // Parse rules in this mode
             if self.current_token.kind == TokenKind::Identifier {
                 let rule = self.parse_rule(grammar)?;
@@ -309,7 +330,7 @@ impl Parser {
                 break;
             }
         }
-        
+
         grammar.add_lexer_mode(mode_name, mode_rules);
         Ok(())
     }
@@ -320,9 +341,10 @@ impl Parser {
             let name = self.current_token.text.clone();
             self.advance();
             name
-        } else if self.current_token.kind == TokenKind::Options 
-            || self.current_token.kind == TokenKind::Parser 
-            || self.current_token.kind == TokenKind::Lexer {
+        } else if self.current_token.kind == TokenKind::Options
+            || self.current_token.kind == TokenKind::Parser
+            || self.current_token.kind == TokenKind::Lexer
+        {
             let name = self.current_token.text.clone();
             self.advance();
             name
@@ -332,7 +354,7 @@ impl Parser {
                 "Expected rule name (identifier or keyword)".to_string(),
             ));
         };
-        
+
         // Determine if it's a lexer or parser rule based on first character
         let rule_type = if name.chars().next().unwrap().is_uppercase() {
             crate::ast::RuleType::Lexer
@@ -353,14 +375,15 @@ impl Parser {
             self.expect(TokenKind::RightBracket)?;
             self.lexer.disable_char_class_mode = old_disable;
         }
-        
+
         // Parse returns: returns [Type value] or returns[Type value] (space optional)
         // Only parse as returns clause if followed by [
-        if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "returns" {
+        if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "returns"
+        {
             // Peek ahead to see if next token is [
             if self.peek_token.kind == TokenKind::LeftBracket {
                 self.advance(); // consume "returns"
-                // Disable CharClass mode for returns clause
+                                // Disable CharClass mode for returns clause
                 let old_disable = self.lexer.disable_char_class_mode;
                 self.lexer.disable_char_class_mode = true;
                 self.advance(); // consume [
@@ -378,7 +401,7 @@ impl Parser {
             // Peek ahead to see if next token is [
             if self.peek_token.kind == TokenKind::LeftBracket {
                 self.advance(); // consume "locals"
-                // Disable CharClass mode for locals clause
+                                // Disable CharClass mode for locals clause
                 let old_disable = self.lexer.disable_char_class_mode;
                 self.lexer.disable_char_class_mode = true;
                 self.advance(); // consume [
@@ -388,14 +411,14 @@ impl Parser {
             }
             // If not followed by [, it's a rule name, so continue parsing as rule
         }
-        
+
         // Check for options after rule name (before colon) - like "CURRENT options { ... }:"
         if self.current_token.kind == TokenKind::Options {
             self.parse_options(grammar)?;
         }
 
         self.expect(TokenKind::Colon)?;
-        
+
         // Parse alternatives
         // Empty alternatives are allowed in ANTLR4 (epsilon productions)
         let alt = self.parse_alternative()?;
@@ -406,22 +429,23 @@ impl Parser {
             let alt = self.parse_alternative()?;
             rule.add_alternative(alt);
         }
-        
+
         self.expect(TokenKind::Semicolon)?;
         Ok(rule)
     }
 
     fn parse_fragment_rule(&mut self, grammar: &mut Grammar) -> Result<Rule> {
         self.expect(TokenKind::Fragment)?;
-        
+
         // Parse rule name
         let name = if self.current_token.kind == TokenKind::Identifier {
             let name = self.current_token.text.clone();
             self.advance();
             name
-        } else if self.current_token.kind == TokenKind::Options 
-            || self.current_token.kind == TokenKind::Parser 
-            || self.current_token.kind == TokenKind::Lexer {
+        } else if self.current_token.kind == TokenKind::Options
+            || self.current_token.kind == TokenKind::Parser
+            || self.current_token.kind == TokenKind::Lexer
+        {
             let name = self.current_token.text.clone();
             self.advance();
             name
@@ -431,32 +455,33 @@ impl Parser {
                 "Expected rule name after fragment".to_string(),
             ));
         };
-        
+
         // Determine rule type
         let rule_type = if name.chars().next().unwrap().is_uppercase() {
             crate::ast::RuleType::Lexer
         } else {
             crate::ast::RuleType::Parser
         };
-        
+
         let mut rule = Rule::new(name, rule_type);
         rule.set_fragment(true);
-        
+
         // Parse arguments: rule[int x, String name]
         if self.current_token.kind == TokenKind::LeftBracket {
             self.advance();
             self.parse_rule_arguments(&mut rule)?;
             self.expect(TokenKind::RightBracket)?;
         }
-        
+
         // Parse returns: returns [Type value]
-        if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "returns" {
+        if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "returns"
+        {
             self.advance();
             self.expect(TokenKind::LeftBracket)?;
             self.parse_rule_returns(&mut rule)?;
             self.expect(TokenKind::RightBracket)?;
         }
-        
+
         // Parse locals: locals [Type var]
         if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "locals" {
             self.advance();
@@ -464,51 +489,53 @@ impl Parser {
             self.parse_rule_locals(&mut rule)?;
             self.expect(TokenKind::RightBracket)?;
         }
-        
+
         // Check for options after fragment rule name (before colon)
         if self.current_token.kind == TokenKind::Options {
             self.parse_options(grammar)?;
         }
-        
+
         self.expect(TokenKind::Colon)?;
-        
+
         // Parse alternatives
         let alt = self.parse_alternative()?;
         rule.add_alternative(alt);
-        
+
         while self.current_token.kind == TokenKind::Pipe {
             self.advance();
             let alt = self.parse_alternative()?;
             rule.add_alternative(alt);
         }
-            
+
         if rule.alternatives.is_empty() {
-                return Err(Error::parse(
-                    format!("{}:{}", self.current_token.line, self.current_token.column),
+            return Err(Error::parse(
+                format!("{}:{}", self.current_token.line, self.current_token.column),
                 "Rule must have at least one alternative".to_string(),
-                ));
+            ));
         }
-        
+
         self.expect(TokenKind::Semicolon)?;
         Ok(rule)
     }
-    
+
     fn parse_rule_arguments(&mut self, rule: &mut Rule) -> Result<()> {
         // Parse: Type name, Type name, ...
         loop {
             // Check if we're at the closing bracket before entering the loop body
-            if self.current_token.kind == TokenKind::RightBracket || self.current_token.kind == TokenKind::Eof {
+            if self.current_token.kind == TokenKind::RightBracket
+                || self.current_token.kind == TokenKind::Eof
+            {
                 break;
             }
-            
+
             // Try to parse type (optional)
             let mut arg_type = None;
             let mut _arg_name = String::new();
-            
+
             if self.current_token.kind == TokenKind::Identifier {
                 let first = self.current_token.text.clone();
                 self.advance();
-                
+
                 // Check if there's another identifier (name after type)
                 if self.current_token.kind == TokenKind::Identifier {
                     arg_type = Some(first);
@@ -522,9 +549,9 @@ impl Parser {
                 // Not an identifier - might be end bracket
                 break;
             }
-            
+
             rule.add_argument(_arg_name, arg_type);
-            
+
             // Check for comma or closing bracket
             if self.current_token.kind == TokenKind::Comma {
                 self.advance();
@@ -539,24 +566,26 @@ impl Parser {
         }
         Ok(())
     }
-    
+
     fn parse_rule_returns(&mut self, rule: &mut Rule) -> Result<()> {
         // Parse: Type name, Type name, ...
         // Examples: "bool value", "Type1 name1, Type2 name2", "bool"
         // We're already inside the brackets, so parse until we find ]
         loop {
             // Check if we're at the closing bracket before entering the loop body
-            if self.current_token.kind == TokenKind::RightBracket || self.current_token.kind == TokenKind::Eof {
+            if self.current_token.kind == TokenKind::RightBracket
+                || self.current_token.kind == TokenKind::Eof
+            {
                 break;
             }
-            
+
             let mut return_type = None;
             let mut _return_name = String::new();
-            
+
             if self.current_token.kind == TokenKind::Identifier {
                 let first = self.current_token.text.clone();
                 self.advance();
-                
+
                 // Check if next token is also an identifier (Type name pattern)
                 // Make sure we're not at the end bracket
                 if self.current_token.kind == TokenKind::Identifier {
@@ -572,9 +601,9 @@ impl Parser {
                 // Break and let caller handle
                 break;
             }
-            
+
             rule.add_return(_return_name, return_type);
-            
+
             // Check for comma (multiple returns) or closing bracket
             if self.current_token.kind == TokenKind::Comma {
                 self.advance();
@@ -589,22 +618,24 @@ impl Parser {
         }
         Ok(())
     }
-    
+
     fn parse_rule_locals(&mut self, rule: &mut Rule) -> Result<()> {
         // Parse: Type name, Type name, ...
         loop {
             // Check if we're at the closing bracket before entering the loop body
-            if self.current_token.kind == TokenKind::RightBracket || self.current_token.kind == TokenKind::Eof {
+            if self.current_token.kind == TokenKind::RightBracket
+                || self.current_token.kind == TokenKind::Eof
+            {
                 break;
             }
-            
+
             let mut local_type = None;
             let mut _local_name = String::new();
-            
+
             if self.current_token.kind == TokenKind::Identifier {
                 let first = self.current_token.text.clone();
                 self.advance();
-                
+
                 if self.current_token.kind == TokenKind::Identifier {
                     local_type = Some(first);
                     _local_name = self.current_token.text.clone();
@@ -616,9 +647,9 @@ impl Parser {
                 // Not an identifier - might be end bracket
                 break;
             }
-            
+
             rule.add_local(_local_name, local_type);
-            
+
             // Check for comma or closing bracket
             if self.current_token.kind == TokenKind::Comma {
                 self.advance();
@@ -635,14 +666,17 @@ impl Parser {
 
     fn parse_alternative(&mut self) -> Result<Alternative> {
         let mut alt = Alternative::new();
-        
+
         while !self.is_alternative_end() {
             // Skip action blocks { ... } or < ... >
             if self.current_token.kind == TokenKind::LeftBrace {
                 self.skip_action_block()?;
                 // After an action block, there might be a quantifier (? * +)
                 // Skip it for now as it applies to the action, not an element
-                if matches!(self.current_token.kind, TokenKind::Question | TokenKind::Star | TokenKind::Plus) {
+                if matches!(
+                    self.current_token.kind,
+                    TokenKind::Question | TokenKind::Star | TokenKind::Plus
+                ) {
                     self.advance();
                     // Check for non-greedy modifier
                     if self.current_token.kind == TokenKind::Question {
@@ -651,34 +685,36 @@ impl Parser {
                 }
                 continue;
             }
-            
+
             // Skip angle bracket actions: <assoc = right>
             if self.current_token.kind == TokenKind::Identifier && self.current_token.text == "<" {
                 self.skip_angle_bracket_action()?;
                 continue;
             }
-            
+
             let element = self.parse_element()?;
             alt.add_element(element);
         }
-        
+
         // Handle lexer commands: -> skip, -> channel(HIDDEN), etc.
         // Support multiple comma-separated commands: -> skip, pushMode(StringMode)
         if self.current_token.kind == TokenKind::Arrow {
             self.advance();
-            
+
             // Parse first command
             let mut first_command = None;
-            
-            while self.current_token.kind == TokenKind::Identifier || self.current_token.kind == TokenKind::Comma {
+
+            while self.current_token.kind == TokenKind::Identifier
+                || self.current_token.kind == TokenKind::Comma
+            {
                 if self.current_token.kind == TokenKind::Comma {
                     self.advance();
                     continue;
                 }
-                
+
                 let command_name = self.current_token.text.clone();
                 self.advance();
-                
+
                 let command = match command_name.as_str() {
                     "skip" => crate::ast::LexerCommand::Skip,
                     "more" => crate::ast::LexerCommand::More,
@@ -710,23 +746,23 @@ impl Parser {
                     }
                     _ => crate::ast::LexerCommand::Skip, // unknown commands default to skip
                 };
-                
+
                 // Store the first command (AST only supports one for now)
                 if first_command.is_none() {
                     first_command = Some(command);
                 }
-                
+
                 // Stop if no comma follows
                 if self.current_token.kind != TokenKind::Comma {
                     break;
                 }
             }
-            
+
             if let Some(cmd) = first_command {
                 alt.set_lexer_command(cmd);
             }
         }
-        
+
         Ok(alt)
     }
 
@@ -734,7 +770,7 @@ impl Parser {
         // Skip angle bracket actions: < ... >
         // We've already consumed the < token
         let mut angle_count = 1;
-        
+
         while angle_count > 0 && self.current_token.kind != TokenKind::Eof {
             // Check for angle brackets - they're tokenized as Identifier tokens with text "<" or ">"
             if self.current_token.kind == TokenKind::Identifier {
@@ -748,17 +784,17 @@ impl Parser {
                     }
                 }
             }
-            
+
             // If we hit a semicolon or other statement-ending token, the angle bracket action might be malformed
             // but we should still try to recover
             if self.current_token.kind == TokenKind::Semicolon && angle_count > 0 {
                 // Malformed angle bracket action - try to recover by breaking
                 break;
             }
-            
+
             self.advance();
         }
-        
+
         // Don't error if angle_count > 0 - might be malformed but we tried to recover
         Ok(())
     }
@@ -767,7 +803,7 @@ impl Parser {
         // Skip action blocks: { ... }
         self.expect(TokenKind::LeftBrace)?;
         let mut brace_count = 1;
-        
+
         while brace_count > 0 && self.current_token.kind != TokenKind::Eof {
             if self.current_token.kind == TokenKind::LeftBrace {
                 brace_count += 1;
@@ -776,14 +812,14 @@ impl Parser {
             }
             self.advance();
         }
-        
+
         if brace_count > 0 {
             return Err(Error::parse(
                 format!("{}:{}", self.current_token.line, self.current_token.column),
                 "Unclosed action block: expected '}' before end of file".to_string(),
             ));
         }
-        
+
         Ok(())
     }
 
@@ -804,7 +840,7 @@ impl Parser {
         } else {
             (None, false)
         };
-        
+
         let element = match self.current_token.kind {
             TokenKind::Identifier => {
                 let name = self.expect_identifier()?;
@@ -821,23 +857,23 @@ impl Parser {
             TokenKind::StringLiteral => {
                 let start_value = self.current_token.text.clone();
                 self.advance();
-                
+
                 // Check for character range shorthand: 'a'..'z' (equivalent to ['a'..'z'])
                 if self.current_token.kind == TokenKind::Range {
                     self.advance(); // consume ..
-                    
+
                     if self.current_token.kind == TokenKind::StringLiteral {
                         let end_value = self.current_token.text.clone();
                         self.advance();
-                        
+
                         // Parse the character literals
                         let start_char = self.parse_char_from_literal(&start_value)?;
                         let end_char = self.parse_char_from_literal(&end_value)?;
-                        
+
                         // Validate range
                         use super::enhanced_errors::validate_char_class_range;
                         validate_char_class_range(start_char, end_char)?;
-                        
+
                         // Create character class element
                         let mut elem = Element::CharClass {
                             negated: false,
@@ -858,7 +894,7 @@ impl Parser {
                         ));
                     }
                 }
-                
+
                 // Regular string literal
                 let mut elem = Element::string_literal(start_value);
                 if let Some(lbl) = label {
@@ -892,14 +928,14 @@ impl Parser {
                     }
                     alternatives.push(alt);
                 }
-                
+
                 if self.current_token.kind == TokenKind::Eof {
                     return Err(Error::parse(
                         format!("{}:{}", self.current_token.line, self.current_token.column),
                         "Unclosed group: expected ')' before end of file".to_string(),
                     ));
                 }
-                
+
                 self.expect(TokenKind::RightParen)?;
                 Element::Group { alternatives }
             }
@@ -1012,29 +1048,33 @@ impl Parser {
 
         // Parse character class contents
         while self.current_token.kind != TokenKind::RightBracket
-            && self.current_token.kind != TokenKind::Eof {
-
+            && self.current_token.kind != TokenKind::Eof
+        {
             if self.current_token.kind == TokenKind::StringLiteral
                 || self.current_token.kind == TokenKind::CharLiteral
-                || self.current_token.kind == TokenKind::Identifier {
+                || self.current_token.kind == TokenKind::Identifier
+            {
                 let start_char = self.parse_char_literal()?;
-                
+
                 // Check for range (either .. or -)
                 // Only treat as range if followed by another character literal
-                if (self.current_token.kind == TokenKind::Range || self.current_token.kind == TokenKind::Minus)
-                    && (self.peek_token.kind == TokenKind::StringLiteral 
+                if (self.current_token.kind == TokenKind::Range
+                    || self.current_token.kind == TokenKind::Minus)
+                    && (self.peek_token.kind == TokenKind::StringLiteral
                         || self.peek_token.kind == TokenKind::CharLiteral
-                        || self.peek_token.kind == TokenKind::Identifier) {
+                        || self.peek_token.kind == TokenKind::Identifier)
+                {
                     self.advance(); // consume .. or -
-                    if self.current_token.kind == TokenKind::StringLiteral 
+                    if self.current_token.kind == TokenKind::StringLiteral
                         || self.current_token.kind == TokenKind::CharLiteral
-                        || self.current_token.kind == TokenKind::Identifier {
+                        || self.current_token.kind == TokenKind::Identifier
+                    {
                         let end_char = self.parse_char_literal()?;
-                        
+
                         // Validate character range
                         use super::enhanced_errors::validate_char_class_range;
                         validate_char_class_range(start_char, end_char)?;
-                        
+
                         ranges.push((start_char, end_char));
                         last_char = None; // Range consumed both chars
                     } else {
@@ -1091,30 +1131,33 @@ impl Parser {
                     TokenKind::RightBracket => Some(']'), // Escaped ]: [\]]
                     _ => None,
                 };
-                
+
                 if let Some(ch) = ch {
                     ranges.push((ch, ch));
                     last_char = Some(ch);
                     self.advance();
-            } else {
-                break;
+                } else {
+                    break;
                 }
             }
         }
-        
+
         // Empty character classes are valid in ANTLR4 (matches nothing)
         if ranges.is_empty() {
-            return Ok(Element::CharClass { negated, ranges: Vec::new() });
+            return Ok(Element::CharClass {
+                negated,
+                ranges: Vec::new(),
+            });
         }
-        
+
         Ok(Element::CharClass { negated, ranges })
     }
-    
+
     fn parse_char_from_literal(&self, literal: &str) -> Result<char> {
         // Parse a character from a string literal (which might be a character literal like '0' or 'a')
         // This handles escape sequences and unicode escapes
         use super::enhanced_errors::parse_unicode_escape;
-        
+
         if literal.starts_with("\\u{") || literal.starts_with("\\u") {
             // Unicode escape: \uXXXX or \u{XXXXXX}
             parse_unicode_escape(literal).map_err(|e| {
@@ -1140,10 +1183,15 @@ impl Parser {
                         u8::from_str_radix(hex, 16)
                             .ok()
                             .and_then(|b| char::from_u32(b as u32))
-                            .ok_or_else(|| Error::parse(
-                                format!("{}:{}", self.current_token.line, self.current_token.column),
-                                "incomplete hex escape sequence".to_string(),
-                            ))
+                            .ok_or_else(|| {
+                                Error::parse(
+                                    format!(
+                                        "{}:{}",
+                                        self.current_token.line, self.current_token.column
+                                    ),
+                                    "incomplete hex escape sequence".to_string(),
+                                )
+                            })
                     } else {
                         Err(Error::parse(
                             format!("{}:{}", self.current_token.line, self.current_token.column),
@@ -1166,11 +1214,11 @@ impl Parser {
             }
         }
     }
-    
+
     fn parse_char_literal(&mut self) -> Result<char> {
         let text = &self.current_token.text;
         use super::enhanced_errors::parse_unicode_escape;
-        
+
         let ch = if text.starts_with("\\u{") || text.starts_with("\\u") {
             // Unicode escape: \uXXXX or \u{XXXXXX}
             parse_unicode_escape(text).map_err(|e| {
@@ -1217,7 +1265,7 @@ impl Parser {
             }
             chars[0]
         };
-        
+
         self.advance();
         Ok(ch)
     }

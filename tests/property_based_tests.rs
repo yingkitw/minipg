@@ -1,6 +1,6 @@
 /// Property-based tests using proptest for grammar validation and parser robustness
 use minipg::parser::GrammarParser;
-use minipg::core::GrammarParser as GrammarParserTrait;
+use minipg::traits::GrammarParser as GrammarParserTrait;
 use proptest::prelude::*;
 
 /// Strategy for generating valid rule names

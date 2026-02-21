@@ -1,7 +1,7 @@
 /// Tests for enhanced error messages and edge case handling
 
 use minipg::parser::GrammarParser;
-use minipg::core::GrammarParser as GrammarParserTrait;
+use minipg::GrammarParser as GrammarParserTrait;
 
 #[test]
 fn test_error_message_expected_tokens() {

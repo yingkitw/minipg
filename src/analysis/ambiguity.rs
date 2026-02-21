@@ -15,44 +15,44 @@ impl AmbiguityDetector {
             first_follow: FirstFollowComputer::new(),
         }
     }
-    
+
     /// Detect ambiguous alternatives in the grammar.
     pub fn detect(&mut self, grammar: &Grammar) -> Vec<Ambiguity> {
         let mut results = Vec::new();
-        
+
         // Compute first/follow sets
         self.first_follow.compute(grammar);
-        
+
         // Check each rule for ambiguous alternatives
         for rule in grammar.parser_rules() {
             if let Some(ambiguities) = self.check_rule(rule) {
                 results.extend(ambiguities);
             }
         }
-        
+
         results
     }
-    
+
     fn check_rule(&self, rule: &Rule) -> Option<Vec<Ambiguity>> {
         if rule.alternatives.len() < 2 {
             return None;
         }
-        
+
         let mut ambiguities = Vec::new();
-        
+
         // Check each pair of alternatives
         for i in 0..rule.alternatives.len() {
             for j in (i + 1)..rule.alternatives.len() {
                 let alt1 = &rule.alternatives[i];
                 let alt2 = &rule.alternatives[j];
-                
+
                 // Get first sets of both alternatives
                 let first1 = self.first_of_alternative(alt1);
                 let first2 = self.first_of_alternative(alt2);
-                
+
                 // Check for overlap
                 let overlap: HashSet<_> = first1.intersection(&first2).cloned().collect();
-                
+
                 if !overlap.is_empty() {
                     ambiguities.push(Ambiguity {
                         rule_name: rule.name.clone(),
@@ -63,17 +63,17 @@ impl AmbiguityDetector {
                 }
             }
         }
-        
+
         if ambiguities.is_empty() {
             None
         } else {
             Some(ambiguities)
         }
     }
-    
+
     fn first_of_alternative(&self, alt: &crate::ast::Alternative) -> HashSet<String> {
         let mut result = HashSet::new();
-        
+
         for element in &alt.elements {
             match element {
                 crate::ast::Element::RuleRef { name, .. } => {
@@ -105,7 +105,7 @@ impl AmbiguityDetector {
                 _ => break,
             }
         }
-        
+
         result
     }
 }
@@ -140,49 +140,49 @@ impl Ambiguity {
 mod tests {
     use super::*;
     use crate::ast::{Alternative, Element, Grammar, Rule};
-    use crate::core::types::GrammarType;
+    use crate::types::GrammarType;
 
     #[test]
     fn test_no_ambiguity() {
         let mut grammar = Grammar::new("Test".to_string(), GrammarType::Parser);
-        
+
         let mut rule = Rule::parser_rule("expr".to_string());
-        
+
         let mut alt1 = Alternative::new();
         alt1.add_element(Element::string_literal("x".to_string()));
         rule.add_alternative(alt1);
-        
+
         let mut alt2 = Alternative::new();
         alt2.add_element(Element::string_literal("y".to_string()));
         rule.add_alternative(alt2);
-        
+
         grammar.add_rule(rule);
-        
+
         let mut detector = AmbiguityDetector::new();
         let results = detector.detect(&grammar);
-        
+
         assert_eq!(results.len(), 0);
     }
 
     #[test]
     fn test_ambiguous_alternatives() {
         let mut grammar = Grammar::new("Test".to_string(), GrammarType::Parser);
-        
+
         let mut rule = Rule::parser_rule("expr".to_string());
-        
+
         let mut alt1 = Alternative::new();
         alt1.add_element(Element::string_literal("x".to_string()));
         rule.add_alternative(alt1);
-        
+
         let mut alt2 = Alternative::new();
         alt2.add_element(Element::string_literal("x".to_string()));
         rule.add_alternative(alt2);
-        
+
         grammar.add_rule(rule);
-        
+
         let mut detector = AmbiguityDetector::new();
         let results = detector.detect(&grammar);
-        
+
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].rule_name, "expr");
         assert!(results[0].conflicting_tokens.contains(&"x".to_string()));

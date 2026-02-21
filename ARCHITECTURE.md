@@ -2,35 +2,32 @@
 
 ## Overview
 
-minipg is a parser generator with **incremental parsing** capabilities, inspired by ANTLR4, designed with modularity and testability as core principles. The architecture follows a pipeline model where grammar files are processed through multiple stages.
+minipg is a fast, Rust-native ANTLR4-compatible parser generator focused on the Rust ecosystem. The architecture follows a pipeline model where grammar files are processed through multiple stages to generate standalone parsers with no runtime dependencies.
 
-**Key Innovation**: Incremental parsing with position tracking enables fast re-parsing for editor integration, making minipg suitable for both runtime parsing and real-time editor use cases. This allows minipg to replace Tree-sitter for editor tooling while maintaining ANTLR4 grammar compatibility.
+**Key Innovation**: Standalone code generation with no runtime dependencies, enabling portable parsers that can be embedded anywhere without external libraries.
 
-**Test Coverage**: minipg has comprehensive test coverage with **147 tests** passing at 100% success rate, including:
+**Test Coverage**: minipg has comprehensive test coverage with **150+ tests** passing at 100% success rate, including:
 - Grammar parsing tests for all supported ANTLR4 features
-- Code generation tests for all 9 target languages (including Tree-sitter)
-- Incremental parsing tests (18 tests)
-- Query language tests (16 tests)
+- Code generation tests for 3 core languages (Rust, Python, JavaScript)
 - Integration tests validating the full pipeline
 - Compatibility tests ensuring ANTLR4 grammar compatibility
 - Real-world grammar tests from the grammars-v4 repository
 
 ## Design Principles
 
-1. **Incremental Parsing**: Position tracking and edit handling for fast re-parsing (PRIMARY)
-2. **Editor Integration**: Complete infrastructure for replacing Tree-sitter
-3. **Query Language**: Tree-sitter-compatible pattern matching for syntax highlighting
-4. **Separation of Concerns**: Each module has a single, well-defined responsibility
-5. **Trait-Based Abstraction**: Core capabilities are defined as traits for flexibility
-6. **Test-Friendly Design**: All components can be tested in isolation
-7. **Type Safety**: Leverage Rust's type system for correctness
-8. **Error Handling**: Comprehensive error types with diagnostic information
-9. **Performance**: Sub-millisecond generation, <10ms incremental edits
-10. **Multi-Language**: Consistent API across all target languages
+1. **Standalone Code Generation**: No runtime dependencies (PRIMARY)
+2. **ANTLR4 Compatibility**: Works with existing ANTLR4 grammars
+3. **Separation of Concerns**: Each module has a single, well-defined responsibility
+4. **Trait-Based Abstraction**: Core capabilities are defined as traits for flexibility
+5. **Test-Friendly Design**: All components can be tested in isolation
+6. **Type Safety**: Leverage Rust's type system for correctness
+7. **Error Handling**: Comprehensive error types with diagnostic information
+8. **Performance**: Sub-millisecond code generation
+9. **Focused Scope**: Quality over quantity - 3 core languages done well
 
 ## Module Structure
 
-**Note**: minipg is now a single consolidated crate with modular organization for easier publishing and installation.
+**Note**: minipg uses a workspace structure with 3 focused crates for modularity while maintaining simplicity.
 
 ### core
 
@@ -110,27 +107,19 @@ Semantic analysis and validation module:
 
 ### codegen
 
-Code generation module for 9 target languages:
+Code generation module for 3 core target languages:
 - **CodeGenerator**: Main dispatcher for code generation
-- **LanguageRegistry**: Extensible registry for adding new language generators
+- **LanguageRegistry**: Extensible registry for language generators
 - **Common Utilities**: Shared code generation helpers
 - **Pattern Matching**: Simple pattern matching for lexer tokenization
-- **Language-Specific Generators**: 
-  - Rust, Python, JavaScript, TypeScript, Go, Java, C, C++, Tree-sitter
-  - All generators tested with comprehensive test suites
-- **RustCodeGenerator**: Rust-specific code generation with inline DFA
-- **PythonCodeGenerator**: Python code with type hints (3.10+)
-- **JavaScriptCodeGenerator**: Modern ES6+ JavaScript
-- **TypeScriptCodeGenerator**: TypeScript with full type safety
-- **GoCodeGenerator**: Idiomatic Go with interfaces
-- **JavaCodeGenerator**: Java with proper package structure
-- **CCodeGenerator**: C with manual memory management
-- **CppCodeGenerator**: Modern C++17+ with RAII and smart pointers
-- **TreeSitterCodeGenerator**: Tree-sitter grammar.js for editor integration
+- **Core Language Generators**: 
+  - **RustCodeGenerator**: Rust with inline DFA and optimizations
+  - **PythonCodeGenerator**: Python with type hints (3.10+)
+  - **JavaScriptCodeGenerator**: Modern ES6+ JavaScript
 - **Template**: Simple template engine for code generation
 - **DfaBuilder**: Generates optimized DFA for tokenization
 - **LookupTableBuilder**: Creates const lookup tables for character classes
-- **modes**: Lexer mode stack management and channel routing for all languages
+- **modes**: Lexer mode stack management and channel routing
 - **actions**: Action code generation and language-specific translation
 - **rule_body**: Rule body generation for parser implementation
 
@@ -145,23 +134,16 @@ The code generator produces:
 - **Lexer modes & channels** - Mode stack management and channel routing
 - **Action code generation** - Embedded actions and semantic predicates
 
-All 9 generators support:
+All 3 core generators support:
 - Parameterized rules (arguments, returns, locals)
 - Named actions (`@header` for imports, `@members` for fields)
 - List labels (`ids+=ID`)
 - Non-greedy quantifiers
 - Character classes with Unicode
-- **Lexer modes** - Mode switching, push/pop operations
-- **Channels** - Token channel routing
-- **Actions** - Embedded action code and semantic predicates
-- **Action translation** - Language-specific action conversion
-
-**Tree-sitter Generator** (NEW in v0.1.5):
-- Converts ANTLR4 grammars to Tree-sitter grammar.js format
-- Generates complete npm package (grammar.js, package.json, README.md)
-- Enables editor integration (VS Code, Neovim, Atom, Emacs, Helix)
-- Supports syntax highlighting, code folding, and semantic analysis
-- Smart case conversion (PascalCase → snake_case/kebab-case)
+- Lexer modes (mode switching, push/pop operations)
+- Channels (token channel routing)
+- Actions (embedded action code and semantic predicates)
+- Action translation (language-specific conversion)
 
 ### cli
 
@@ -172,79 +154,22 @@ Command-line interface module:
   - `validate`: Validate grammar file
   - `info`: Show grammar information
 
-### incremental (NEW in v0.1.5)
-
-Incremental parsing module for editor integration:
-- **position**: Position tracking (Point, Position, Range)
-  - Byte offset and line/column tracking
-  - Range calculations and utilities
-- **edit**: Edit tracking and application
-  - Insert, delete, replace operations
-  - Point advancement calculations
-- **parser**: IncrementalParser trait and implementation
-  - SyntaxTree with position information
-  - Incremental re-parsing (basic implementation)
-  - Foundation for subtree reuse optimization
-
-### query (NEW in v0.1.5)
-
-Query language module for pattern matching:
-- **pattern**: Pattern representation (Pattern, PatternNode)
-  - Node type matching
-  - Field matching (field: syntax)
-  - Capture groups (@name syntax)
-  - Wildcard patterns (_)
-- **parser**: S-expression query parser
-  - Tree-sitter-compatible syntax
-  - Comment support
-  - Multiple patterns per query
-- **capture**: Capture groups with position tracking
-- **matcher**: Pattern matching engine
-  - Match patterns against AST
-  - Extract captures with positions
-
-### mcp
-
-Model Context Protocol (MCP) server module:
-- **MinipgServer**: MCP server implementation using rmcp
-- **Tool Router**: Routes MCP tool calls to minipg operations
-- **Tools**: Exposes minipg functionality via MCP protocol
-  - `parse_grammar`: Parse grammar text into AST
-  - `generate_parser`: Generate parser code for target language
-  - `validate_grammar`: Validate grammar and return diagnostics
-- Enables AI assistants and tools to interact with minipg programmatically
 
 ## Processing Pipeline
 
-### Traditional Pipeline (Code Generation)
 ```
-Grammar File
+Grammar File (.g4)
     ↓
 [Lexer] → Tokens
     ↓
-[Parser] → AST
+[Parser] → AST (Abstract Syntax Tree)
     ↓
 [Semantic Analysis] → Validated AST + Diagnostics
     ↓
-[Code Generator] → Generated Code
+[Code Generator] → Generated Parser Code
     ↓
-Output Files
+Output Files (Rust/Python/JavaScript)
 ```
-
-### Incremental Parsing Pipeline (Editor Integration)
-```
-Source Code
-    ↓
-[IncrementalParser] → SyntaxTree (with positions)
-    ↓
-[Edit Applied] → Updated SyntaxTree
-    ↓
-[QueryMatcher] → Pattern Matches + Captures
-    ↓
-Syntax Highlighting / Editor Features
-```
-
-**Key Difference**: Incremental parsing maintains position information and enables fast re-parsing when edits occur, making it suitable for real-time editor integration.
 
 ## Error Handling Strategy
 
@@ -255,60 +180,41 @@ Syntax Highlighting / Editor Features
 
 ## Testing Strategy
 
-minipg has **comprehensive test coverage** with **147 tests** passing at 100% success rate:
+minipg has **comprehensive test coverage** with **150+ tests** passing at 100% success rate:
 
-1. **Unit Tests (113)**: Test individual components in isolation
+1. **Unit Tests**: Test individual components in isolation
    - Core parsing and lexing functionality
    - AST construction and manipulation
    - Error handling and diagnostics
-   - Incremental parsing (18 tests)
-   - Query language (16 tests)
-2. **Integration Tests (9)**: Test full pipeline end-to-end
+2. **Integration Tests**: Test full pipeline end-to-end
    - Grammar parsing → semantic analysis → code generation
-   - Multi-language code generation validation
+   - Multi-language code generation validation (Rust, Python, JavaScript)
    - Real-world grammar processing
-3. **Feature Tests (13)**: Advanced ANTLR4 features
+3. **Feature Tests**: Advanced ANTLR4 features
    - Rule arguments, returns, locals
    - Named actions
    - Lexer modes and channels
-4. **Compatibility Tests (19)**: ANTLR4 compatibility
-   - Real-world grammars (Java, Python, SQL, GraphQL, JSON)
+4. **Compatibility Tests**: ANTLR4 compatibility
+   - Real-world grammars (JSON, SQL, etc.)
    - Grammar imports and composition
-   - Code generation for all languages
-5. **Example Tests (19)**: Example grammar validation
-   - 19+ example grammars tested
+   - Code generation for core languages
+5. **Example Tests**: Example grammar validation
+   - 15+ example grammars tested
    - All parse successfully
    - Code generation verified
-   - Common utilities
-5. **Compatibility Tests (19)**: ANTLR4 feature compatibility
-   - Named actions, options, imports
-   - ANTLR4 test suite patterns
-   - Real-world grammar subsets
-6. **Feature Tests (13)**: Advanced grammar features
-   - Rule arguments, returns, locals
-   - Lexer modes and channels
-   - Labels and actions
-7. **Example Tests (9)**: Real-world grammar examples
-   - CompleteJSON, SQL, and other complex grammars
-8. **Grammar Test Suite**: Comprehensive validation
-   - ✅ All example grammars pass
-   - ✅ Real-world grammars from grammars-v4 repository
-   - ✅ Complex grammars with advanced features
-   - ✅ Multi-language code generation validation
 
-**All grammar tests pass successfully**, demonstrating robust parsing and code generation capabilities across all supported features and target languages.
+**All tests pass successfully**, demonstrating robust parsing and code generation capabilities.
 
 ## Extension Points
 
 The architecture supports extension through:
-1. **New Target Languages**: Implement `CodeGenerator` trait
-2. **Custom Analysis**: Implement `SemanticAnalyzer` trait
-3. **AST Transformations**: Use `AstVisitor` or `AstVisitorMut`
-4. **Custom Diagnostics**: Extend `Diagnostic` type
+1. **Custom Analysis**: Implement `SemanticAnalyzer` trait
+2. **AST Transformations**: Use `AstVisitor` or `AstVisitorMut`
+3. **Custom Diagnostics**: Extend `Diagnostic` type
 
 ## Future Enhancements
 
-1. **Incremental Parsing**: Cache parse results for faster iteration
-2. **Parallel Analysis**: Analyze multiple grammars concurrently
-3. **Plugin System**: Load custom code generators dynamically
-4. **LSP Support**: Language server for IDE integration
+1. **Complete Code Generation**: Finish rule body generation for all languages
+2. **Performance Optimization**: Optimize generated parser performance
+3. **Better Error Recovery**: Improve error recovery in generated parsers
+4. **Grammar Debugging**: Tools for debugging and optimizing grammars

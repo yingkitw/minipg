@@ -1,6 +1,6 @@
 /// Fuzzing tests for parser robustness against malformed and random input
 use minipg::parser::GrammarParser;
-use minipg::core::GrammarParser as GrammarParserTrait;
+use minipg::traits::GrammarParser as GrammarParserTrait;
 use proptest::prelude::*;
 
 /// Strategy for generating arbitrary strings (potential malformed grammars)
@@ -11,7 +11,7 @@ fn arb_arbitrary_string() -> impl Strategy<Value = String> {
 
 /// Strategy for generating random bytes
 fn arb_random_bytes() -> impl Strategy<Value = Vec<u8>> {
-    prop::collection::vec(any::<u8>(), 0..1000)
+    prop::collection::vec(prop::num::u8::ANY, 0..1000)
 }
 
 /// Test: Parser doesn't panic on arbitrary strings

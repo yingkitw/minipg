@@ -4,7 +4,7 @@
 //! with context, expected tokens, and helpful suggestions.
 
 use super::token::{Token, TokenKind};
-use crate::core::Error;
+use crate::Error;
 
 /// Context information for error reporting
 #[derive(Debug, Clone)]
@@ -77,7 +77,9 @@ impl ErrorContext {
             if self.expected.len() == 1 {
                 msg.push_str(&format!("Expected {}, ", self.expected[0]));
             } else {
-                let expected_str = self.expected.iter()
+                let expected_str = self
+                    .expected
+                    .iter()
                     .map(|t| t.to_string())
                     .collect::<Vec<_>>()
                     .join(", ");
@@ -151,7 +153,7 @@ fn extract_surrounding_text(token: &Token, source: Option<&str>) -> String {
             };
             let end = (token.column + 20).min(line_text.len());
             let snippet = &line_text[start..end];
-            
+
             // Show the line with a caret pointing to the error
             let caret_pos = token.column - start;
             let caret = format!("{}^", " ".repeat(caret_pos));
@@ -225,15 +227,19 @@ pub fn validate_unicode_escape(hex: &str) -> Result<char, Error> {
     if hex.len() != 4 {
         return Err(Error::parse(
             format!("unicode escape"),
-            format!("Unicode escape must be 4 hex digits, got {} digits", hex.len()),
+            format!(
+                "Unicode escape must be 4 hex digits, got {} digits",
+                hex.len()
+            ),
         ));
     }
 
-    let code = u32::from_str_radix(hex, 16)
-        .map_err(|_| Error::parse(
+    let code = u32::from_str_radix(hex, 16).map_err(|_| {
+        Error::parse(
             format!("unicode escape"),
             format!("Invalid hex digits in unicode escape: \\u{}", hex),
-        ))?;
+        )
+    })?;
 
     // Allow surrogate pairs (U+D800 to U+DFFF) even though they're not valid Unicode scalars
     // Some grammars use them, and they're valid in UTF-16
@@ -241,11 +247,12 @@ pub fn validate_unicode_escape(hex: &str) -> Result<char, Error> {
         // Return replacement character for surrogate pairs
         Ok('\u{FFFD}')
     } else {
-        char::from_u32(code)
-            .ok_or_else(|| Error::parse(
+        char::from_u32(code).ok_or_else(|| {
+            Error::parse(
                 format!("unicode escape"),
                 format!("Invalid Unicode code point: U+{:04X}", code),
-            ))
+            )
+        })
     }
 }
 
@@ -253,36 +260,44 @@ pub fn validate_unicode_escape(hex: &str) -> Result<char, Error> {
 pub fn parse_unicode_escape(text: &str) -> Result<char, Error> {
     if text.starts_with("\\u{") {
         // Extended Unicode escape: \u{XXXXXX}
-        let hex = text.strip_prefix("\\u{")
+        let hex = text
+            .strip_prefix("\\u{")
             .and_then(|s| s.strip_suffix('}'))
-            .ok_or_else(|| Error::parse(
-                format!("unicode escape"),
-                "Unclosed Unicode escape sequence".to_string(),
-            ))?;
+            .ok_or_else(|| {
+                Error::parse(
+                    format!("unicode escape"),
+                    "Unclosed Unicode escape sequence".to_string(),
+                )
+            })?;
 
         if hex.len() > 6 {
             return Err(Error::parse(
                 format!("unicode escape"),
-                format!("Unicode escape too long: max 6 hex digits, got {}", hex.len()),
+                format!(
+                    "Unicode escape too long: max 6 hex digits, got {}",
+                    hex.len()
+                ),
             ));
         }
 
-        let code = u32::from_str_radix(hex, 16)
-            .map_err(|_| Error::parse(
+        let code = u32::from_str_radix(hex, 16).map_err(|_| {
+            Error::parse(
                 format!("unicode escape"),
                 format!("Invalid hex digits in unicode escape: \\u{{{}}}", hex),
-            ))?;
+            )
+        })?;
 
         // Allow surrogate pairs (U+D800 to U+DFFF) even though they're not valid Unicode scalars
         if code >= 0xD800 && code <= 0xDFFF {
             // Return replacement character for surrogate pairs
             Ok('\u{FFFD}')
         } else {
-            char::from_u32(code)
-                .ok_or_else(|| Error::parse(
+            char::from_u32(code).ok_or_else(|| {
+                Error::parse(
                     format!("unicode escape"),
                     format!("Invalid Unicode code point: U+{:04X}", code),
-                ))
+                )
+            })
         }
     } else if text.starts_with("\\u") {
         // Standard Unicode escape: \uXXXX
@@ -297,12 +312,9 @@ pub fn parse_unicode_escape(text: &str) -> Result<char, Error> {
 }
 
 /// Edge case validation for grammar elements
-pub fn validate_grammar_edge_cases(
-    token: &Token,
-    context: &str,
-) -> Result<(), Error> {
+pub fn validate_grammar_edge_cases(token: &Token, context: &str) -> Result<(), Error> {
     // Check for common edge cases
-    
+
     // Empty alternatives
     if context.contains("||") {
         return Err(Error::parse(
@@ -325,7 +337,10 @@ pub fn validate_grammar_edge_cases(
     if open_braces != close_braces {
         return Err(Error::parse(
             format!("{}:{}", token.line, token.column),
-            format!("Unmatched braces: {} opening, {} closing", open_braces, close_braces),
+            format!(
+                "Unmatched braces: {} opening, {} closing",
+                open_braces, close_braces
+            ),
         ));
     }
 
@@ -334,7 +349,10 @@ pub fn validate_grammar_edge_cases(
     if open_parens != close_parens {
         return Err(Error::parse(
             format!("{}:{}", token.line, token.column),
-            format!("Unmatched parentheses: {} opening, {} closing", open_parens, close_parens),
+            format!(
+                "Unmatched parentheses: {} opening, {} closing",
+                open_parens, close_parens
+            ),
         ));
     }
 
@@ -343,10 +361,12 @@ pub fn validate_grammar_edge_cases(
     if open_brackets != close_brackets {
         return Err(Error::parse(
             format!("{}:{}", token.line, token.column),
-            format!("Unmatched brackets: {} opening, {} closing", open_brackets, close_brackets),
+            format!(
+                "Unmatched brackets: {} opening, {} closing",
+                open_brackets, close_brackets
+            ),
         ));
     }
 
     Ok(())
 }
-

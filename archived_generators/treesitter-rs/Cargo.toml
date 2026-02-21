@@ -1,0 +1,27 @@
+[package]
+name = "treesitter-rs"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+description = "Tree-sitter grammar generation and query support for minipg"
+keywords = ["parser", "generator", "treesitter", "syntax", "highlighting"]
+categories = ["parser-implementations", "development-tools", "text-editors"]
+
+[dependencies]
+minipg-core = { workspace = true }
+minipg-antlr = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

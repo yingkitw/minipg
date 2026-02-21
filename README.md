@@ -12,73 +12,41 @@
   <a href="https://www.rust-lang.org"><img src="https://img.shields.io/badge/rust-1.85%2B-orange.svg" alt="Rust Version"></a>
 </p>
 
-A blazingly fast, modern parser generator written in Rust with **incremental parsing** and **editor integration**. Generate parsers for 9 languages from ANTLR4 grammars, with complete infrastructure to replace Tree-sitter for editor tooling.
+A fast, Rust-native ANTLR4-compatible parser generator focused on the Rust ecosystem. Generate standalone parsers for Rust and Python from ANTLR4 grammars with no runtime dependencies.
 
 ## ✨ Features
 
-### ⚡ Incremental Parsing (v0.1.6)
-- **Position Tracking** - Byte offsets and line/column for every AST node
-- **Edit Tracking** - Insert, delete, replace operations with automatic point calculation
-- **Fast Re-parsing** - **<5ms incremental edits** with subtree caching
-- **Lazy Parsing** - Parse visible regions first with configurable buffer zones
-- **Parallel Parsing** - Process multiple files concurrently with job queuing
-- **Performance Metrics** - Track parse times and incremental reuse statistics
-- **Custom Hooks** - Extensible semantic analysis with custom validation passes
-- **Editor Integration** - Complete infrastructure for replacing Tree-sitter
-- **Query Language** - Tree-sitter-compatible S-expression queries for pattern matching
-- **Syntax Highlighting** - Pattern-based highlighting with capture groups
-
 ### 🚀 Performance
-- **faster** than ANTLR4 for code generation
+- **Fast code generation** - Sub-millisecond for typical grammars
 - **Linear O(n) scaling** with grammar complexity
-- **Sub-millisecond** generation for typical grammars
-- **<100 KB memory** usage
-- **<5ms incremental edits** with subtree caching and lazy parsing
+- **Low memory usage** - <100 KB for code generation
+- **No runtime dependencies** - Generates standalone parsers
 
-### 🌍 Multi-Language Support (9 Languages)
-- **Rust** - Optimized with inline attributes and DFA generation ✅
+### 🌍 Language Support (3 Core Languages)
+- **Rust** - Primary target with optimized DFA generation and inline attributes ✅
 - **Python** - Type hints and dataclasses (Python 3.10+) ✅
 - **JavaScript** - Modern ES6+ with error recovery ✅
-- **TypeScript** - Full type safety with interfaces and enums ✅
-- **Go** - Idiomatic Go with interfaces and error handling ✅
-- **Java** - Standalone .java files with proper package structure ✅
-- **C** - Standalone .c/.h files with manual memory management ✅
-- **C++** - Modern C++17+ with RAII and smart pointers ✅
-- **Tree-sitter** - Grammar.js for editor syntax highlighting (VS Code, Neovim, Atom) ✅
 
 ### 🎯 ANTLR4 Compatible
-- **Advanced Character Classes** - Full support with Unicode escapes (`\u0000-\uFFFF`) ✅
-- **Non-Greedy Quantifiers** - `.*?`, `.+?`, `.??` for complex patterns ✅
-- **Lexer Commands** - `-> skip`, `-> channel(NAME)`, `-> mode(NAME)` (parsed & generated) ✅
-- **Lexer Modes & Channels** - Mode stack management and channel routing (code generation) ✅
+- **Character Classes** - Full Unicode support with escapes (`\u0000-\uFFFF`) ✅
+- **Non-Greedy Quantifiers** - `.*?`, `.+?`, `.??` ✅
+- **Lexer Commands** - `-> skip`, `-> channel(NAME)`, `-> mode(NAME)` ✅
+- **Lexer Modes & Channels** - Mode stack management and channel routing ✅
 - **Labels** - Element labels (`id=ID`) and list labels (`ids+=ID`) ✅
-- **Named Actions** - `@header`, `@members` with code generation for all 5 languages ✅
-- **Actions** - Embedded actions and semantic predicates (parsed & generated) ✅
+- **Named Actions** - `@header`, `@members` ✅
+- **Actions & Predicates** - Embedded actions and semantic predicates ✅
 - **Fragments** - Reusable lexer components ✅
 - **Parameterized Rules** - Arguments, returns, and local variables ✅
 - **Grammar Imports** - `import X;` syntax ✅
 - **Grammar Options** - `options {...}` blocks ✅
-- **Real-World Grammars** - CompleteJSON.g4 ✅, SQL.g4 ✅, 16 example grammars ✅
-- **Modular Architecture**: Organized into focused crates
-- **Trait-Based Design**: Extensible and testable
-- **Rich Diagnostics**: Detailed error messages with location information
-- **AST with Visitor Pattern**: Flexible tree traversal
-- **Semantic Analysis**: 
-  - Undefined rule detection
-  - Duplicate rule detection
-  - Left recursion detection
-  - Reachability analysis
-  - Empty alternative warnings
-- **Code Generation**: 
-  - Generates optimized standalone parsers
-  - Visitor pattern generation
-  - Listener pattern generation
-  - Configurable output
-- **CLI Tool**: Easy-to-use command-line interface
-- **Error Recovery**: Robust error handling and recovery strategies
-- **Comprehensive Documentation**: User guide, API docs, and syntax reference
-- **Snapshot Testing**: Comprehensive tests using insta for regression prevention
-- **Complex Grammar Examples**: JSON, SQL, Java, Python, and more
+
+### 🔧 Core Features
+- **Standalone Code Generation** - No runtime dependencies
+- **Semantic Analysis** - Undefined rules, duplicates, left recursion detection
+- **Rich Diagnostics** - Detailed error messages with location information
+- **Visitor Pattern** - Flexible AST traversal
+- **CLI Tool** - Easy-to-use command-line interface
+- **Comprehensive Testing** - 150+ tests with 100% pass rate
 
 ## Architecture
 
@@ -88,7 +56,7 @@ minipg is organized as a single crate with modular structure:
 - **ast**: Abstract Syntax Tree definitions and visitor patterns
 - **parser**: Grammar file parser (lexer + parser)
 - **analysis**: Semantic analysis and validation
-- **codegen**: Code generation for target languages (Rust, Python, JS, TS)
+- **codegen**: Code generation for target languages (Rust, Python, JavaScript)
 - **CLI**: Command-line interface with binary
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed design documentation.
@@ -122,15 +90,6 @@ minipg generate grammar.g4 -o output/ -l python
 
 # Generate JavaScript parser
 minipg generate grammar.g4 -o output/ -l javascript
-
-# Generate TypeScript parser
-minipg generate grammar.g4 -o output/ -l typescript
-
-# Generate Go parser
-minipg generate grammar.g4 -o output/ -l go
-
-# Generate Tree-sitter grammar
-minipg generate grammar.g4 -o output/ -l treesitter
 ```
 
 ### Validate a Grammar
@@ -177,46 +136,36 @@ WS: [ \t\r\n]+ -> skip;
 
 ### minipg vs ANTLR4 vs Pest
 
-A comprehensive comparison of three parser generator tools:
-
 | Feature | minipg | ANTLR4 | Pest |
 |---------|--------|--------|------|
 | **Language** | Rust | Java | Rust |
 | **Runtime Dependency** | None (standalone) | Requires runtime library | Requires runtime library |
-| **Grammar Syntax** | ANTLR4 (industry standard) | ANTLR4 (native) | PEG (Parsing Expression Grammar) |
-| **Grammar Compatibility** | 100% ANTLR4 compatible | Native | Pest-specific |
-| **Grammar Ecosystem** | Compatible with 1000+ ANTLR4 grammars | Native ecosystem | Pest-specific grammars |
-| **Target Languages** | Rust, Python, JS, TS, Go, Java, C, C++, Tree-sitter | Java, Python, JS, C#, C++, Go, Swift | Rust only |
-| **Code Generation** | Standalone parsers (no runtime) | Runtime-based parsers | Macro-based (requires runtime) |
+| **Grammar Syntax** | ANTLR4 compatible | ANTLR4 (native) | PEG |
+| **Target Languages** | Rust, Python, JavaScript | Java, Python, JS, C#, C++, Go, Swift | Rust only |
+| **Code Generation** | Standalone parsers | Runtime-based parsers | Macro-based |
 | **Generation Speed** | Sub-millisecond | Seconds | Compile-time |
 | **Memory Usage** | <100 KB | Higher (JVM overhead) | Low (Rust native) |
-| **AST Patterns** | Auto-generated visitor/listener | Auto-generated visitor/listener | Manual tree walking |
-| **Error Recovery** | Built-in, continues after errors | Built-in, continues after errors | Stops at first error |
-| **Test Coverage** | 186+ tests, 100% pass rate | Comprehensive | Good |
-| **Grammar Test Suite** | ✅ All tests pass | ✅ Comprehensive | ✅ Good |
-| **Real-World Grammars** | ✅ grammars-v4 compatible | ✅ Native support | Limited ecosystem |
-| **Standalone Output** | ✅ Yes (no dependencies) | ❌ Requires runtime | ❌ Requires runtime |
-| **Multi-Language** | ✅ 8 languages | ✅ 7+ languages | ❌ Rust only |
-| **Modern Implementation** | ✅ Rust 2024 | Java-based | ✅ Rust macros |
+| **AST Patterns** | Visitor/listener | Visitor/listener | Manual tree walking |
+| **Error Recovery** | Built-in | Built-in | Stops at first error |
+| **Test Coverage** | 150+ tests, 100% pass | Comprehensive | Good |
+| **Standalone Output** | ✅ Yes | ❌ Requires runtime | ❌ Requires runtime |
+| **ANTLR4 Grammars** | ✅ Compatible | ✅ Native | ❌ Different syntax |
 
 **Key Advantages of minipg**:
-- ⚡ **Fast code generation** - sub-millisecond for typical grammars
-- 🚀 **No runtime dependencies** - generates standalone parsers
-- 🦀 **Modern Rust** implementation with safety guarantees
+- ⚡ **Fast code generation** - Sub-millisecond for typical grammars
+- 🚀 **No runtime dependencies** - Generates standalone parsers
+- 🦀 **Modern Rust** - Safety guarantees and modern tooling
 - 📦 **Smaller footprint** - <100 KB memory usage
-- 🔧 **Easy integration** - no Java runtime required
-- ✅ **Comprehensive testing** - 147 tests with 100% pass rate
-- ✅ **Grammar compatibility** - works with existing ANTLR4 grammars
-- ✅ **Multi-language** - generate parsers for 9 different languages
-- ✅ **Editor integration** - Tree-sitter support for VS Code, Neovim, Atom
+- 🔧 **Easy integration** - No Java runtime required
+- ✅ **ANTLR4 compatible** - Works with existing ANTLR4 grammars
+- ✅ **Focused scope** - Rust and Python targets, well-tested
 
 **Choose minipg if you need**:
-- Multi-language parser generation
 - ANTLR4 grammar compatibility
-- Standalone, portable parsers with no runtime dependencies
-- Automatic visitor/listener patterns
+- Standalone parsers with no runtime dependencies
+- Rust or Python parser generation
 - Fast code generation
-- Comprehensive test coverage
+- Modern Rust implementation
 
 **Choose ANTLR4 if you need**:
 - Mature, battle-tested tooling
@@ -292,44 +241,28 @@ RUST_LOG=info cargo run -- generate grammar.g4
 
 ## Project Status
 
-- **Current Version**: 0.1.6 (Production Ready)
-- **Status**: Advanced Features Complete ✅
-- **Test Suite**: **203 tests** with **100% pass rate**
-  - ✅ All grammar parsing tests pass
-  - ✅ All code generation tests pass
-  - ✅ All integration tests pass
-  - ✅ All compatibility tests pass
-  - ✅ Incremental parsing tests pass (18 tests)
-  - ✅ Query language tests pass (16 tests)
-  - ✅ Comprehensive coverage of ANTLR4 features
-- **Target Languages**: **9 languages** (Rust, Python, JavaScript, TypeScript, Go, Java, C, C++, Tree-sitter)
-- **Package**: Single consolidated crate for easy installation
+- **Current Version**: 0.2.0 (Simplified & Focused)
+- **Status**: Core Features Complete ✅
+- **Test Suite**: **150+ tests** with **100% pass rate**
+  - ✅ Grammar parsing tests
+  - ✅ Code generation tests (Rust, Python, JavaScript)
+  - ✅ Integration tests
+  - ✅ ANTLR4 compatibility tests
+- **Target Languages**: **3 core languages** (Rust, Python, JavaScript)
 - **Grammar Support**: 
-  - ✅ CompleteJSON.g4 - Full JSON grammar
-  - ✅ SQL.g4 - SQL grammar subset
-  - ✅ 19+ example grammars
-  - ✅ Real-world grammars from grammars-v4 repository
-- **E2E Coverage**: Full pipeline testing from grammar to working parser
-- **ANTLR4 Compatibility**: High - supports most common features with comprehensive test coverage
-- **Latest Features (v0.1.6)**:
-  - ✅ **Lazy Parsing** - Parse visible regions first with configurable buffer zones
-  - ✅ **Parallel Parsing** - Process multiple files concurrently with job queuing
-  - ✅ **Custom Analysis Hooks** - Extensible semantic analysis with custom validation passes
-  - ✅ **Performance Optimization** - <5ms incremental edits with subtree caching
-  - ✅ **Parse Metrics** - Track parse times, incremental reuse, and performance
-  - ✅ **Hook Registry** - Manage and enable/disable custom analysis hooks
-  - ✅ **Batch Processing** - Process large numbers of files in batches
-  - ✅ **Built-in Hooks** - Naming convention checker, complexity analyzer
-  - ✅ **Incremental Parsing (v0.1.5)** - Position tracking, edit tracking, incremental re-parsing
-  - ✅ **Query Language (v0.1.5)** - Tree-sitter-compatible S-expression queries for pattern matching
-  - ✅ **Tree-sitter Generator** - Generate grammar.js for editor integration
-  - ✅ **Editor Foundation** - Complete infrastructure for replacing Tree-sitter
-  - ✅ Go code generator (idiomatic, production-ready)
+  - ✅ CompleteJSON.g4
+  - ✅ SQL.g4
+  - ✅ 15+ example grammars
+  - ✅ ANTLR4 grammars-v4 compatible
+- **ANTLR4 Compatibility**: High - supports most common features
+- **Core Features**:
   - ✅ Rule arguments: `rule[Type name]`
   - ✅ Return values: `returns [Type name]`
   - ✅ Local variables: `locals [Type name]`
   - ✅ List labels (`ids+=ID`)
-  - ✅ Named actions with code generation
+  - ✅ Named actions (`@header`, `@members`)
+  - ✅ Lexer modes and channels
+  - ✅ Grammar composition and imports
 
 See [TODO.md](TODO.md) for current tasks and [docs/archive/ROADMAP.md](docs/archive/ROADMAP.md) for the complete roadmap.
 

@@ -15,12 +15,12 @@ use minipg::analysis::{
     first_follow::FirstFollowComputer,
     SemanticAnalyzer, GrammarValidator,
 };
-use minipg::core::{
+use minipg::{
     GrammarValidator as GrammarValidatorTrait,
     SemanticAnalyzer as SemanticAnalyzerTrait,
 };
 use minipg::parser::GrammarParser;
-use minipg::core::GrammarParser as GrammarParserTrait;
+use minipg::GrammarParser as GrammarParserTrait;
 
 fn parse_grammar(grammar_text: &str) -> minipg::ast::Grammar {
     let parser = GrammarParser::new();

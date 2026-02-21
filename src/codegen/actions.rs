@@ -24,7 +24,10 @@ pub fn translate_action(code: &str, from_lang: &str, to_lang: &str) -> String {
         // Rust to Go
         ("rust", "go") => translate_rust_to_go(code),
         // Default: return as-is with comment
-        _ => format!("// TODO: Translate action from {} to {}\n{}", from_lang, to_lang, code),
+        _ => format!(
+            "// TODO: Translate action from {} to {}\n{}",
+            from_lang, to_lang, code
+        ),
     }
 }
 

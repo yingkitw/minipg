@@ -1,7 +1,7 @@
 //! Custom semantic analysis hooks for extensibility.
 
 use crate::ast::Grammar;
-use crate::core::{Diagnostic, DiagnosticSeverity};
+use crate::{Diagnostic, DiagnosticSeverity};
 use std::sync::Arc;
 
 /// Context for semantic analysis hooks.
@@ -157,14 +157,20 @@ impl AnalysisHook for NamingConventionHook {
         if let Some(suffix) = &self.lexer_suffix {
             for rule in &context.grammar.rules {
                 // Check if it's a lexer rule (uppercase first letter)
-                if rule.name.chars().next().map(|c| c.is_uppercase()).unwrap_or(false) {
+                if rule
+                    .name
+                    .chars()
+                    .next()
+                    .map(|c| c.is_uppercase())
+                    .unwrap_or(false)
+                {
                     if !rule.name.ends_with(suffix) {
                         result.diagnostics.push(
                             Diagnostic::warning(format!(
                                 "Lexer rule '{}' should end with '{}'",
                                 rule.name, suffix
                             ))
-                            .with_code("N001")
+                            .with_code("N001"),
                         );
                     }
                 }
@@ -182,7 +188,9 @@ pub struct ComplexityHook {
 
 impl ComplexityHook {
     pub fn new() -> Self {
-        Self { max_alternatives: 10 }
+        Self {
+            max_alternatives: 10,
+        }
     }
 
     pub fn with_max_alternatives(mut self, max: usize) -> Self {
@@ -218,7 +226,7 @@ impl AnalysisHook for ComplexityHook {
                         rule.alternatives.len(),
                         self.max_alternatives
                     ))
-                    .with_code("C001")
+                    .with_code("C001"),
                 );
             }
         }
@@ -230,11 +238,14 @@ impl AnalysisHook for ComplexityHook {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{Rule, Alternative};
+    use crate::ast::{Alternative, Rule};
 
     #[test]
     fn test_analysis_context() {
-        let grammar = Grammar::new("Test".to_string(), crate::core::types::GrammarType::Combined);
+        let grammar = Grammar::new(
+            "Test".to_string(),
+            crate::types::GrammarType::Combined,
+        );
         let context = AnalysisContext::new(grammar.clone(), "test.g4");
 
         assert_eq!(context.source, "test.g4");
@@ -248,8 +259,7 @@ mod tests {
 
     #[test]
     fn test_hook_result_with_diagnostic() {
-        let result = HookResult::new()
-            .with_diagnostic(Diagnostic::error("test error"));
+        let result = HookResult::new().with_diagnostic(Diagnostic::error("test error"));
 
         assert!(result.has_errors());
     }
@@ -267,10 +277,12 @@ mod tests {
 
     #[test]
     fn test_naming_convention_hook() {
-        let hook = NamingConventionHook::new()
-            .with_lexer_suffix("_TOKEN");
+        let hook = NamingConventionHook::new().with_lexer_suffix("_TOKEN");
 
-        let mut grammar = Grammar::new("Test".to_string(), crate::core::types::GrammarType::Combined);
+        let mut grammar = Grammar::new(
+            "Test".to_string(),
+            crate::types::GrammarType::Combined,
+        );
         let rule = Rule::new("ID".to_string(), crate::ast::RuleType::Lexer);
         grammar.add_rule(rule);
 
@@ -282,10 +294,12 @@ mod tests {
 
     #[test]
     fn test_complexity_hook() {
-        let hook = ComplexityHook::new()
-            .with_max_alternatives(2);
+        let hook = ComplexityHook::new().with_max_alternatives(2);
 
-        let mut grammar = Grammar::new("Test".to_string(), crate::core::types::GrammarType::Combined);
+        let mut grammar = Grammar::new(
+            "Test".to_string(),
+            crate::types::GrammarType::Combined,
+        );
         let mut rule = Rule::new("test".to_string(), crate::ast::RuleType::Parser);
 
         for _ in 0..5 {
@@ -310,7 +324,10 @@ mod tests {
         registry.register(hook1);
         registry.register(hook2);
 
-        let grammar = Grammar::new("Test".to_string(), crate::core::types::GrammarType::Combined);
+        let grammar = Grammar::new(
+            "Test".to_string(),
+            crate::types::GrammarType::Combined,
+        );
         let context = AnalysisContext::new(grammar, "test.g4");
 
         let result = registry.run_all(&context);

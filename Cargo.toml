@@ -1,67 +1,36 @@
 [package]
 name = "minipg"
-version = "0.1.6"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.85"
 authors = ["Ying Kit WONG"]
 license = "Apache-2.0"
-description = "A blazingly fast parser generator with ANTLR4 compatibility"
 repository = "https://github.com/yingkitw/minipg"
 homepage = "https://github.com/yingkitw/minipg"
-documentation = "https://docs.rs/minipg"
-readme = "README.md"
-keywords = ["parser", "generator", "antlr4", "compiler", "lexer"]
+description = "A modern parser generator supporting ANTLR4 grammars with code generation for Rust, Python, and JavaScript"
+keywords = ["parser", "generator", "antlr", "compiler","treesitter"]
 categories = ["parser-implementations", "development-tools", "compilers"]
-
-[package.metadata.docs.rs]
-all-features = true
-rustdoc-args = ["--cfg", "docsrs"]
 
 [[bin]]
 name = "minipg"
 path = "src/main.rs"
 
-[[bin]]
-name = "minipg-mcp"
-path = "src/bin/minipg-mcp.rs"
-
 [dependencies]
-# Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-
-# Error handling
 thiserror = "2.0"
 anyhow = "1.0"
-
-# CLI
 clap = { version = "4", features = ["derive"] }
-
-# Logging
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-# MCP server
-rmcp = { version = "0.14", features = ["server", "macros", "transport-io"] }
-tokio = { version = "1.0", features = ["full"] }
-schemars = { version = "1.0", features = ["derive"] }
-
 [dev-dependencies]
-insta = "1.41"
-proptest = "1.6"
-criterion = "0.5"
-tempfile = "3.11"
+proptest = "1.0"
 
-[[bench]]
-name = "codegen_bench"
-harness = false
+[features]
+default = ["cli"]
+cli = []
 
-[[bench]]
-name = "performance_bench"
-harness = false
-
-[profile.release]
-opt-level = 3
-lto = true
-codegen-units = 1
-strip = true
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

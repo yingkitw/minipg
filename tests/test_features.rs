@@ -12,19 +12,19 @@
 //!
 //! Tests are organized by feature category for easy navigation.
 
-use minipg::core::{CodeGenerator, SemanticAnalyzer, GrammarParser};
-use minipg::codegen::{RustCodeGenerator, PythonCodeGenerator, JavaScriptCodeGenerator, TypeScriptCodeGenerator, GoCodeGenerator};
-use minipg::core::types::CodeGenConfig;
-use minipg::parser::{GrammarParser as GP, Lexer, Parser};
+use minipg::{CodeGenerator, SemanticAnalyzer, GrammarParser, types::CodeGenConfig};
+use minipg::codegen::{rust::RustCodeGenerator, python::PythonCodeGenerator, javascript::JavaScriptCodeGenerator};
+use minipg::parser::{Lexer, Parser};
 use minipg::ast::{Element, Grammar, Rule};
-use minipg::core::types::GrammarType;
+use minipg::traits::GrammarParser as GrammarParserTrait;
+use minipg::types::GrammarType;
 
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
 fn parse_grammar(grammar_text: &str) -> Grammar {
-    let parser = GP::new();
+    let parser = minipg::parser::GrammarParser::new();
     parser.parse_string(grammar_text, "test.g4").expect("Failed to parse grammar")
 }
 

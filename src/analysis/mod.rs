@@ -1,22 +1,22 @@
 //! Semantic analysis for grammars.
 
-pub mod semantic;
-pub mod validator;
-pub mod reachability;
-pub mod left_recursion;
-pub mod first_follow;
 pub mod ambiguity;
 pub mod composition;
+pub mod first_follow;
 pub mod hooks;
+pub mod left_recursion;
+pub mod reachability;
+pub mod semantic;
+pub mod validator;
 
+pub use composition::GrammarComposer;
+pub use hooks::{AnalysisContext, AnalysisHook, HookRegistry, HookResult};
+pub use hooks::{ComplexityHook, NamingConventionHook};
 pub use semantic::SemanticAnalyzer;
 pub use validator::GrammarValidator;
-pub use composition::GrammarComposer;
-pub use hooks::{AnalysisHook, HookRegistry, AnalysisContext, HookResult};
-pub use hooks::{NamingConventionHook, ComplexityHook};
 
 use crate::ast::Grammar;
-use crate::core::Diagnostic;
+use crate::Diagnostic;
 
 /// Analysis result containing validated grammar and diagnostics.
 #[derive(Debug)]
@@ -40,6 +40,6 @@ impl AnalysisResult {
     pub fn has_errors(&self) -> bool {
         self.diagnostics
             .iter()
-            .any(|d| matches!(d.severity, crate::core::DiagnosticSeverity::Error))
+            .any(|d| matches!(d.severity, crate::DiagnosticSeverity::Error))
     }
 }

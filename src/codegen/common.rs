@@ -292,4 +292,3 @@ mod tests {
         assert_eq!(format_identifier("MyVariable", "go"), "MyVariable");
     }
 }
-

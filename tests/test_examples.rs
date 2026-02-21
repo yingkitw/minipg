@@ -16,7 +16,7 @@
 //! - Feature verification
 
 use minipg::parser::GrammarParser;
-use minipg::core::GrammarParser as GrammarParserTrait;
+use minipg::GrammarParser as GrammarParserTrait;
 use std::fs;
 
 fn load_grammar(filename: &str) -> String {

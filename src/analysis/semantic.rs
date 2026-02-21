@@ -1,11 +1,11 @@
 //! Semantic analysis implementation.
 
 use super::{
-    ambiguity::AmbiguityDetector,
-    left_recursion::LeftRecursionDetector, reachability::ReachabilityAnalyzer, AnalysisResult,
+    ambiguity::AmbiguityDetector, left_recursion::LeftRecursionDetector,
+    reachability::ReachabilityAnalyzer, AnalysisResult,
 };
 use crate::ast::{AstVisitor, Grammar};
-use crate::core::{Diagnostic, Result, SemanticAnalyzer as SemanticAnalyzerTrait};
+use crate::{Diagnostic, Result, SemanticAnalyzer as SemanticAnalyzerTrait};
 use std::collections::{HashMap, HashSet};
 
 /// Semantic analyzer for grammars.
@@ -17,6 +17,21 @@ impl SemanticAnalyzer {
     pub fn new() -> Self {
         Self {
             diagnostics: Vec::new(),
+        }
+    }
+
+    pub fn analyze(&mut self, grammar: &mut Grammar) -> AnalysisResult {
+        self.check_undefined_rules(grammar);
+        self.check_duplicate_rules(grammar);
+        self.check_empty_alternatives(grammar);
+        self.check_left_recursion(grammar);
+        self.check_unreachable_rules(grammar);
+        self.check_ambiguous_alternatives(grammar);
+        self.extract_channels(grammar);
+
+        AnalysisResult {
+            grammar: grammar.clone(),
+            diagnostics: std::mem::take(&mut self.diagnostics),
         }
     }
 
@@ -33,8 +48,7 @@ impl SemanticAnalyzer {
         for rule_ref in &referenced_rules {
             if !defined_rules.contains(rule_ref) {
                 self.diagnostics.push(
-                    Diagnostic::error(format!("undefined rule: {}", rule_ref))
-                        .with_code("E001"),
+                    Diagnostic::error(format!("undefined rule: {}", rule_ref)).with_code("E001"),
                 );
             }
         }
@@ -79,7 +93,7 @@ impl SemanticAnalyzer {
         // Use advanced left recursion detector
         let mut detector = LeftRecursionDetector::new();
         let recursions = detector.detect(grammar);
-        
+
         for recursion in recursions {
             let message = match recursion.kind {
                 crate::analysis::left_recursion::LeftRecursionKind::Direct => {
@@ -93,28 +107,28 @@ impl SemanticAnalyzer {
                     )
                 }
             };
-            
-            self.diagnostics.push(Diagnostic::warning(message).with_code("W002"));
+
+            self.diagnostics
+                .push(Diagnostic::warning(message).with_code("W002"));
         }
     }
-    
+
     fn check_unreachable_rules(&mut self, grammar: &Grammar) {
         let mut analyzer = ReachabilityAnalyzer::new();
         analyzer.analyze(grammar);
         let unreachable = analyzer.unreachable_rules(grammar);
-        
+
         for rule_name in unreachable {
             self.diagnostics.push(
-                Diagnostic::warning(format!("unreachable rule: {}", rule_name))
-                    .with_code("W003"),
+                Diagnostic::warning(format!("unreachable rule: {}", rule_name)).with_code("W003"),
             );
         }
     }
-    
+
     fn check_ambiguous_alternatives(&mut self, grammar: &Grammar) {
         let mut detector = AmbiguityDetector::new();
         let ambiguities = detector.detect(grammar);
-        
+
         for ambiguity in ambiguities {
             self.diagnostics.push(
                 Diagnostic::warning(format!(
@@ -126,10 +140,12 @@ impl SemanticAnalyzer {
             );
         }
     }
-    
+
     fn extract_channels(&self, grammar: &mut Grammar) {
         // Extract channel names from lexer commands
-        let channels: Vec<String> = grammar.rules.iter()
+        let channels: Vec<String> = grammar
+            .rules
+            .iter()
             .flat_map(|rule| rule.alternatives.iter())
             .filter_map(|alt| {
                 if let Some(crate::ast::LexerCommand::Channel(channel_name)) = &alt.lexer_command {
@@ -143,7 +159,7 @@ impl SemanticAnalyzer {
                 }
             })
             .collect();
-        
+
         for channel in channels {
             grammar.add_channel(channel);
         }
@@ -162,7 +178,7 @@ impl SemanticAnalyzerTrait for SemanticAnalyzer {
 
     fn analyze(&self, input: &Self::Input) -> Result<Self::Output> {
         let mut analyzer = Self::new();
-        
+
         analyzer.check_undefined_rules(input);
         analyzer.check_duplicate_rules(input);
         analyzer.check_empty_alternatives(input);
@@ -171,10 +187,10 @@ impl SemanticAnalyzerTrait for SemanticAnalyzer {
         analyzer.check_ambiguous_alternatives(input);
 
         let mut result = AnalysisResult::new(input.clone());
-        
+
         // Extract channels from lexer commands
         analyzer.extract_channels(&mut result.grammar);
-        
+
         result.diagnostics = analyzer.diagnostics;
 
         Ok(result)

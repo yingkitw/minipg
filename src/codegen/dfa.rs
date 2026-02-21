@@ -79,9 +79,7 @@ impl DfaBuilder {
             Element::CharRange { start, end } => {
                 self.add_transition(from_state, CharClass::Range(*start, *end))
             }
-            Element::Wildcard => {
-                self.add_transition(from_state, CharClass::Any)
-            }
+            Element::Wildcard => self.add_transition(from_state, CharClass::Any),
             _ => from_state, // Handle other elements as needed
         }
     }
@@ -112,7 +110,6 @@ impl DfaBuilder {
 
         new_state_id
     }
-
 }
 
 impl Default for DfaBuilder {
@@ -133,7 +130,7 @@ pub fn generate_dfa_match(states: &[DfaState]) -> String {
     code.push_str("        loop {\n");
     code.push_str("            // Check if current state is accepting\n");
     code.push_str("            match state {\n");
-    
+
     for state in states {
         if let Some(token_name) = &state.accepting {
             code.push_str(&format!(
@@ -142,7 +139,7 @@ pub fn generate_dfa_match(states: &[DfaState]) -> String {
             ));
         }
     }
-    
+
     code.push_str("                _ => {}\n");
     code.push_str("            }\n\n");
 
@@ -160,11 +157,18 @@ pub fn generate_dfa_match(states: &[DfaState]) -> String {
             let pattern = match char_class {
                 CharClass::Single(ch) => format!("'{}'", ch.escape_default()),
                 CharClass::Range(start, end) => {
-                    format!("'{}' ..= '{}'", start.escape_default(), end.escape_default())
+                    format!(
+                        "'{}' ..= '{}'",
+                        start.escape_default(),
+                        end.escape_default()
+                    )
                 }
                 CharClass::Any => "_".to_string(),
             };
-            code.push_str(&format!("                ({}, {}) => {},\n", state.id, pattern, next_state));
+            code.push_str(&format!(
+                "                ({}, {}) => {},\n",
+                state.id, pattern, next_state
+            ));
         }
     }
 
@@ -175,21 +179,23 @@ pub fn generate_dfa_match(states: &[DfaState]) -> String {
 
     code.push_str("        // Return token if we found an accepting state\n");
     code.push_str("        if let Some((end_pos, token_name)) = last_accepting {\n");
-    code.push_str("            let text: String = self.input[token_start..end_pos].iter().collect();\n");
+    code.push_str(
+        "            let text: String = self.input[token_start..end_pos].iter().collect();\n",
+    );
     code.push_str("            Some(Token {\n");
     code.push_str("                position: token_start,\n");
     code.push_str("                kind: match token_name {\n");
-    
+
     // Generate token kind matching
-    let token_names: HashSet<String> = states
-        .iter()
-        .filter_map(|s| s.accepting.clone())
-        .collect();
-    
+    let token_names: HashSet<String> = states.iter().filter_map(|s| s.accepting.clone()).collect();
+
     for token_name in token_names {
-        code.push_str(&format!("                    \"{}\" => TokenKind::{},\n", token_name, token_name));
+        code.push_str(&format!(
+            "                    \"{}\" => TokenKind::{},\n",
+            token_name, token_name
+        ));
     }
-    
+
     code.push_str("                    _ => TokenKind::Eof,\n");
     code.push_str("                },\n");
     code.push_str("                text,\n");
@@ -212,5 +218,4 @@ mod tests {
         assert_eq!(builder.states.len(), 1);
         assert_eq!(builder.next_state_id, 1);
     }
-
 }

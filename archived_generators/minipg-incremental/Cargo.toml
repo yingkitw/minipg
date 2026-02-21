@@ -1,0 +1,28 @@
+[package]
+name = "minipg-incremental"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+description = "Incremental parsing and editor integration for minipg"
+keywords = ["parser", "incremental", "editor", "syntax", "highlighting"]
+categories = ["parser-implementations", "development-tools", "text-editors"]
+
+[dependencies]
+minipg-core = { workspace = true }
+minipg-antlr = { workspace = true }
+treesitter-rs = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

@@ -1,7 +1,7 @@
 //! Grammar AST node definitions.
 
 use super::rule::Rule;
-use crate::core::types::GrammarType;
+use crate::types::GrammarType;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

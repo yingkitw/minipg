@@ -24,7 +24,7 @@
 //! 3. **Skip mode**: Skips tests entirely (set SKIP_GRAMMARS_V4_TESTS=1)
 
 use minipg::parser::GrammarParser;
-use minipg::core::GrammarParser as GrammarParserTrait;
+use minipg::GrammarParser as GrammarParserTrait;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;

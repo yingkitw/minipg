@@ -37,9 +37,9 @@ pub enum TokenKind {
     LeftBracket,
     RightBracket,
     Equals,
-    PlusEquals,  // += for list labels
+    PlusEquals, // += for list labels
     Arrow,
-    At,  // @ for named actions
+    At, // @ for named actions
 
     // Special
     Eof,

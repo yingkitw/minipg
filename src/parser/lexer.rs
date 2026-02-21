@@ -43,18 +43,18 @@ impl Lexer {
             disable_char_class_mode: false,
         }
     }
-    
+
     pub fn push_mode(&mut self, mode: LexerMode) {
         self.mode_stack.push(self.mode);
         self.mode = mode;
     }
-    
+
     pub fn pop_mode(&mut self) {
         if let Some(prev_mode) = self.mode_stack.pop() {
             self.mode = prev_mode;
         }
     }
-    
+
     pub fn mode(&self) -> LexerMode {
         self.mode
     }
@@ -76,7 +76,7 @@ impl Lexer {
 
         let start_line = self.line;
         let start_column = self.column;
-        
+
         // Save the last token kind before generating the next one
         let _prev_token_kind = self.last_token_kind;
         let ch = self.current_char();
@@ -88,7 +88,12 @@ impl Lexer {
             }
             ';' => {
                 self.advance();
-                Token::new(TokenKind::Semicolon, ";".to_string(), start_line, start_column)
+                Token::new(
+                    TokenKind::Semicolon,
+                    ";".to_string(),
+                    start_line,
+                    start_column,
+                )
             }
             '|' => {
                 self.advance();
@@ -100,7 +105,12 @@ impl Lexer {
             }
             '?' => {
                 self.advance();
-                Token::new(TokenKind::Question, "?".to_string(), start_line, start_column)
+                Token::new(
+                    TokenKind::Question,
+                    "?".to_string(),
+                    start_line,
+                    start_column,
+                )
             }
             '*' => {
                 self.advance();
@@ -117,7 +127,12 @@ impl Lexer {
                     // Check for +=
                     if self.current_char() == '=' {
                         self.advance();
-                        Token::new(TokenKind::PlusEquals, "+=".to_string(), start_line, start_column)
+                        Token::new(
+                            TokenKind::PlusEquals,
+                            "+=".to_string(),
+                            start_line,
+                            start_column,
+                        )
                     } else {
                         Token::new(TokenKind::Plus, "+".to_string(), start_line, start_column)
                     }
@@ -133,19 +148,39 @@ impl Lexer {
             }
             '(' => {
                 self.advance();
-                Token::new(TokenKind::LeftParen, "(".to_string(), start_line, start_column)
+                Token::new(
+                    TokenKind::LeftParen,
+                    "(".to_string(),
+                    start_line,
+                    start_column,
+                )
             }
             ')' => {
                 self.advance();
-                Token::new(TokenKind::RightParen, ")".to_string(), start_line, start_column)
+                Token::new(
+                    TokenKind::RightParen,
+                    ")".to_string(),
+                    start_line,
+                    start_column,
+                )
             }
             '{' => {
                 self.advance();
-                Token::new(TokenKind::LeftBrace, "{".to_string(), start_line, start_column)
+                Token::new(
+                    TokenKind::LeftBrace,
+                    "{".to_string(),
+                    start_line,
+                    start_column,
+                )
             }
             '}' => {
                 self.advance();
-                Token::new(TokenKind::RightBrace, "}".to_string(), start_line, start_column)
+                Token::new(
+                    TokenKind::RightBrace,
+                    "}".to_string(),
+                    start_line,
+                    start_column,
+                )
             }
             '[' => {
                 self.advance();
@@ -153,13 +188,18 @@ impl Lexer {
                 // 1. Explicitly disabled
                 // 2. Last token was an identifier (likely rule arguments: rule[args])
                 // 3. Last token was 'returns' or 'locals' (likely returns[type] or locals[type])
-                let should_enter_charclass = !self.disable_char_class_mode 
+                let should_enter_charclass = !self.disable_char_class_mode
                     && self.last_token_kind != Some(TokenKind::Identifier);
-                
+
                 if should_enter_charclass {
                     self.push_mode(LexerMode::CharClass);
                 }
-                Token::new(TokenKind::LeftBracket, "[".to_string(), start_line, start_column)
+                Token::new(
+                    TokenKind::LeftBracket,
+                    "[".to_string(),
+                    start_line,
+                    start_column,
+                )
             }
             ']' => {
                 self.advance();
@@ -167,7 +207,12 @@ impl Lexer {
                 if self.mode == LexerMode::CharClass {
                     self.pop_mode();
                 }
-                Token::new(TokenKind::RightBracket, "]".to_string(), start_line, start_column)
+                Token::new(
+                    TokenKind::RightBracket,
+                    "]".to_string(),
+                    start_line,
+                    start_column,
+                )
             }
             '=' => {
                 self.advance();
@@ -230,7 +275,12 @@ impl Lexer {
                     // Outside character class, treat as action delimiter (skip for now)
                     // We'll handle it in the parser
                     self.advance();
-                    Token::new(TokenKind::Identifier, "<".to_string(), start_line, start_column)
+                    Token::new(
+                        TokenKind::Identifier,
+                        "<".to_string(),
+                        start_line,
+                        start_column,
+                    )
                 }
             }
             '>' => {
@@ -243,7 +293,12 @@ impl Lexer {
                 } else {
                     // Outside character class, treat as action delimiter
                     self.advance();
-                    Token::new(TokenKind::Identifier, ">".to_string(), start_line, start_column)
+                    Token::new(
+                        TokenKind::Identifier,
+                        ">".to_string(),
+                        start_line,
+                        start_column,
+                    )
                 }
             }
             '\\' => {
@@ -264,10 +319,14 @@ impl Lexer {
             }
             _ => {
                 self.advance();
-                Token::error(format!("unexpected character: {}", ch), start_line, start_column)
+                Token::error(
+                    format!("unexpected character: {}", ch),
+                    start_line,
+                    start_column,
+                )
             }
         };
-        
+
         // Track the token kind for context-aware lexing
         self.last_token_kind = Some(token.kind);
         token
@@ -277,15 +336,19 @@ impl Lexer {
         let mut text = String::new();
         text.push(self.current_char()); // backslash
         self.advance();
-        
+
         if self.is_at_end() {
-            return Token::error("incomplete escape sequence".to_string(), start_line, start_column);
+            return Token::error(
+                "incomplete escape sequence".to_string(),
+                start_line,
+                start_column,
+            );
         }
-        
+
         let escape_char = self.current_char();
         text.push(escape_char);
         self.advance();
-        
+
         // Handle Unicode escapes: \uXXXX or \u{XXXXXX}
         if escape_char == 'u' {
             if self.current_char() == '{' {
@@ -295,14 +358,22 @@ impl Lexer {
                 let mut digit_count = 0;
                 while !self.is_at_end() && self.current_char() != '}' && digit_count < 6 {
                     if !self.current_char().is_ascii_hexdigit() {
-                        return Token::error("invalid hex digit in unicode escape".to_string(), start_line, start_column);
+                        return Token::error(
+                            "invalid hex digit in unicode escape".to_string(),
+                            start_line,
+                            start_column,
+                        );
                     }
                     text.push(self.current_char());
                     self.advance();
                     digit_count += 1;
                 }
                 if self.is_at_end() || self.current_char() != '}' {
-                    return Token::error("unclosed unicode escape sequence".to_string(), start_line, start_column);
+                    return Token::error(
+                        "unclosed unicode escape sequence".to_string(),
+                        start_line,
+                        start_column,
+                    );
                 }
                 text.push('}');
                 self.advance();
@@ -310,7 +381,11 @@ impl Lexer {
                 // Standard Unicode escape: \uXXXX (4 hex digits)
                 for _ in 0..4 {
                     if self.is_at_end() || !self.current_char().is_ascii_hexdigit() {
-                        return Token::error("invalid unicode escape: expected 4 hex digits".to_string(), start_line, start_column);
+                        return Token::error(
+                            "invalid unicode escape: expected 4 hex digits".to_string(),
+                            start_line,
+                            start_column,
+                        );
                     }
                     text.push(self.current_char());
                     self.advance();
@@ -325,7 +400,11 @@ impl Lexer {
                 digit_count += 1;
             }
             if digit_count == 0 {
-                return Token::error("invalid hex escape: expected hex digits".to_string(), start_line, start_column);
+                return Token::error(
+                    "invalid hex escape: expected hex digits".to_string(),
+                    start_line,
+                    start_column,
+                );
             }
         } else if escape_char.is_ascii_digit() {
             // Octal escape: \0, \00, \000 (1-3 octal digits)
@@ -343,11 +422,11 @@ impl Lexer {
             }
         }
         // For other escapes like \n, \r, \t, \\, etc., we already consumed them
-        
+
         // Return as StringLiteral so parser can handle it with parse_char_literal
         Token::new(TokenKind::StringLiteral, text, start_line, start_column)
     }
-    
+
     fn lex_identifier_or_keyword(&mut self) -> Token {
         let start_line = self.line;
         let start_column = self.column;
@@ -359,7 +438,9 @@ impl Lexer {
             self.advance();
         } else {
             // Normal mode: consume full identifier
-            while !self.is_at_end() && (self.current_char().is_alphanumeric() || self.current_char() == '_') {
+            while !self.is_at_end()
+                && (self.current_char().is_alphanumeric() || self.current_char() == '_')
+            {
                 text.push(self.current_char());
                 self.advance();
             }
@@ -382,9 +463,9 @@ impl Lexer {
         let start_line = self.line;
         let start_column = self.column;
         let mut text = String::new();
-        
+
         self.advance(); // skip opening quote
-        
+
         while !self.is_at_end() && self.current_char() != '"' {
             if self.current_char() == '\\' {
                 self.advance();
@@ -397,11 +478,15 @@ impl Lexer {
                 self.advance();
             }
         }
-        
+
         if self.is_at_end() {
-            return Token::error("unterminated string literal".to_string(), start_line, start_column);
+            return Token::error(
+                "unterminated string literal".to_string(),
+                start_line,
+                start_column,
+            );
         }
-        
+
         self.advance(); // skip closing quote
         Token::new(TokenKind::StringLiteral, text, start_line, start_column)
     }
@@ -410,9 +495,9 @@ impl Lexer {
         let start_line = self.line;
         let start_column = self.column;
         let mut text = String::new();
-        
+
         self.advance(); // skip opening quote
-        
+
         while !self.is_at_end() && self.current_char() != '\'' {
             if self.current_char() == '\\' {
                 self.advance();
@@ -425,13 +510,17 @@ impl Lexer {
                 self.advance();
             }
         }
-        
+
         if self.is_at_end() {
-            return Token::error("unterminated character literal".to_string(), start_line, start_column);
+            return Token::error(
+                "unterminated character literal".to_string(),
+                start_line,
+                start_column,
+            );
         }
-        
+
         self.advance(); // skip closing quote
-        
+
         // Treat as string literal for grammar purposes
         Token::new(TokenKind::StringLiteral, text, start_line, start_column)
     }

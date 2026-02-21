@@ -9,7 +9,7 @@
 /// - dhat-rs: cargo test --test memory_profiling --features dhat-heap
 
 use minipg::parser::GrammarParser;
-use minipg::core::GrammarParser as GrammarParserTrait;
+use minipg::GrammarParser as GrammarParserTrait;
 
 /// Test that parsing doesn't leak memory when called repeatedly
 #[test]
