@@ -2,7 +2,7 @@
 name = "minipg"
 version = "0.2.0"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.93"
 authors = ["Ying Kit WONG"]
 license = "Apache-2.0"
 repository = "https://github.com/yingkitw/minipg"
