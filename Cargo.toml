@@ -10,6 +10,15 @@ homepage = "https://github.com/yingkitw/minipg"
 description = "A modern parser generator supporting ANTLR4 grammars with code generation for Rust, Python, and JavaScript"
 keywords = ["parser", "generator", "antlr", "compiler","treesitter"]
 categories = ["parser-implementations", "development-tools", "compilers"]
+exclude = [
+    "grammars-v4-cache/**",
+    "archived_generators/**",
+    "target/**",
+    "tests/**",
+    ".github/**",
+    "*.png",
+    "*.pdf",
+]
 
 [[bin]]
 name = "minipg"
