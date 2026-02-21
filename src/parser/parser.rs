@@ -171,9 +171,9 @@ impl Parser {
             }
 
             // Skip comma or semicolon
-            if self.current_token.kind == TokenKind::Comma {
-                self.advance();
-            } else if self.current_token.kind == TokenKind::Semicolon {
+            if self.current_token.kind == TokenKind::Comma
+                || self.current_token.kind == TokenKind::Semicolon
+            {
                 self.advance();
             } else if self.current_token.kind != TokenKind::RightBrace {
                 // Skip whitespace/newlines
@@ -199,9 +199,9 @@ impl Parser {
             }
 
             // Skip comma or semicolon
-            if self.current_token.kind == TokenKind::Comma {
-                self.advance();
-            } else if self.current_token.kind == TokenKind::Semicolon {
+            if self.current_token.kind == TokenKind::Comma
+                || self.current_token.kind == TokenKind::Semicolon
+            {
                 self.advance();
             } else if self.current_token.kind != TokenKind::RightBrace {
                 break;
@@ -337,11 +337,8 @@ impl Parser {
 
     fn parse_rule(&mut self, grammar: &mut Grammar) -> Result<Rule> {
         // Rule names can be identifiers OR keywords (like "options", "parser", "lexer")
-        let name = if self.current_token.kind == TokenKind::Identifier {
-            let name = self.current_token.text.clone();
-            self.advance();
-            name
-        } else if self.current_token.kind == TokenKind::Options
+        let name = if self.current_token.kind == TokenKind::Identifier
+            || self.current_token.kind == TokenKind::Options
             || self.current_token.kind == TokenKind::Parser
             || self.current_token.kind == TokenKind::Lexer
         {
@@ -438,11 +435,8 @@ impl Parser {
         self.expect(TokenKind::Fragment)?;
 
         // Parse rule name
-        let name = if self.current_token.kind == TokenKind::Identifier {
-            let name = self.current_token.text.clone();
-            self.advance();
-            name
-        } else if self.current_token.kind == TokenKind::Options
+        let name = if self.current_token.kind == TokenKind::Identifier
+            || self.current_token.kind == TokenKind::Options
             || self.current_token.kind == TokenKind::Parser
             || self.current_token.kind == TokenKind::Lexer
         {

@@ -99,9 +99,9 @@ impl PythonCodeGenerator {
             code.push_str("        # Custom members from @members action\n");
             code.push_str("        ");
             code.push_str(members_code);
-            code.push_str("\n");
+            code.push('\n');
         }
-        code.push_str("\n");
+        code.push('\n');
 
         // Generate parse methods for each rule
         for rule in grammar.parser_rules() {
@@ -126,7 +126,7 @@ impl PythonCodeGenerator {
             }
         }
 
-        code.push_str(")");
+        code.push(')');
 
         // Add return type annotation
         if !rule.returns.is_empty() {
@@ -150,7 +150,7 @@ impl PythonCodeGenerator {
                         code.push_str("AstNode");
                     }
                 }
-                code.push_str("]");
+                code.push(']');
             }
         }
 
@@ -178,9 +178,7 @@ impl PythonCodeGenerator {
             code.push_str("        Returns:\n");
             for ret in &rule.returns {
                 let type_str = ret
-                    .return_type
-                    .as_ref()
-                    .map(|t| t.as_str())
+                    .return_type.as_deref()
                     .unwrap_or("AstNode");
                 code.push_str(&format!("            {}: {}\n", ret.name, type_str));
             }
@@ -197,7 +195,7 @@ impl PythonCodeGenerator {
             code.push_str(&format!("        {}{} = None\n", local.name, type_str));
         }
         if !rule.locals.is_empty() {
-            code.push_str("\n");
+            code.push('\n');
         }
 
         // Generate rule body
@@ -232,7 +230,7 @@ impl PythonCodeGenerator {
                     code.push_str("            pass\n");
                 }
             }
-            code.push_str("\n");
+            code.push('\n');
         }
 
         code
@@ -247,7 +245,7 @@ impl PythonCodeGenerator {
             let class_name = to_pascal_case(&rule.name);
             let fields = self.extract_labeled_fields(rule);
             
-            code.push_str(&format!("@dataclass\n"));
+            code.push_str("@dataclass\n");
             code.push_str(&format!("class {}Node:\n", class_name));
             code.push_str(&format!("    \"\"\"AST node for {} rule.\"\"\"\n", rule.name));
             
@@ -261,7 +259,7 @@ impl PythonCodeGenerator {
                         code.push_str(&format!("    {}: {}\n", field_name, field_type));
                     }
                 }
-                code.push_str("\n");
+                code.push('\n');
             }
         }
 
@@ -367,12 +365,10 @@ impl PythonCodeGenerator {
                         } else {
                             code.push_str(&format!("        self.{}()\\n", method_name));
                         }
+                    } else if let Some(lbl) = label {
+                        code.push_str(&format!("        {} = self.{}()\\n", lbl, method_name));
                     } else {
-                        if let Some(lbl) = label {
-                            code.push_str(&format!("        {} = self.{}()\\n", lbl, method_name));
-                        } else {
-                            code.push_str(&format!("        self.{}()\\n", method_name));
-                        }
+                        code.push_str(&format!("        self.{}()\\n", method_name));
                     }
                 }
                 Element::Terminal { value, label, is_list } => {
@@ -384,10 +380,8 @@ impl PythonCodeGenerator {
                         if let Some(lbl) = label {
                             code.push_str(&format!("            {}.append(self.tokens[self.position])\\n", lbl));
                         }
-                    } else {
-                        if let Some(lbl) = label {
-                            code.push_str(&format!("            {} = self.tokens[self.position]\\n", lbl));
-                        }
+                    } else if let Some(lbl) = label {
+                        code.push_str(&format!("            {} = self.tokens[self.position]\\n", lbl));
                     }
                     code.push_str("            self.position += 1\\n");
                     code.push_str("        else:\\n");
@@ -402,16 +396,14 @@ impl PythonCodeGenerator {
                         if let Some(lbl) = label {
                             code.push_str(&format!("            {}.append(self.tokens[self.position])\\n", lbl));
                         }
-                    } else {
-                        if let Some(lbl) = label {
-                            code.push_str(&format!("            {} = self.tokens[self.position]\\n", lbl));
-                        }
+                    } else if let Some(lbl) = label {
+                        code.push_str(&format!("            {} = self.tokens[self.position]\\n", lbl));
                     }
                     code.push_str("            self.position += 1\\n");
                     code.push_str("        else:\\n");
                     code.push_str(&format!("            raise ParseError(f'Expected \\\"{}\\\", got {{self.tokens[self.position].value}}', self.position, [], None)\\n", value));
                 }
-                Element::Optional { element, .. } => {
+                Element::Optional { element: _, .. } => {
                     code.push_str("        # Optional element\\n");
                     code.push_str("        saved_pos = self.position\\n");
                     code.push_str("        try:\\n");
@@ -421,7 +413,7 @@ impl PythonCodeGenerator {
                     code.push_str("            # Optional failed, restore position\\n");
                     code.push_str("            self.position = saved_pos\\n");
                 }
-                Element::ZeroOrMore { element, .. } => {
+                Element::ZeroOrMore { element: _, .. } => {
                     code.push_str("        # Zero or more repetition\\n");
                     code.push_str("        while self.position < len(self.tokens):\\n");
                     code.push_str("            saved_pos = self.position\\n");
@@ -432,7 +424,7 @@ impl PythonCodeGenerator {
                     code.push_str("                self.position = saved_pos\\n");
                     code.push_str("                break\\n");
                 }
-                Element::OneOrMore { element, .. } => {
+                Element::OneOrMore { element: _, .. } => {
                     code.push_str("        # One or more repetition\\n");
                     code.push_str("        match_count = 0\\n");
                     code.push_str("        while self.position < len(self.tokens):\\n");
@@ -500,9 +492,9 @@ impl CodeGeneratorTrait for PythonCodeGenerator {
         if let Some(header_code) = input.named_actions.get("header") {
             code.push_str("\n# Custom header from @header action\n");
             code.push_str(header_code);
-            code.push_str("\n");
+            code.push('\n');
         }
-        code.push_str("\n");
+        code.push('\n');
 
         // Error class
         code.push_str("@dataclass\n");

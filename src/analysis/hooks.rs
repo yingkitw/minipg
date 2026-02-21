@@ -163,8 +163,7 @@ impl AnalysisHook for NamingConventionHook {
                     .next()
                     .map(|c| c.is_uppercase())
                     .unwrap_or(false)
-                {
-                    if !rule.name.ends_with(suffix) {
+                    && !rule.name.ends_with(suffix) {
                         result.diagnostics.push(
                             Diagnostic::warning(format!(
                                 "Lexer rule '{}' should end with '{}'",
@@ -173,7 +172,6 @@ impl AnalysisHook for NamingConventionHook {
                             .with_code("N001"),
                         );
                     }
-                }
             }
         }
 

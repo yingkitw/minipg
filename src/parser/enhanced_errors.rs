@@ -146,11 +146,7 @@ fn extract_surrounding_text(token: &Token, source: Option<&str>) -> String {
         let lines: Vec<&str> = source_text.lines().collect();
         if token.line > 0 && token.line <= lines.len() {
             let line_text = lines[token.line - 1];
-            let start = if token.column > 20 {
-                token.column - 20
-            } else {
-                0
-            };
+            let start = token.column.saturating_sub(20);
             let end = (token.column + 20).min(line_text.len());
             let snippet = &line_text[start..end];
 
@@ -203,7 +199,7 @@ fn generate_suggestion(context: &ErrorContext) -> Option<String> {
 pub fn validate_char_class_range(start: char, end: char) -> Result<(), Error> {
     if start > end {
         return Err(Error::parse(
-            format!("character class"),
+            "character class".to_string(),
             format!("Invalid character range: '{}' must be <= '{}'", start, end),
         ));
     }
@@ -211,10 +207,10 @@ pub fn validate_char_class_range(start: char, end: char) -> Result<(), Error> {
     // Check for valid Unicode ranges
     if !start.is_ascii() || !end.is_ascii() {
         // For non-ASCII, ensure valid Unicode scalar values
-        if !char::from_u32(start as u32).is_some() || !char::from_u32(end as u32).is_some() {
+        if char::from_u32(start as u32).is_none() || char::from_u32(end as u32).is_none() {
             return Err(Error::parse(
-                format!("character class"),
-                format!("Invalid Unicode character in range"),
+                "character class".to_string(),
+                "Invalid Unicode character in range".to_string(),
             ));
         }
     }
@@ -226,7 +222,7 @@ pub fn validate_char_class_range(start: char, end: char) -> Result<(), Error> {
 pub fn validate_unicode_escape(hex: &str) -> Result<char, Error> {
     if hex.len() != 4 {
         return Err(Error::parse(
-            format!("unicode escape"),
+            "unicode escape".to_string(),
             format!(
                 "Unicode escape must be 4 hex digits, got {} digits",
                 hex.len()
@@ -236,20 +232,20 @@ pub fn validate_unicode_escape(hex: &str) -> Result<char, Error> {
 
     let code = u32::from_str_radix(hex, 16).map_err(|_| {
         Error::parse(
-            format!("unicode escape"),
+            "unicode escape".to_string(),
             format!("Invalid hex digits in unicode escape: \\u{}", hex),
         )
     })?;
 
     // Allow surrogate pairs (U+D800 to U+DFFF) even though they're not valid Unicode scalars
     // Some grammars use them, and they're valid in UTF-16
-    if code >= 0xD800 && code <= 0xDFFF {
+    if (0xD800..=0xDFFF).contains(&code) {
         // Return replacement character for surrogate pairs
         Ok('\u{FFFD}')
     } else {
         char::from_u32(code).ok_or_else(|| {
             Error::parse(
-                format!("unicode escape"),
+                "unicode escape".to_string(),
                 format!("Invalid Unicode code point: U+{:04X}", code),
             )
         })
@@ -265,14 +261,14 @@ pub fn parse_unicode_escape(text: &str) -> Result<char, Error> {
             .and_then(|s| s.strip_suffix('}'))
             .ok_or_else(|| {
                 Error::parse(
-                    format!("unicode escape"),
+                    "unicode escape".to_string(),
                     "Unclosed Unicode escape sequence".to_string(),
                 )
             })?;
 
         if hex.len() > 6 {
             return Err(Error::parse(
-                format!("unicode escape"),
+                "unicode escape".to_string(),
                 format!(
                     "Unicode escape too long: max 6 hex digits, got {}",
                     hex.len()
@@ -282,30 +278,29 @@ pub fn parse_unicode_escape(text: &str) -> Result<char, Error> {
 
         let code = u32::from_str_radix(hex, 16).map_err(|_| {
             Error::parse(
-                format!("unicode escape"),
+                "unicode escape".to_string(),
                 format!("Invalid hex digits in unicode escape: \\u{{{}}}", hex),
             )
         })?;
 
         // Allow surrogate pairs (U+D800 to U+DFFF) even though they're not valid Unicode scalars
-        if code >= 0xD800 && code <= 0xDFFF {
+        if (0xD800..=0xDFFF).contains(&code) {
             // Return replacement character for surrogate pairs
             Ok('\u{FFFD}')
         } else {
             char::from_u32(code).ok_or_else(|| {
                 Error::parse(
-                    format!("unicode escape"),
+                    "unicode escape".to_string(),
                     format!("Invalid Unicode code point: U+{:04X}", code),
                 )
             })
         }
-    } else if text.starts_with("\\u") {
+    } else if let Some(hex) = text.strip_prefix("\\u") {
         // Standard Unicode escape: \uXXXX
-        let hex = &text[2..];
         validate_unicode_escape(hex)
     } else {
         Err(Error::parse(
-            format!("unicode escape"),
+            "unicode escape".to_string(),
             format!("Invalid unicode escape format: {}", text),
         ))
     }
@@ -324,7 +319,7 @@ pub fn validate_grammar_edge_cases(token: &Token, context: &str) -> Result<(), E
     }
 
     // Unterminated strings
-    if context.contains("'") && !context.matches("'").count() % 2 == 0 {
+    if context.contains("'") && (!context.matches("'").count()).is_multiple_of(2) {
         return Err(Error::parse(
             format!("{}:{}", token.line, token.column),
             "Unterminated string literal".to_string(),

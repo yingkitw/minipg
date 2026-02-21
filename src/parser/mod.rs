@@ -1,9 +1,10 @@
 //! Grammar parser implementation.
 
+#[allow(clippy::module_inception)]
+pub mod parser;
 pub mod enhanced_errors;
 pub mod error_recovery;
 pub mod lexer;
-pub mod parser;
 pub mod token;
 
 pub use lexer::Lexer;

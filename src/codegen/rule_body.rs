@@ -100,9 +100,9 @@ fn generate_alternatives(rule: &Rule, ctx: &mut RuleBodyContext, lang: &str) -> 
                     "{}    let saved_pos = self.position;\n",
                     indent_str
                 ));
-                ctx.indent = ctx.indent + 4;
+                ctx.indent += 4;
                 code.push_str(&generate_alternative_body(alt, rule, ctx, lang));
-                ctx.indent = ctx.indent - 4;
+                ctx.indent -= 4;
 
                 // If successful, return
                 code.push_str(&format!(
@@ -121,9 +121,9 @@ fn generate_alternatives(rule: &Rule, ctx: &mut RuleBodyContext, lang: &str) -> 
                     "{}        let saved_pos = self.position;\n",
                     indent_str
                 ));
-                ctx.indent = ctx.indent + 8;
+                ctx.indent += 8;
                 code.push_str(&generate_alternative_body(alt, rule, ctx, lang));
-                ctx.indent = ctx.indent - 8;
+                ctx.indent -= 8;
                 code.push_str(&format!(
                     "{}        Ok(result) => return Ok(result),\n",
                     indent_str
@@ -189,7 +189,7 @@ fn generate_alternative_body(
             code.push_str(&format!("{}let mut {}: Vec<AstNode> = Vec::new();\n", indent_str, lbl));
         }
         if !list_vars.is_empty() {
-            code.push_str("\n");
+            code.push('\n');
         }
     }
 
@@ -256,15 +256,13 @@ fn generate_element_code(
                     } else {
                         code.push_str(&format!("{}let _ = self.{}()?;\n", indent_str, method_name));
                     }
+                } else if let Some(lbl) = label {
+                    code.push_str(&format!(
+                        "{}let {} = self.{}()?;\n",
+                        indent_str, lbl, method_name
+                    ));
                 } else {
-                    if let Some(lbl) = label {
-                        code.push_str(&format!(
-                            "{}let {} = self.{}()?;\n",
-                            indent_str, lbl, method_name
-                        ));
-                    } else {
-                        code.push_str(&format!("{}self.{}()?;\n", indent_str, method_name));
-                    }
+                    code.push_str(&format!("{}self.{}()?;\n", indent_str, method_name));
                 }
             }
         }
@@ -293,14 +291,12 @@ fn generate_element_code(
                             lbl
                         ));
                     }
-                } else {
-                    if let Some(lbl) = label {
-                        code.push_str(&format!(
-                            "{}let {} = self.tokens[self.position].clone();\n",
-                            " ".repeat(ctx.indent + 4),
-                            lbl
-                        ));
-                    }
+                } else if let Some(lbl) = label {
+                    code.push_str(&format!(
+                        "{}let {} = self.tokens[self.position].clone();\n",
+                        " ".repeat(ctx.indent + 4),
+                        lbl
+                    ));
                 }
 
                 code.push_str(&format!(
@@ -342,14 +338,12 @@ fn generate_element_code(
                             lbl
                         ));
                     }
-                } else {
-                    if let Some(lbl) = label {
-                        code.push_str(&format!(
-                            "{}let {} = self.tokens[self.position].clone();\n",
-                            " ".repeat(ctx.indent + 4),
-                            lbl
-                        ));
-                    }
+                } else if let Some(lbl) = label {
+                    code.push_str(&format!(
+                        "{}let {} = self.tokens[self.position].clone();\n",
+                        " ".repeat(ctx.indent + 4),
+                        lbl
+                    ));
                 }
 
                 code.push_str(&format!(
@@ -584,9 +578,9 @@ fn generate_group_alternatives(
                 code.push_str(&format!("{}self.position = saved_pos;\n", indent_str));
             }
             code.push_str(&format!("{}match {{\n", indent_str));
-            ctx.indent = ctx.indent + 4;
+            ctx.indent += 4;
             let alt_code = generate_alternative_body(alt, rule, ctx, lang);
-            ctx.indent = ctx.indent - 4;
+            ctx.indent -= 4;
             code.push_str(&alt_code);
             code.push_str(&format!(
                 "{}    Ok(result) => return Ok(result),\n",
@@ -619,19 +613,6 @@ fn to_pascal_case(s: &str) -> String {
                 None => String::new(),
                 Some(first) => first.to_uppercase().chain(chars).collect(),
             }
-        })
-        .collect()
-}
-
-fn escape_string(s: &str) -> String {
-    s.chars()
-        .map(|c| match c {
-            '"' => "\\\"".to_string(),
-            '\\' => "\\\\".to_string(),
-            '\n' => "\\n".to_string(),
-            '\r' => "\\r".to_string(),
-            '\t' => "\\t".to_string(),
-            _ => c.to_string(),
         })
         .collect()
 }

@@ -3,7 +3,6 @@
 use crate::ast::{Grammar, Rule};
 
 /// Common patterns and utilities for code generation.
-
 /// Token type information for code generation
 pub struct TokenTypeInfo {
     pub name: String,

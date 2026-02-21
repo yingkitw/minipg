@@ -117,7 +117,7 @@ impl JavaScriptCodeGenerator {
             code.push_str("    // Custom members from @members action\n");
             code.push_str("    ");
             code.push_str(members_code);
-            code.push_str("\n");
+            code.push('\n');
         }
 
         code.push_str("  }\n\n");
@@ -186,7 +186,7 @@ impl JavaScriptCodeGenerator {
             code.push_str(&format!("    let {};\n", local.name));
         }
         if !rule.locals.is_empty() {
-            code.push_str("\n");
+            code.push('\n');
         }
 
         // Generate rule body
@@ -378,12 +378,10 @@ impl JavaScriptCodeGenerator {
                         } else {
                             code.push_str(&format!("      this.parse{}();\\n", capitalize(&method_name)));
                         }
+                    } else if let Some(lbl) = label {
+                        code.push_str(&format!("      const {} = this.parse{}();\\n", lbl, capitalize(&method_name)));
                     } else {
-                        if let Some(lbl) = label {
-                            code.push_str(&format!("      const {} = this.parse{}();\\n", lbl, capitalize(&method_name)));
-                        } else {
-                            code.push_str(&format!("      this.parse{}();\\n", capitalize(&method_name)));
-                        }
+                        code.push_str(&format!("      this.parse{}();\\n", capitalize(&method_name)));
                     }
                 }
                 Element::Terminal { value, label, is_list } => {
@@ -396,10 +394,8 @@ impl JavaScriptCodeGenerator {
                         if let Some(lbl) = label {
                             code.push_str(&format!("        {}.push(this.tokens[this.position]);\\n", lbl));
                         }
-                    } else {
-                        if let Some(lbl) = label {
-                            code.push_str(&format!("        const {} = this.tokens[this.position];\\n", lbl));
-                        }
+                    } else if let Some(lbl) = label {
+                        code.push_str(&format!("        const {} = this.tokens[this.position];\\n", lbl));
                     }
                     code.push_str("        this.position++;\\n");
                     code.push_str("      } else {\\n");
@@ -416,17 +412,15 @@ impl JavaScriptCodeGenerator {
                         if let Some(lbl) = label {
                             code.push_str(&format!("        {}.push(this.tokens[this.position]);\\n", lbl));
                         }
-                    } else {
-                        if let Some(lbl) = label {
-                            code.push_str(&format!("        const {} = this.tokens[this.position];\\n", lbl));
-                        }
+                    } else if let Some(lbl) = label {
+                        code.push_str(&format!("        const {} = this.tokens[this.position];\\n", lbl));
                     }
                     code.push_str("        this.position++;\\n");
                     code.push_str("      } else {\\n");
                     code.push_str(&format!("        throw new ParseError(`Expected \\\"{}\\\", got ${{this.tokens[this.position].value}}`, this.position);\\n", value));
                     code.push_str("      }\\n");
                 }
-                Element::Optional { element, .. } => {
+                Element::Optional { element: _, .. } => {
                     code.push_str("      // Optional element\\n");
                     code.push_str("      const savedPos = this.position;\\n");
                     code.push_str("      try {\\n");
@@ -437,7 +431,7 @@ impl JavaScriptCodeGenerator {
                     code.push_str("        this.position = savedPos;\\n");
                     code.push_str("      }\\n");
                 }
-                Element::ZeroOrMore { element, .. } => {
+                Element::ZeroOrMore { element: _, .. } => {
                     code.push_str("      // Zero or more repetition\\n");
                     code.push_str("      while (this.position < this.tokens.length) {\\n");
                     code.push_str("        const savedPos = this.position;\\n");
@@ -449,7 +443,7 @@ impl JavaScriptCodeGenerator {
                     code.push_str("        }\\n");
                     code.push_str("      }\\n");
                 }
-                Element::OneOrMore { element, .. } => {
+                Element::OneOrMore { element: _, .. } => {
                     code.push_str("      // One or more repetition\\n");
                     code.push_str("      let matchCount = 0;\\n");
                     code.push_str("      while (this.position < this.tokens.length) {\\n");

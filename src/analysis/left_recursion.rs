@@ -84,17 +84,15 @@ impl LeftRecursionDetector {
     fn check_rule(&mut self, rule: &Rule, grammar: &Grammar) -> Option<LeftRecursion> {
         // Check for direct left recursion
         for alt in &rule.alternatives {
-            if let Some(first_elem) = alt.elements.first() {
-                if let Element::RuleRef { name, .. } = first_elem {
-                    if name == &rule.name {
+            if let Some(first_elem) = alt.elements.first()
+                && let Element::RuleRef { name, .. } = first_elem
+                    && name == &rule.name {
                         return Some(LeftRecursion {
                             rule_name: rule.name.clone(),
                             kind: LeftRecursionKind::Direct,
                             cycle: vec![rule.name.clone()],
                         });
                     }
-                }
-            }
         }
 
         // Check for indirect left recursion using cycle detection
@@ -103,15 +101,13 @@ impl LeftRecursionDetector {
 
         if let Some(cycle) =
             self.find_cycle(&rule.name, &rule.name, grammar, &mut visited, &mut path)
-        {
-            if cycle.len() > 1 {
+            && cycle.len() > 1 {
                 return Some(LeftRecursion {
                     rule_name: rule.name.clone(),
                     kind: LeftRecursionKind::Indirect,
                     cycle,
                 });
             }
-        }
 
         None
     }
@@ -142,13 +138,11 @@ impl LeftRecursionDetector {
         if let Some(rule) = grammar.get_rule(current) {
             // Check first element of each alternative
             for alt in &rule.alternatives {
-                if let Some(first_elem) = alt.elements.first() {
-                    if let Element::RuleRef { name, .. } = first_elem {
-                        if let Some(cycle) = self.find_cycle(start, name, grammar, visited, path) {
+                if let Some(first_elem) = alt.elements.first()
+                    && let Element::RuleRef { name, .. } = first_elem
+                        && let Some(cycle) = self.find_cycle(start, name, grammar, visited, path) {
                             return Some(cycle);
                         }
-                    }
-                }
             }
         }
 

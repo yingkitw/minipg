@@ -29,7 +29,7 @@ impl RustCodeGenerator {
             code.push_str("    // Custom members from @members action\n");
             code.push_str("    ");
             code.push_str(members_code);
-            code.push_str("\n");
+            code.push('\n');
         }
 
         code.push_str("}\n\n");
@@ -80,9 +80,7 @@ impl RustCodeGenerator {
             code.push_str("    /// # Returns\n");
             for ret in &rule.returns {
                 let type_str = ret
-                    .return_type
-                    .as_ref()
-                    .map(|t| t.as_str())
+                    .return_type.as_deref()
                     .unwrap_or("AstNode");
                 code.push_str(&format!("    /// * `{}` - {}\n", ret.name, type_str));
             }
@@ -99,23 +97,19 @@ impl RustCodeGenerator {
             code.push_str(&arg.name);
             code.push_str(": ");
             code.push_str(
-                arg.arg_type
-                    .as_ref()
-                    .map(|t| t.as_str())
+                arg.arg_type.as_deref()
                     .unwrap_or("String"),
             );
         }
 
-        code.push_str(")");
+        code.push(')');
 
         // Add return type
         if rule.returns.is_empty() {
             code.push_str(" -> Result<AstNode>");
         } else if rule.returns.len() == 1 {
             let ret_type = rule.returns[0]
-                .return_type
-                .as_ref()
-                .map(|t| t.as_str())
+                .return_type.as_deref()
                 .unwrap_or("AstNode");
             code.push_str(&format!(" -> Result<{}>", ret_type));
         } else {
@@ -126,9 +120,7 @@ impl RustCodeGenerator {
                     code.push_str(", ");
                 }
                 code.push_str(
-                    ret.return_type
-                        .as_ref()
-                        .map(|t| t.as_str())
+                    ret.return_type.as_deref()
                         .unwrap_or("AstNode"),
                 );
             }
@@ -140,14 +132,12 @@ impl RustCodeGenerator {
         // Generate local variables
         for local in &rule.locals {
             let type_str = local
-                .local_type
-                .as_ref()
-                .map(|t| t.as_str())
+                .local_type.as_deref()
                 .unwrap_or("String");
             code.push_str(&format!("        let mut {}: {};\n", local.name, type_str));
         }
         if !rule.locals.is_empty() {
-            code.push_str("\n");
+            code.push('\n');
         }
 
         // Generate actual rule body using rule_body helper
@@ -461,9 +451,9 @@ impl CodeGeneratorTrait for RustCodeGenerator {
         if let Some(header_code) = input.named_actions.get("header") {
             code.push_str("\n// Custom header from @header action\n");
             code.push_str(header_code);
-            code.push_str("\n");
+            code.push('\n');
         }
-        code.push_str("\n");
+        code.push('\n');
 
         // Error types for parsing
         code.push_str("/// Parse error with context information.\n");

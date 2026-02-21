@@ -76,6 +76,7 @@ impl FirstFollowComputer {
         }
     }
 
+    #[allow(clippy::only_used_in_recursion)]
     fn compute_first_of_sequence(&mut self, elements: &[Element], grammar: &Grammar) {
         for element in elements {
             match element {
@@ -101,6 +102,7 @@ impl FirstFollowComputer {
         }
     }
 
+    #[allow(clippy::only_used_in_recursion)]
     fn first_of_sequence(&self, elements: &[Element], grammar: &Grammar) -> HashSet<String> {
         let mut result = HashSet::new();
 
@@ -169,14 +171,11 @@ impl FirstFollowComputer {
                             }
 
                             // If rest is nullable, add follow of rule
-                            if self.is_sequence_nullable(rest) {
-                                if let Some(rule_follow) = self.follow_sets.get(&rule.name).cloned()
-                                {
-                                    if let Some(follow) = self.follow_sets.get_mut(name) {
+                            if self.is_sequence_nullable(rest)
+                                && let Some(rule_follow) = self.follow_sets.get(&rule.name).cloned()
+                                    && let Some(follow) = self.follow_sets.get_mut(name) {
                                         follow.extend(rule_follow);
                                     }
-                                }
-                            }
 
                             let new_size = self.follow_sets.get(name).unwrap().len();
                             if new_size > old_size {

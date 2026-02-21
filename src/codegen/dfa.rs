@@ -86,11 +86,10 @@ impl DfaBuilder {
 
     fn add_transition(&mut self, from_state: usize, char_class: CharClass) -> usize {
         // Check if transition already exists
-        if let Some(state) = self.states.get(from_state) {
-            if let Some(&next_state) = state.transitions.get(&char_class) {
+        if let Some(state) = self.states.get(from_state)
+            && let Some(&next_state) = state.transitions.get(&char_class) {
                 return next_state;
             }
-        }
 
         // Create new state
         let new_state_id = self.next_state_id;

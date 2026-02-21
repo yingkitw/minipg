@@ -36,9 +36,7 @@ pub fn translate_action_element(element: &Element, target_lang: &str) -> Option<
     match element {
         Element::Action { code, language } => {
             let source_lang = language.as_deref().unwrap_or("generic");
-            let translated = if source_lang == target_lang {
-                code.clone()
-            } else if source_lang == "generic" {
+            let translated = if source_lang == target_lang || source_lang == "generic" {
                 code.clone()
             } else {
                 translate_action(code, source_lang, target_lang)
@@ -47,9 +45,7 @@ pub fn translate_action_element(element: &Element, target_lang: &str) -> Option<
         }
         Element::Predicate { code, language } => {
             let source_lang = language.as_deref().unwrap_or("generic");
-            let translated = if source_lang == target_lang {
-                code.clone()
-            } else if source_lang == "generic" {
+            let translated = if source_lang == target_lang || source_lang == "generic" {
                 code.clone()
             } else {
                 translate_action(code, source_lang, target_lang)
@@ -234,12 +230,12 @@ pub fn generate_rust_action(code: &str) -> String {
 /// Generate action code wrapper for Python.
 pub fn generate_python_action(code: &str) -> String {
     // Indent the code for Python
-    let indented = code
+    
+    code
         .lines()
         .map(|line| format!("    {}", line))
         .collect::<Vec<_>>()
-        .join("\n");
-    indented
+        .join("\n")
 }
 
 /// Generate action code wrapper for JavaScript.

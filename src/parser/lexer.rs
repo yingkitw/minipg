@@ -412,7 +412,7 @@ impl Lexer {
             let mut digit_count = 1;
             while !self.is_at_end() && self.current_char().is_ascii_digit() && digit_count < 3 {
                 let ch = self.current_char();
-                if ch >= '0' && ch <= '7' {
+                if ('0'..='7').contains(&ch) {
                     text.push(ch);
                     self.advance();
                     digit_count += 1;
@@ -523,17 +523,6 @@ impl Lexer {
 
         // Treat as string literal for grammar purposes
         Token::new(TokenKind::StringLiteral, text, start_line, start_column)
-    }
-
-    fn skip_whitespace(&mut self) {
-        while !self.is_at_end() {
-            match self.current_char() {
-                ' ' | '\t' | '\r' | '\n' => {
-                    self.advance();
-                }
-                _ => break,
-            }
-        }
     }
 
     fn skip_whitespace_and_comments(&mut self) {
